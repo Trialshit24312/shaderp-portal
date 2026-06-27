@@ -45,6 +45,7 @@
 
     <!-- PUBLIC -->
     <section id="panel-home" class="panel active" data-min-role="guest">
+      <div class="server-strip" id="server-strip"></div>
       <div class="hero">
         <div class="hero-text">
           <span class="pill">ESX Legacy · Serious RP</span>
@@ -102,6 +103,9 @@
       <h2>Jobs & activities</h2>
       <p class="hint">Legal work, side hustles, and whitelisted departments.</p>
       <div id="jobs-grid" class="card-grid three"></div>
+      <h3 class="section-sub">Whitelisted businesses</h3>
+      <p class="hint">Player-owned shops and departments managed in-city via pls_jobsystem.</p>
+      <div id="jobs-whitelist" class="chip-grid"></div>
     </section>
 
     <section id="panel-connect" class="panel" data-min-role="guest">
@@ -256,6 +260,8 @@
       <div class="card" style="margin-top:1rem"><h3>Server paths (sync source)</h3><div id="settings-paths" class="table-wrap"></div></div>
     </section>
   </main>
+
+  <footer class="site-footer" id="site-footer"></footer>
 
   <div id="toast" class="toast" hidden>Copied</div>
   <script src="/app.js" type="module"></script>

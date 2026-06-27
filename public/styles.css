@@ -670,8 +670,49 @@ kbd {
 
 .update-body h5 { margin: 0.5rem 0 0.25rem; font-size: 0.88rem; color: var(--text-muted); }
 
+.server-strip {
+  margin-bottom: 1.25rem; padding: 0.65rem 1rem;
+  background: linear-gradient(90deg, rgba(0, 212, 200, 0.08), rgba(0,0,0,0.2));
+  border: 1px solid var(--border); border-radius: var(--radius);
+}
+.server-strip-inner {
+  display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 0.75rem;
+  font-size: 0.88rem;
+}
+.strip-item { display: flex; align-items: center; gap: 0.5rem; color: var(--text-muted); }
+.strip-dot {
+  width: 8px; height: 8px; border-radius: 50%; background: var(--accent);
+  box-shadow: 0 0 8px rgba(0, 212, 200, 0.5);
+}
+.strip-dot.warn { background: #f0a020; box-shadow: 0 0 8px rgba(240, 160, 32, 0.5); }
+.strip-actions { display: flex; flex-wrap: wrap; gap: 0.45rem; align-items: center; }
+.strip-link, .strip-pill {
+  padding: 0.35rem 0.65rem; border-radius: 6px; border: 1px solid var(--border);
+  background: rgba(0,0,0,0.25); color: var(--text); font-size: 0.78rem;
+  font-family: var(--mono); cursor: pointer; text-decoration: none;
+}
+.strip-link:hover { border-color: var(--accent); color: var(--accent); }
+.strip-pill.warn { border-color: rgba(240, 160, 32, 0.4); color: #f0a020; cursor: default; }
+
+.site-footer {
+  margin-left: var(--sidebar-w); padding: 1.5rem 1.75rem 2rem;
+  border-top: 1px solid var(--border); background: rgba(0,0,0,0.35);
+}
+.footer-inner {
+  max-width: 1200px; display: flex; flex-direction: column; gap: 0.75rem;
+}
+.footer-brand { display: flex; flex-direction: column; gap: 0.15rem; }
+.footer-nav { display: flex; flex-wrap: wrap; gap: 0.65rem; }
+.footer-nav button, .footer-nav a {
+  background: none; border: none; color: var(--text-muted); font-size: 0.85rem;
+  cursor: pointer; text-decoration: none; padding: 0;
+}
+.footer-nav button:hover, .footer-nav a:hover { color: var(--accent); }
+.footer-meta { margin: 0; font-size: 0.78rem; }
+
 @media (max-width: 900px) {
   .hero { grid-template-columns: 1fr; }
   .chart-row, .connect-grid { grid-template-columns: 1fr; }
+  .site-footer { margin-left: 0; }
 }
 

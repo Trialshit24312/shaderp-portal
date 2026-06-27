@@ -156,6 +156,8 @@ function renderHome() {
   el('hero-name').textContent = DATA.branding?.serverName || 'ShadeRP';
   el('hero-desc').textContent = site.tagline || DATA.branding?.tagline || 'Serious ESX Legacy roleplay with jobs, economy, and a staff-managed city.';
 
+  renderServerStrip();
+
   el('hero-stats').innerHTML = [
     ['Player slots', DATA.connect?.maxClients ?? 48],
     ['Locations', DATA.businesses?.length ?? DATA.blips?.length ?? '—'],
@@ -178,6 +180,64 @@ function renderHome() {
     const pass = getUpdatePasses()[0];
     latest.textContent = pass?.overview?.slice(0, 220) || DATA.latestNotes?.slice(0, 220) || 'No updates synced yet.';
   }
+}
+
+function renderServerStrip() {
+  const strip = el('server-strip');
+  if (!strip || !DATA) return;
+  const cfx = DATA.portal?.cfxJoinUrl || 'cfx.re/join/YOUR-CODE';
+  const pending = cfx.includes('YOUR-CODE');
+  const discord = DATA.portal?.discordInvite || DATA.branding?.discord || ME?.discordInvite || '#';
+  const portalUrl = DATA.portal?.websiteUrl || location.origin;
+  const hostname = DATA.connect?.hostname || 'ShadeRP';
+  const slots = DATA.connect?.maxClients ?? 48;
+  const framework = DATA.connect?.framework || 'ESX Legacy';
+
+  strip.innerHTML = `
+    <div class="server-strip-inner">
+      <div class="strip-item">
+        <span class="strip-dot${pending ? ' warn' : ''}"></span>
+        <span>${esc(hostname)} · ${esc(framework)} · ${slots} slots</span>
+      </div>
+      <div class="strip-actions">
+        ${pending
+    ? '<span class="strip-pill warn">CFX code pending</span>'
+    : `<button type="button" class="strip-link copy-block" data-copy="${esc(cfx)}">${esc(cfx)}</button>`}
+        <a href="${esc(discord)}" class="strip-link" target="_blank" rel="noopener">Discord</a>
+        <a href="${esc(portalUrl)}" class="strip-link" target="_blank" rel="noopener">Portal</a>
+        <button type="button" class="strip-link" data-panel="connect">Connect</button>
+      </div>
+    </div>`;
+  strip.querySelector('.copy-block')?.addEventListener('click', () => copyText(cfx));
+  strip.querySelector('[data-panel="connect"]')?.addEventListener('click', () => showPanel('connect'));
+}
+
+function renderFooter() {
+  const foot = el('site-footer');
+  if (!foot || !DATA) return;
+  const name = DATA.branding?.serverName || 'ShadeRP';
+  const discord = DATA.portal?.discordInvite || DATA.branding?.discord || ME?.discordInvite || '#';
+  const portalUrl = DATA.portal?.websiteUrl || location.origin;
+  const year = new Date().getFullYear();
+  const synced = DATA.generatedAt ? `Data synced ${DATA.generatedAt}` : 'Awaiting dashboard sync';
+
+  foot.innerHTML = `
+    <div class="footer-inner">
+      <div class="footer-brand">
+        <strong>${esc(name)}</strong>
+        <span class="hint">${esc(DATA.branding?.tagline || 'ESX Legacy Roleplay')}</span>
+      </div>
+      <nav class="footer-nav">
+        <button type="button" data-panel="rules">Rules</button>
+        <button type="button" data-panel="jobs">Jobs</button>
+        <button type="button" data-panel="connect">Connect</button>
+        <a href="${esc(discord)}" target="_blank" rel="noopener">Discord</a>
+      </nav>
+      <p class="footer-meta hint">${esc(synced)} · © ${year} ${esc(name)}</p>
+    </div>`;
+  foot.querySelectorAll('[data-panel]').forEach((b) => {
+    b.addEventListener('click', () => showPanel(b.dataset.panel));
+  });
 }
 
 function renderAbout() {
@@ -275,6 +335,15 @@ function renderConnect() {
 
 function renderJobs() {
   const guide = DATA?.jobGuide || [];
+  const whitelistEl = el('jobs-whitelist');
+  const plsJobs = DATA?.plsJobs || [];
+
+  if (whitelistEl) {
+    whitelistEl.innerHTML = plsJobs.length
+      ? plsJobs.map((j) => `<span class="chip" title="${esc(j.name || j.id || '')}">${esc(j.label)}</span>`).join('')
+      : '<span class="hint">Run Build-DashboardData.ps1 to sync pls_jobsystem businesses.</span>';
+  }
+
   if (guide.length) {
     el('jobs-grid').innerHTML = guide.map((j) =>
       `<div class="feature-card"><span class="pill">${esc(j.category)}</span><h4>${esc(j.name)}</h4><p>${esc(j.how)}</p></div>`
@@ -712,6 +781,7 @@ function renderAll() {
   renderMap();
   setupSearch();
   renderTeam();
+  renderFooter();
   if (hasRole('admin')) {
     renderResources();
     renderBranding();

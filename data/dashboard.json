@@ -1,10 +1,13 @@
 {
-    "generatedAt":  "2026-06-27 03:03:07",
+    "generatedAt":  "2026-06-27 15:31:31",
     "branding":  {
                      "resources":  {
                                        "kq_powerwashing":  "ShadeRP Power Washing",
+                                       "fivem_discord_hour_logger":  "ShadeRP Duty Logger",
+                                       "shade_config":  "ShadeRP Config",
                                        "codem_billing":  "ShadeRP Billing",
                                        "wasabi_police":  "ShadeRP Mission Row PD",
+                                       "tuff_loading":  "ShadeRP Loading Screen",
                                        "pawnshop":  "ShadeRP Pawn Shop",
                                        "pyh_tablet":  "ShadeRP Job Tablet",
                                        "lb_phone":  "ShadeRP Phone",
@@ -14,25 +17,34 @@
                                        "pls_jobsystem":  "ShadeRP Job Locations",
                                        "it_drugs":  "ShadeRP Drugs",
                                        "wasabi_mdt":  "ShadeRP MDT",
+                                       "shade_discord":  "ShadeRP Discord Bridge",
+                                       "codewave_sneaker_business":  "ShadeRP Sneaker Business",
                                        "fetchq_oil":  "ShadeRP Oil Rig",
-                                       "wasabi_fishing":  "ShadeRP Fishing (Wasabi)",
-                                       "lgd_policeradar":  "ShadeRP Police Radar",
+                                       "viper_carbomb":  "ShadeRP Car Bomb (Admin)",
                                        "pyh_mosley":  "ShadeRP Mosley Auto",
+                                       "HWC_Blips_V2":  "ShadeRP Map Blips",
                                        "shade_airdrops":  "ShadeRP Care Packages",
                                        "Spoogy_TrapPhone":  "ShadeRP Street Sales",
+                                       "ravn_logs":  "ShadeRP Logs",
                                        "pyh_lumberjack":  "ShadeRP Lumberjack",
                                        "shade_lspd_pd":  "ShadeRP Mission Row PD",
+                                       "wasabi_mining":  "ShadeRP Mining (Wasabi)",
                                        "pyh_groupsystem":  "ShadeRP Group System",
                                        "pyh_fishing":  "ShadeRP Fishing",
+                                       "tuff_hud":  "ShadeRP HUD",
                                        "hwc_blips":  "ShadeRP Map Blips",
+                                       "codem_craft":  "ShadeRP Crafting",
                                        "rup_vehiclespawner":  "ShadeRP Vehicle Spawner",
                                        "pyh_trucking":  "ShadeRP Trucking",
                                        "portis_afterhours":  "ShadeRP After Hours",
+                                       "lgd_policeradar":  "ShadeRP Police Radar",
+                                       "wasabi_fishing":  "ShadeRP Fishing (Wasabi)",
                                        "pyh_boosting":  "ShadeRP Boosting",
                                        "pyh_gruppe6":  "ShadeRP Gruppe 6",
-                                       "wasabi_mining":  "ShadeRP Mining (Wasabi)",
+                                       "shade_proximity_mlo":  "ShadeRP Proximity MLOs",
                                        "wasabi_ambulance":  "ShadeRP Pillbox EMS",
-                                       "kq_jobcontracts":  "ShadeRP Job Contracts"
+                                       "kq_jobcontracts":  "ShadeRP Job Contracts",
+                                       "gen_pausev2":  "ShadeRP Pause Menu"
                                    },
                      "serverName":  "ShadeRP",
                      "portalUrl":  "https://shaderp-website.onrender.com",
@@ -42,13 +54,17 @@
                                        "pdm":  "ShadeRP PDM",
                                        "gruppe6":  "ShadeRP Gruppe 6 HQ",
                                        "prison":  "ShadeRP Bolingbroke Prison",
+                                       "pizza_paleto":  "ShadeRP Pizza Paleto",
+                                       "rideout":  "ShadeRP Ride Out Customs",
                                        "lumberjack":  "ShadeRP Lumberjack",
                                        "mosley":  "ShadeRP Mosley Auto",
                                        "powerwash":  "ShadeRP Power Washing",
                                        "oilrig":  "ShadeRP Oil Rig",
                                        "bennys":  "ShadeRP Bennys",
                                        "trucking":  "ShadeRP Trucking Hub",
+                                       "gearhead":  "ShadeRP Gear Head Customs",
                                        "racetrack":  "ShadeRP Race Track",
+                                       "uwucafe":  "ShadeRP UwU Cat Cafe",
                                        "mall":  "ShadeRP MV Mall",
                                        "pawnshop":  "ShadeRP Pawn Shop",
                                        "hospital":  "ShadeRP Pillbox Hospital"
@@ -161,7 +177,7 @@
                                       "id":  "mechanic",
                                       "name":  "ShadeRP Mechanics",
                                       "category":  "Business",
-                                      "how":  "Bennys, Ride Out, Gear Head — jg-mechanic tuning \u0026 repairs"
+                                      "how":  "ShadeRP Bennys, Ride Out, Gear Head — jg-mechanic tuning \u0026 repairs"
                                   },
                                   {
                                       "id":  "pyh_trucking",
@@ -219,7 +235,7 @@
                                   },
                                   {
                                       "id":  "uwucafe",
-                                      "name":  "UwU Cat Cafe",
+                                      "name":  "ShadeRP UwU Cat Cafe",
                                       "category":  "Business",
                                       "how":  "pls_jobsystem · food service RP"
                                   }
@@ -551,7 +567,7 @@
                     },
                     {
                         "job":  "mechanic",
-                        "label":  "Ride Out Customs",
+                        "label":  "ShadeRP Ride Out Customs",
                         "area":  45,
                         "coords":  {
                                        "x":  1175.0,
@@ -598,7 +614,7 @@
                     },
                     {
                         "job":  "uwucafe",
-                        "label":  "UwU Cat Cafe",
+                        "label":  "ShadeRP UwU Cat Cafe",
                         "area":  40,
                         "coords":  {
                                        "x":  -580.0,
@@ -679,7 +695,7 @@
                     },
                     {
                         "job":  "slaughterer",
-                        "label":  "Pizza Paleto",
+                        "label":  "ShadeRP Pizza Paleto",
                         "area":  40,
                         "coords":  {
                                        "x":  -289.0,
@@ -750,7 +766,7 @@
                     },
                     {
                         "job":  "mechanic",
-                        "label":  "Gear Head Customs",
+                        "label":  "ShadeRP Gear Head Customs",
                         "area":  50,
                         "coords":  {
                                        "x":  68.24,
@@ -770,7 +786,7 @@
                         "stashes":  [
                                         {
                                             "id":  "mechanic_gearhead_stash",
-                                            "label":  "Gear Head Storage",
+                                            "label":  "ShadeRP Gear Head Storage",
                                             "coords":  {
                                                            "x":  70.0,
                                                            "y":  -1752.0,
@@ -813,7 +829,7 @@
                          "id":  "mechanic",
                          "name":  "ShadeRP Mechanics",
                          "category":  "Business",
-                         "how":  "Bennys, Ride Out, Gear Head — jg-mechanic tuning \u0026 repairs"
+                         "how":  "ShadeRP Bennys, Ride Out, Gear Head — jg-mechanic tuning \u0026 repairs"
                      },
                      {
                          "id":  "pyh_trucking",
@@ -871,7 +887,7 @@
                      },
                      {
                          "id":  "uwucafe",
-                         "name":  "UwU Cat Cafe",
+                         "name":  "ShadeRP UwU Cat Cafe",
                          "category":  "Business",
                          "how":  "pls_jobsystem · food service RP"
                      }

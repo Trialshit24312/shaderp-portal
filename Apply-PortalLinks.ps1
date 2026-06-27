@@ -25,4 +25,14 @@ $cfg.navbuttons.discord.url = $discord
 $cfg | ConvertTo-Json -Depth 10 | Set-Content -LiteralPath $loadingJson -Encoding UTF8
 
 Write-Host "tuff-loading website -> $url"
-Write-Host "Done. restart tuff-loading on the server if it is running."
+
+$pauseManifest = Join-Path $BasePath 'resources\[standalone]\gen_pausev2\fxmanifest.lua'
+if (Test-Path -LiteralPath $pauseManifest) {
+    $mf = Get-Content -LiteralPath $pauseManifest -Raw -Encoding UTF8
+    $mf = $mf -replace "website\s+'[^']*'", "website '$url'"
+    $mf = $mf -replace "discord\s+'[^']*'", "discord '$discord'"
+    Set-Content -LiteralPath $pauseManifest -Value $mf -Encoding UTF8 -NoNewline
+    Write-Host "gen_pausev2 manifest -> $url / $discord"
+}
+
+Write-Host "Done. restart tuff-loading and gen_pausev2 on the server if running."

@@ -1,10 +1,23 @@
 # Deploy ShadeRP Portal to Render
 
-## 1. Create a GitHub repo
+## 1. GitHub repo
 
-Push the `tools/shaderp-dashboard/` folder as its own repo (or the whole txData repo with root directory set on Render).
+**Use the standalone portal repo** (small ~3 MB — not the full FiveM server):
 
-**Render root directory:** `tools/shaderp-dashboard` (if using monorepo)
+**https://github.com/Trialshit24312/shaderp-portal**
+
+On Render, connect this repo directly — **no root directory** needed.
+
+To re-publish from your PC after changes:
+
+```powershell
+cd F:\txData\QBCore_A9FD7A.base\tools\shaderp-dashboard
+git add -A
+git commit -m "Your message"
+git push
+```
+
+*(Optional: monorepo with root `QBCore_A9FD7A.base/tools/shaderp-dashboard` — not recommended; full txData is too large for GitHub.)*
 
 ## 2. Create Render Web Service
 

@@ -6,9 +6,14 @@ let charts = {};
 const NAV = [
   { section: 'Public' },
   { id: 'home', label: 'Home', min: 'guest' },
-  { id: 'about', label: 'About', min: 'guest' },
-  { id: 'jobs', label: 'Jobs', min: 'guest' },
   { id: 'connect', label: 'Connect', min: 'guest' },
+  { id: 'rules', label: 'Rules', min: 'guest' },
+  { id: 'jobs', label: 'Jobs', min: 'guest' },
+  { id: 'locations', label: 'Locations', min: 'guest' },
+  { id: 'faq', label: 'FAQ', min: 'guest' },
+  { id: 'credits', label: 'Team', min: 'guest' },
+  { id: 'keybinds', label: 'Keybinds', min: 'guest' },
+  { id: 'about', label: 'About', min: 'guest' },
   { id: 'updates', label: 'Updates', min: 'guest' },
   { section: 'Community' },
   { id: 'team', label: 'Team & Roles', min: 'member' },
@@ -131,56 +136,99 @@ function stat(label, value) {
 
 function renderHome() {
   if (!DATA) return;
+  const site = DATA.site || {};
   el('portal-name').textContent = DATA.branding?.serverName || ME.portal.name;
-  el('portal-tagline').textContent = ME.portal.tagline;
+  el('portal-tagline').textContent = site.tagline || ME.portal.tagline;
   el('hero-name').textContent = DATA.branding?.serverName || 'ShadeRP';
-  el('hero-desc').textContent = 'Serious ESX Legacy roleplay with jobs, economy, and a staff-managed city.';
-  const portalBtn = el('hero-portal');
-  if (portalBtn && (DATA.portal?.websiteUrl || DATA.branding?.portalUrl)) {
-    portalBtn.href = DATA.portal?.websiteUrl || DATA.branding.portalUrl;
-    portalBtn.hidden = false;
-  }
+  el('hero-desc').textContent = site.tagline || DATA.branding?.tagline || 'Serious ESX Legacy roleplay with jobs, economy, and a staff-managed city.';
 
   el('hero-stats').innerHTML = [
-    ['Map blips', DATA.blips?.length ?? '—'],
-    ['Latest pass', DATA.updatePasses?.[0]?.version ?? '—'],
+    ['Player slots', DATA.connect?.maxClients ?? 48],
+    ['Locations', DATA.businesses?.length ?? DATA.blips?.length ?? '—'],
     ['Starting bank', DATA.economy ? '$' + Number(DATA.economy.startingBank).toLocaleString() : '—'],
-    ['Framework', 'ESX Legacy'],
+    ['Latest pass', DATA.updatePasses?.[0]?.version ?? '—'],
   ].map(([lbl, val]) => `<div class="hero-stat"><div class="val">${esc(val)}</div><div class="lbl">${esc(lbl)}</div></div>`).join('');
 
-  el('feature-cards').innerHTML = [
-    ['Updates', 'Enhancement pass history and patch notes'],
-    ['Jobs', 'Trucking, Gruppe 6, fishing, PD, EMS, mechanics'],
-    ['Economy', 'Balanced salaries and starting money'],
-    ['Staff tools', 'Discord-synced roles for admin dashboard'],
-  ].map(([t, d]) => `<div class="feature-card"><h4>${esc(t)}</h4><p>${esc(d)}</p></div>`).join('');
+  const features = site.features?.length ? site.features : [
+    { icon: '📋', title: 'Rules', desc: 'Serious RP standards' },
+    { icon: '💼', title: 'Jobs', desc: 'PD, EMS, trucking, and more' },
+    { icon: '💰', title: 'Economy', desc: 'Balanced paychecks & side jobs' },
+    { icon: '🔐', title: 'Staff portal', desc: 'Discord-synced admin tools' },
+  ];
+  el('feature-cards').innerHTML = features.map((f) =>
+    `<div class="feature-card"><div class="feature-icon">${esc(f.icon || '•')}</div><h4>${esc(f.title)}</h4><p>${esc(f.desc)}</p></div>`
+  ).join('');
+
+  const latest = el('home-latest');
+  if (latest) {
+    latest.textContent = DATA.latestNotes?.slice(0, 200) || DATA.updatePasses?.[0]?.overview || 'No updates synced yet.';
+  }
 }
 
 function renderAbout() {
+  const b = DATA?.branding || {};
   el('about-content').innerHTML = `
-    <p><strong>ShadeRP</strong> is an ESX Legacy roleplay server built around serious RP, a balanced economy, and curated scripts.</p>
-    <h3>Core systems</h3>
+    <p><strong>${esc(b.serverName || 'ShadeRP')}</strong> — ${esc(DATA?.site?.tagline || b.tagline || 'ESX Legacy roleplay')}.</p>
+    <h3>What we run</h3>
     <ul class="check-list">
-      <li>ESX Legacy + ox_inventory</li>
-      <li>Wasabi PD / EMS / MDT at Mission Row & Pillbox</li>
-      <li>HWC map blips + shade-config central branding</li>
+      <li>ESX Legacy + ox_inventory + ox_target</li>
+      <li>Wasabi PD / EMS / MDT — Mission Row & Pillbox</li>
       <li>pyh job tablet — trucking, Gruppe 6, contacts, boosting</li>
-      <li>Discord logging via ravn-logs + shade-discord</li>
+      <li>lb-phone, codem-billing, HWC map blips</li>
+      <li>Central config via shade-config (branding, economy, portal)</li>
     </ul>
-    <h3>Staff access</h3>
-    <p>Login with Discord to unlock panels matching your server roles — staff, developer, admin, and owner tiers.</p>
+    <h3>Stack highlights</h3>
+    <div class="chip-grid">${(DATA?.resources?.enabled || []).slice(0, 24).map((n) => `<span class="chip">${esc(n)}</span>`).join('') || '<span class="hint">Login as staff or sync dashboard for full resource list.</span>'}</div>
+    <h3>Portal access</h3>
+    <p>Discord login unlocks member, staff, and admin panels based on your server roles.</p>
   `;
+}
+
+function renderRules() {
+  const rules = DATA?.site?.rules || [];
+  el('rules-list').innerHTML = rules.length
+    ? rules.map((r, i) => `<div class="rule-card"><span class="rule-num">${i + 1}</span><div><h4>${esc(r.title)}</h4><p>${esc(r.body)}</p></div></div>`).join('')
+    : '<p class="hint">Sync dashboard data — rules live in shade-config/config/portal_content.lua</p>';
+}
+
+function renderFaq() {
+  const faq = DATA?.site?.faq || [];
+  el('faq-list').innerHTML = faq.length
+    ? faq.map((f, i) => `<details class="faq-card"${i === 0 ? ' open' : ''}><summary>${esc(f.q)}</summary><p>${esc(f.a)}</p></details>`).join('')
+    : '<p class="hint">No FAQ synced yet.</p>';
+}
+
+function renderCredits() {
+  const credits = DATA?.credits || [];
+  el('credits-grid').innerHTML = credits.length
+    ? credits.map((c) => `<div class="feature-card credit-card"><h4>${esc(c.role)}</h4><p>${esc(c.note)}</p><span class="pill mono">&lt;@${esc(c.discordId)}&gt;</span></div>`).join('')
+    : '<p class="hint">Team credits in shade-config/config/credits.lua</p>';
+}
+
+function renderKeybinds() {
+  const binds = DATA?.site?.keybinds || [];
+  el('keybinds-table').innerHTML = binds.length
+    ? `<table><thead><tr><th>Key</th><th>Action</th></tr></thead><tbody>${binds.map((k) => `<tr><td><kbd>${esc(k.key)}</kbd></td><td>${esc(k.action)}</td></tr>`).join('')}</tbody></table>`
+    : '<p class="hint">Keybinds in portal_content.lua</p>';
+}
+
+function renderLocations() {
+  const locs = DATA?.businesses || [];
+  el('locations-grid').innerHTML = locs.length
+    ? locs.map((l) => `<div class="feature-card"><span class="pill">${esc(l.category)}</span><h4>${esc(l.label)}</h4><p class="mono hint">${l.coords ? `${l.coords.x?.toFixed(1)}, ${l.coords.y?.toFixed(1)}, ${l.coords.z?.toFixed(1)}` : ''}</p></div>`).join('')
+    : '<p class="hint">Locations sync from shade-config/config/businesses.lua</p>';
 }
 
 function renderConnect() {
   if (!DATA) return;
-  const cfx = DATA.portal?.cfxJoinUrl || DATA.connect?.cfxJoinUrl || 'cfx.re/join/YOUR-CODE';
+  const cfx = DATA.portal?.cfxJoinUrl || 'cfx.re/join/YOUR-CODE';
+  const cfxFull = cfx.startsWith('http') ? cfx : `https://${cfx}`;
   const cfxEl = el('connect-cfx');
   if (cfxEl) {
     cfxEl.textContent = cfx;
     cfxEl.dataset.copy = cfx;
   }
-  const portalUrl = DATA.portal?.websiteUrl || DATA.branding?.portalUrl || '#';
+  const portalUrl = DATA.portal?.websiteUrl || DATA.branding?.portalUrl || location.origin;
   const portalLink = el('connect-portal-link');
   if (portalLink) {
     portalLink.href = portalUrl;
@@ -192,25 +240,39 @@ function renderConnect() {
 
   const hostname = DATA.connect?.hostname;
   const meta = el('connect-meta');
-  if (meta && hostname) {
-    meta.innerHTML = `<p class="hint">${esc(hostname)} · ${DATA.connect.maxClients ?? 48} slots · ${esc(DATA.connect.framework || 'ESX Legacy')}</p>`;
+  if (meta) {
+    const pending = cfx.includes('YOUR-CODE');
+    meta.innerHTML = `
+      <p class="hint">${esc(hostname || 'ShadeRP')} · ${DATA.connect?.maxClients ?? 48} slots · ${esc(DATA.connect?.framework || 'ESX Legacy')}</p>
+      ${pending ? '<p class="warn-banner">⚠ CFX join code not set — edit shade-config/config/portal.lua then run Sync-PortalToRender.ps1</p>' : ''}
+      <div class="hero-actions" style="margin-top:0.75rem">
+        <a href="${esc(cfxFull)}" class="btn primary" target="_blank" rel="noopener">Open in browser</a>
+        <button type="button" class="btn ghost copy-block" data-copy="${esc(cfx)}">Copy connect link</button>
+      </div>`;
+    meta.querySelector('.copy-block')?.addEventListener('click', () => copyText(cfx));
   }
 }
 
 function renderJobs() {
-  const jobs = [
-    { name: 'ShadeRP LSPD', desc: 'Mission Row PD — MDT, radar, clock-in', cat: 'Government' },
-    { name: 'ShadeRP Pillbox EMS', desc: 'Medical roleplay & billing', cat: 'Government' },
-    { name: 'ShadeRP Trucking', desc: 'Reputation-based delivery contracts', cat: 'Civilian' },
-    { name: 'ShadeRP Gruppe 6', desc: 'Co-op armored transport (group system)', cat: 'Civilian' },
-    { name: 'ShadeRP Mechanics', desc: 'Bennys / LSC — jg-mechanic', cat: 'Business' },
-    { name: 'ShadeRP Oil Rig', desc: 'fetchq-oil offshore work', cat: 'Civilian' },
-    { name: 'ShadeRP Power Washing', desc: 'kq_powerwashing contracts', cat: 'Civilian' },
-    { name: 'ShadeRP Boosting', desc: 'Underground vehicle contracts (tablet)', cat: 'Illegal' },
+  const branding = DATA?.branding?.resources || {};
+  const jobEntries = [
+    { key: 'wasabi_police', cat: 'Government', desc: 'MDT, radar, Mission Row PD MLO' },
+    { key: 'wasabi_ambulance', cat: 'Government', desc: 'EMS, billing, Pillbox hospital' },
+    { key: 'pyh_trucking', cat: 'Civilian', desc: 'Reputation delivery contracts' },
+    { key: 'pyh_gruppe6', cat: 'Civilian', desc: 'Co-op armored transport' },
+    { key: 'jg_mechanic', cat: 'Business', desc: 'Bennys / LSC repairs & tuning' },
+    { key: 'fetchq_oil', cat: 'Civilian', desc: 'Offshore oil rig work' },
+    { key: 'kq_powerwashing', cat: 'Civilian', desc: 'Contract power washing jobs' },
+    { key: 'pyh_boosting', cat: 'Illegal', desc: 'Underground vehicle contracts' },
+    { key: 'wasabi_fishing', cat: 'Civilian', desc: 'Fishing & selling catch' },
+    { key: 'wasabi_mining', cat: 'Civilian', desc: 'Mining and ore processing' },
+    { key: 'pyh_fishing', cat: 'Civilian', desc: 'pyh fishing routes' },
+    { key: 'pyh_lumberjack', cat: 'Civilian', desc: 'Lumberjack harvesting' },
   ];
-  el('jobs-grid').innerHTML = jobs.map((j) =>
-    `<div class="feature-card"><span class="pill">${esc(j.cat)}</span><h4>${esc(j.name)}</h4><p>${esc(j.desc)}</p></div>`
-  ).join('');
+  el('jobs-grid').innerHTML = jobEntries.map((j) => {
+    const name = branding[j.key] || j.key.replace(/_/g, ' ');
+    return `<div class="feature-card"><span class="pill">${esc(j.cat)}</span><h4>${esc(name)}</h4><p>${esc(j.desc)}</p></div>`;
+  }).join('');
 }
 
 async function renderTeam() {
@@ -242,9 +304,57 @@ function renderUpdates() {
   el('updates-list').innerHTML = (DATA?.updatePasses || []).map((p, i) => `
     <details class="update-card" ${i === 0 ? 'open' : ''}>
       <summary><span>${esc(p.title)}</span><span class="ver">${esc(p.version)}</span></summary>
-      <div class="update-body">${esc(p.body?.slice(0, 3000) || p.overview || '')}</div>
+      <div class="update-body">${formatUpdateBody(p.body || p.overview || '')}</div>
     </details>
-  `).join('');
+  `).join('') || '<p class="hint">Run Build-DashboardData.ps1 to pull UPDATE-LOG.md</p>';
+}
+
+function formatUpdateBody(text) {
+  return esc(text)
+    .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
+    .replace(/^## (.+)$/gm, '<h4>$1</h4>')
+    .replace(/^- (.+)$/gm, '<li>$1</li>')
+    .replace(/(<li>.*<\/li>\n?)+/g, (m) => `<ul class="check-list">${m}</ul>`)
+    .replace(/\n/g, '<br>');
+}
+
+function buildSearchIndex() {
+  const items = [];
+  NAV.filter((n) => n.id).forEach((n) => items.push({ panel: n.id, label: n.label, text: n.label }));
+  (DATA?.site?.rules || []).forEach((r) => items.push({ panel: 'rules', label: r.title, text: `${r.title} ${r.body}` }));
+  (DATA?.site?.faq || []).forEach((f) => items.push({ panel: 'faq', label: f.q, text: `${f.q} ${f.a}` }));
+  (DATA?.businesses || []).forEach((b) => items.push({ panel: 'locations', label: b.label, text: `${b.label} ${b.category}` }));
+  return items;
+}
+
+function setupSearch() {
+  const input = el('global-search');
+  if (!input) return;
+  let box = document.getElementById('search-results');
+  if (!box) {
+    box = document.createElement('div');
+    box.id = 'search-results';
+    box.className = 'search-results';
+    box.hidden = true;
+    input.parentElement.appendChild(box);
+  }
+  input.addEventListener('input', () => {
+    const q = input.value.trim().toLowerCase();
+    if (q.length < 2) { box.hidden = true; return; }
+    const hits = buildSearchIndex().filter((i) => i.text.toLowerCase().includes(q)).slice(0, 8);
+    box.innerHTML = hits.length
+      ? hits.map((h) => `<button type="button" data-panel="${esc(h.panel)}">${esc(h.label)} <span class="hint">→ ${esc(h.panel)}</span></button>`).join('')
+      : '<p class="hint" style="padding:0.75rem">No results</p>';
+    box.hidden = false;
+    box.querySelectorAll('[data-panel]').forEach((btn) => btn.addEventListener('click', () => {
+      showPanel(btn.dataset.panel);
+      box.hidden = true;
+      input.value = '';
+    }));
+  });
+  document.addEventListener('click', (e) => {
+    if (!input.contains(e.target) && !box.contains(e.target)) box.hidden = true;
+  });
 }
 
 function renderEconomy() {
@@ -382,13 +492,19 @@ async function loadAnalytics() {
 
 function renderAll() {
   renderHome();
-  renderAbout();
-  renderJobs();
   renderConnect();
+  renderRules();
+  renderJobs();
+  renderLocations();
+  renderFaq();
+  renderCredits();
+  renderKeybinds();
+  renderAbout();
   renderOverview();
   renderUpdates();
   renderEconomy();
   renderMap();
+  setupSearch();
   if (hasRole('admin')) {
     renderResources();
     renderBranding();
@@ -403,6 +519,14 @@ function renderAll() {
 async function init() {
   el('menu-toggle')?.addEventListener('click', () => el('sidebar').classList.toggle('open'));
   document.querySelectorAll('.copy-block').forEach((b) => b.addEventListener('click', () => copyText(b.dataset.copy || b.textContent)));
+  document.querySelectorAll('[data-panel]').forEach((b) => {
+    if (b.tagName === 'A' || b.tagName === 'BUTTON') {
+      b.addEventListener('click', (e) => {
+        const id = b.dataset.panel;
+        if (id) { e.preventDefault(); showPanel(id); }
+      });
+    }
+  });
 
   const params = new URLSearchParams(location.search);
   if (params.get('error')) toast('Login failed — check Discord OAuth config');

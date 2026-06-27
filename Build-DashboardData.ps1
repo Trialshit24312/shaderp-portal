@@ -65,6 +65,37 @@ function Parse-UpdatePasses([string]$md) {
     return $passes
 }
 
+function Parse-Credits([string]$text) {
+    $list = @()
+    foreach ($m in [regex]::Matches($text, '(\w+)\s*=\s*\{\s*discordId\s*=\s*''([^'']+)'',\s*role\s*=\s*''([^'']+)'',\s*note\s*=\s*''([^'']+)''')) {
+        $list += [ordered]@{
+            id = $m.Groups[1].Value
+            discordId = $m.Groups[2].Value
+            role = $m.Groups[3].Value
+            note = $m.Groups[4].Value
+        }
+    }
+    return $list
+}
+
+function Parse-PortalSite([string]$text) {
+    $site = @{ tagline = ''; rules = @(); faq = @(); keybinds = @(); features = @() }
+    if ($text -match "tagline\s*=\s*'([^']+)'") { $site.tagline = $Matches[1] }
+    foreach ($m in [regex]::Matches($text, "title\s*=\s*'([^']+)',\s*body\s*=\s*'([^']+)'")) {
+        $site.rules += [ordered]@{ title = $m.Groups[1].Value; body = $m.Groups[2].Value }
+    }
+    foreach ($m in [regex]::Matches($text, "q\s*=\s*'([^']+)',\s*a\s*=\s*'([^']+)'")) {
+        $site.faq += [ordered]@{ q = $m.Groups[1].Value; a = $m.Groups[2].Value }
+    }
+    foreach ($m in [regex]::Matches($text, "key\s*=\s*'([^']+)',\s*action\s*=\s*'([^']+)'")) {
+        $site.keybinds += [ordered]@{ key = $m.Groups[1].Value; action = $m.Groups[2].Value }
+    }
+    foreach ($m in [regex]::Matches($text, "icon\s*=\s*'([^']+)',\s*title\s*=\s*'([^']+)',\s*desc\s*=\s*'([^']+)'")) {
+        $site.features += [ordered]@{ icon = $m.Groups[1].Value; title = $m.Groups[2].Value; desc = $m.Groups[3].Value }
+    }
+    return $site
+}
+
 function Parse-ServerResources([string]$cfgText) {
     $enabled = @()
     $disabled = @()
@@ -85,6 +116,8 @@ $brandingText = Read-Text (Join-Path $cfg 'branding.lua')
 $portalText = Read-Text (Join-Path $cfg 'portal.lua')
 $economyText = Read-Text (Join-Path $cfg 'economy.lua')
 $businessText = Read-Text (Join-Path $cfg 'businesses.lua')
+$creditsText = Read-Text (Join-Path $cfg 'credits.lua')
+$siteText = Read-Text (Join-Path $cfg 'portal_content.lua')
 $loggingText = Read-Text (Join-Path $cfg 'logging.lua')
 
 $branding = @{
@@ -194,6 +227,8 @@ $data = [ordered]@{
     branding = $branding
     portal = $portal
     connect = $connect
+    site = Parse-PortalSite $siteText
+    credits = Parse-Credits $creditsText
     economy = $economy
     salaries = $salaries
     businesses = Parse-Businesses $businessText

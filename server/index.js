@@ -127,9 +127,19 @@ app.get('/api/dashboard', (req, res) => {
     return res.json({
       generatedAt: data.generatedAt,
       branding: data.branding,
-      economy: { startingBank: data.economy?.startingBank, startingCash: data.economy?.startingCash, paycheckMinutes: data.economy?.paycheckMinutes },
-      blips: data.blips,
-      updatePasses: (data.updatePasses || []).slice(0, 3),
+      portal: data.portal,
+      connect: data.connect,
+      site: data.site,
+      credits: data.credits,
+      businesses: data.businesses,
+      economy: {
+        startingBank: data.economy?.startingBank,
+        startingCash: data.economy?.startingCash,
+        paycheckMinutes: data.economy?.paycheckMinutes,
+        offDutyMultiplier: data.economy?.offDutyMultiplier,
+      },
+      blips: (data.blips || []).slice(0, 12),
+      updatePasses: (data.updatePasses || []).slice(0, 6),
       latestNotes: data.latestNotes,
       public: true,
     });

@@ -51,14 +51,46 @@
           <h2>Welcome to <span class="accent" id="hero-name">ShadeRP</span></h2>
           <p id="hero-desc">Community portal for updates, jobs, economy info, and staff tools — synced with Discord roles.</p>
           <div class="hero-actions">
-            <a id="hero-discord" href="#" class="btn primary" target="_blank">Join Discord</a>
-            <a id="hero-portal" href="#" class="btn ghost" target="_blank" hidden>Open Portal</a>
+            <a id="hero-connect" href="#" class="btn primary" data-panel="connect">How to join</a>
+            <a id="hero-discord" href="#" class="btn ghost" target="_blank">Join Discord</a>
             <a href="/auth/discord" class="btn ghost" id="hero-login">Staff Login</a>
           </div>
         </div>
         <div class="hero-stats" id="hero-stats"></div>
       </div>
       <div class="card-grid" id="feature-cards"></div>
+      <div class="card" style="margin-top:1.25rem">
+        <h3>Latest update</h3>
+        <p id="home-latest" class="hint">—</p>
+        <button type="button" class="btn ghost btn-sm" data-panel="updates">View all updates</button>
+      </div>
+    </section>
+
+    <section id="panel-rules" class="panel" data-min-role="guest">
+      <h2>Server rules</h2>
+      <p class="hint">Read before joining — full rules also posted in Discord.</p>
+      <div id="rules-list" class="stack"></div>
+    </section>
+
+    <section id="panel-faq" class="panel" data-min-role="guest">
+      <h2>FAQ</h2>
+      <div id="faq-list" class="stack"></div>
+    </section>
+
+    <section id="panel-credits" class="panel" data-min-role="guest">
+      <h2>Team & credits</h2>
+      <div id="credits-grid" class="card-grid three"></div>
+    </section>
+
+    <section id="panel-keybinds" class="panel" data-min-role="guest">
+      <h2>Keybinds</h2>
+      <div id="keybinds-table" class="table-wrap"></div>
+    </section>
+
+    <section id="panel-locations" class="panel" data-min-role="guest">
+      <h2>Locations</h2>
+      <p class="hint">Major businesses and job hubs across ShadeRP.</p>
+      <div id="locations-grid" class="card-grid three"></div>
     </section>
 
     <section id="panel-about" class="panel" data-min-role="guest">

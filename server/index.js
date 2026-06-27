@@ -172,6 +172,6 @@ app.get('*', (req, res) => {
   res.sendFile(path.join(PUBLIC, 'index.html'));
 });
 
-app.listen(PORT, () => {
-  console.log(`ShadeRP Portal → http://localhost:${PORT}`);
+app.listen(PORT, '0.0.0.0', () => {
+  console.log(`ShadeRP Portal listening on port ${PORT}`);
 });

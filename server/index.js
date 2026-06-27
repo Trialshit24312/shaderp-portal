@@ -15,6 +15,7 @@ import {
 } from './discord.js';
 import { trackPageView, trackEvent, getAnalyticsSummary } from './analytics.js';
 import { getPortalEnv, isAuthConfigured, isOAuthReady } from './env.js';
+import { loadDashboardData, normalizeUpdatePasses, extractPassHighlights } from './dashboard.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const ROOT = path.join(__dirname, '..');
@@ -104,27 +105,52 @@ app.get('/api/me', (req, res) => {
 });
 
 app.get('/api/team', async (_req, res) => {
+  const data = loadDashboardData();
+  const credits = data?.credits || [];
+  let guildRoles = [];
   try {
-    const guildRoles = await fetchGuildRoles(portalEnv.DISCORD_GUILD_ID, portalEnv.DISCORD_BOT_TOKEN);
-    res.json({
-      roles: Object.entries(roleMap).map(([discordId, appRole]) => ({
-        discordRoleId: discordId,
-        appRole,
-        discordName: guildRoles.find((r) => r.id === discordId)?.name || 'Configure role ID',
-      })),
-      invite: portalEnv.DISCORD_INVITE_URL,
-    });
-  } catch {
-    res.json({ roles: [], invite: portalEnv.DISCORD_INVITE_URL });
-  }
+    guildRoles = await fetchGuildRoles(portalEnv.DISCORD_GUILD_ID, portalEnv.DISCORD_BOT_TOKEN);
+  } catch { /* bot optional */ }
+
+  const roles = Object.entries(roleMap)
+    .map(([discordRoleId, appRole]) => ({
+      discordRoleId,
+      appRole,
+      discordName: guildRoles.find((r) => r.id === discordRoleId)?.name || discordRoleId,
+      level: ROLE_LEVEL[appRole] ?? 0,
+    }))
+    .sort((a, b) => b.level - a.level || a.discordName.localeCompare(b.discordName));
+
+  const tiers = ['owner', 'admin', 'developer', 'staff', 'moderator', 'member'];
+  const grouped = Object.fromEntries(
+    tiers.map((tier) => [tier, roles.filter((r) => r.appRole === tier)])
+  );
+
+  res.json({
+    credits,
+    roles,
+    grouped,
+    invite: portalEnv.DISCORD_INVITE_URL,
+    tierMeta: {
+      owner: { label: 'Owner', icon: '👑', desc: 'Full portal + server control' },
+      admin: { label: 'Admin', icon: '🛡️', desc: 'Resources, branding, blocked mods' },
+      developer: { label: 'Developer', icon: '⚙️', desc: 'Dev tools + staff panels' },
+      staff: { label: 'Staff', icon: '📋', desc: 'Analytics + staff hub' },
+      moderator: { label: 'Moderator', icon: '🔨', desc: 'Community member access' },
+      member: { label: 'Member', icon: '✅', desc: 'Overview, economy, map' },
+    },
+  });
 });
 
 app.get('/api/dashboard', (req, res) => {
   const user = getUser(req);
-  if (!fs.existsSync(DATA_FILE)) {
+  const data = loadDashboardData();
+  if (!data) {
     return res.json({ empty: true, message: 'Sync dashboard data first' });
   }
-  const data = JSON.parse(fs.readFileSync(DATA_FILE, 'utf8'));
+  const passes = normalizeUpdatePasses(data.updatePasses);
+  const latestPass = passes[0] || null;
+
   if (!hasMinRole(user?.appRole, 'staff')) {
     return res.json({
       generatedAt: data.generatedAt,
@@ -141,18 +167,37 @@ app.get('/api/dashboard', (req, res) => {
         startingCash: data.economy?.startingCash,
         paycheckMinutes: data.economy?.paycheckMinutes,
         offDutyMultiplier: data.economy?.offDutyMultiplier,
+        unemployed: data.economy?.unemployed,
       },
       blips: (data.blips || []).slice(0, 12),
-      updatePasses: (data.updatePasses || []).slice(0, 6),
+      updatePasses: passes.slice(0, 8),
+      latestPass,
+      latestHighlights: extractPassHighlights(latestPass),
       latestNotes: data.latestNotes,
+      resourceCounts: {
+        enabled: data.resources?.enabled?.length ?? 0,
+        disabled: data.resources?.disabled?.length ?? 0,
+      },
       public: true,
     });
   }
   if (!hasMinRole(user?.appRole, 'admin')) {
     const { blockedMods, paths, ...rest } = data;
-    return res.json({ ...rest, admin: false });
+    return res.json({
+      ...rest,
+      updatePasses: passes,
+      latestPass,
+      latestHighlights: extractPassHighlights(latestPass),
+      admin: false,
+    });
   }
-  res.json({ ...data, admin: true });
+  res.json({
+    ...data,
+    updatePasses: passes,
+    latestPass,
+    latestHighlights: extractPassHighlights(latestPass),
+    admin: true,
+  });
 });
 
 app.post('/api/dashboard/sync', (req, res) => {

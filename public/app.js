@@ -32,9 +32,22 @@ const NAV = [
 ];
 
 const ROLE_LEVEL = { guest: 0, member: 1, moderator: 2, staff: 3, developer: 4, admin: 5, owner: 6 };
+let TEAM = null;
 
 const el = (id) => document.getElementById(id);
 const esc = (s) => { const d = document.createElement('div'); d.textContent = s ?? ''; return d.innerHTML; };
+
+function getUpdatePasses() {
+  const u = DATA?.updatePasses;
+  if (!u) return [];
+  return Array.isArray(u) ? u : [u];
+}
+
+function discordAvatarUrl(discordId) {
+  if (!discordId) return '';
+  const idx = Number(BigInt(discordId) >> 22n) % 6;
+  return `https://cdn.discordapp.com/embed/avatars/${idx}.png`;
+}
 
 function toast(msg = 'Copied') {
   const t = el('toast');
@@ -127,6 +140,7 @@ function showPanel(id) {
   document.querySelectorAll('.panel').forEach((p) => p.classList.toggle('active', p.id === `panel-${id}`));
   track('panel_view', { panel: id });
   if (id === 'analytics' && hasRole('staff')) loadAnalytics();
+  if (id === 'team') renderTeam();
   el('sidebar')?.classList.remove('open');
 }
 
@@ -146,7 +160,7 @@ function renderHome() {
     ['Player slots', DATA.connect?.maxClients ?? 48],
     ['Locations', DATA.businesses?.length ?? DATA.blips?.length ?? '—'],
     ['Starting bank', DATA.economy ? '$' + Number(DATA.economy.startingBank).toLocaleString() : '—'],
-    ['Latest pass', DATA.updatePasses?.[0]?.version ?? '—'],
+    ['Latest pass', getUpdatePasses()[0]?.version ?? '—'],
   ].map(([lbl, val]) => `<div class="hero-stat"><div class="val">${esc(val)}</div><div class="lbl">${esc(lbl)}</div></div>`).join('');
 
   const features = site.features?.length ? site.features : [
@@ -161,7 +175,8 @@ function renderHome() {
 
   const latest = el('home-latest');
   if (latest) {
-    latest.textContent = DATA.latestNotes?.slice(0, 200) || DATA.updatePasses?.[0]?.overview || 'No updates synced yet.';
+    const pass = getUpdatePasses()[0];
+    latest.textContent = pass?.overview?.slice(0, 220) || DATA.latestNotes?.slice(0, 220) || 'No updates synced yet.';
   }
 }
 
@@ -197,9 +212,16 @@ function renderFaq() {
 }
 
 function renderCredits() {
-  const credits = DATA?.credits || [];
+  const credits = DATA?.credits || TEAM?.credits || [];
   el('credits-grid').innerHTML = credits.length
-    ? credits.map((c) => `<div class="feature-card credit-card"><h4>${esc(c.role)}</h4>${c.displayName ? `<p class="accent-text">${esc(c.displayName)}${c.username ? ` (@${esc(c.username)})` : ''}</p>` : ''}<p>${esc(c.note)}</p><span class="pill mono">Discord: ${esc(c.discordId)}</span></div>`).join('')
+    ? credits.map((c) => `
+      <div class="feature-card credit-card team-card">
+        <img class="team-avatar" src="${esc(discordAvatarUrl(c.discordId))}" alt="" />
+        <h4>${esc(c.role)}</h4>
+        ${c.displayName ? `<p class="accent-text">${esc(c.displayName)}${c.username ? ` · @${esc(c.username)}` : ''}</p>` : ''}
+        <p>${esc(c.note)}</p>
+        <a class="pill mono" href="https://discord.com/users/${esc(c.discordId)}" target="_blank" rel="noopener">Discord profile</a>
+      </div>`).join('')
     : '<p class="hint">Team credits in shade-config/config/credits.lua</p>';
 }
 
@@ -282,44 +304,144 @@ function renderJobs() {
 
 async function renderTeam() {
   try {
-    const res = await fetch('/api/team');
-    const team = await res.json();
-    el('team-roles').innerHTML = team.roles.length
-      ? team.roles.map((r) => `<div class="role-card"><div class="app">${esc(r.appRole)}</div><div class="discord-name">${esc(r.discordName)}</div></div>`).join('')
-      : '<p class="hint">Configure PORTAL_ROLE_MAP on Render with your Discord role IDs.</p>';
+    if (!TEAM) {
+      const res = await fetch('/api/team');
+      TEAM = await res.json();
+    }
+    const credits = TEAM.credits?.length ? TEAM.credits : (DATA?.credits || []);
+    el('team-leadership').innerHTML = credits.length
+      ? credits.map((c) => `
+        <div class="feature-card team-card">
+          <img class="team-avatar" src="${esc(discordAvatarUrl(c.discordId))}" alt="" />
+          <h4>${esc(c.role)}</h4>
+          <p class="accent-text">${esc(c.displayName || c.username || 'Team member')}</p>
+          <p>${esc(c.note)}</p>
+        </div>`).join('')
+      : '<p class="hint">No team credits synced — edit credits.lua and run Sync-PortalToRender.ps1</p>';
+
+    const tiers = ['owner', 'admin', 'developer', 'staff', 'moderator', 'member'];
+    el('team-tiers').innerHTML = tiers.map((tier) => {
+      const meta = TEAM.tierMeta?.[tier] || { label: tier, icon: '•', desc: '' };
+      const roles = TEAM.grouped?.[tier] || [];
+      if (!roles.length) return '';
+      return `
+        <div class="tier-card">
+          <div class="tier-head">
+            <span class="tier-icon">${meta.icon}</span>
+            <div>
+              <strong class="role-badge role-${esc(tier)}">${esc(meta.label)}</strong>
+              <p class="hint">${esc(meta.desc)}</p>
+            </div>
+          </div>
+          <div class="role-grid">${roles.map((r) => `
+            <div class="role-card">
+              <div class="app role-${esc(r.appRole)}">${esc(r.appRole)}</div>
+              <div class="discord-name">${esc(r.discordName)}</div>
+            </div>`).join('')}</div>
+        </div>`;
+    }).join('') || '<p class="hint">Configure PORTAL_ROLE_MAP on Render with your Discord role IDs.</p>';
+
+    const access = el('team-your-access');
+    if (ME?.user) {
+      access.hidden = false;
+      access.innerHTML = `
+        <h3>Your portal access</h3>
+        <p>You are logged in as <strong>${esc(ME.user.globalName)}</strong>
+          <span class="role-badge role-${esc(ME.user.appRole)}">${esc(ME.user.appRole)}</span></p>
+        <p class="hint">${ME.user.inGuild ? 'Member of ShadeRP Discord' : 'Not detected in guild — join Discord first'}</p>
+        <p class="hint">Panels unlocked: ${esc((ME.panels || []).join(', '))}</p>`;
+    } else {
+      access.hidden = true;
+    }
   } catch {
-    el('team-roles').innerHTML = '<p class="hint">Could not load team roles.</p>';
+    el('team-leadership').innerHTML = '<p class="hint">Could not load team data.</p>';
+    el('team-tiers').innerHTML = '';
   }
 }
 
 function renderOverview() {
   if (!DATA) return;
+  const passes = getUpdatePasses();
+  const latest = DATA.latestPass || passes[0];
+  const rc = DATA.resourceCounts || {};
+
   el('stat-grid').innerHTML = [
-    stat('Framework', 'ESX Legacy'),
-    stat('Latest pass', DATA.updatePasses?.[0]?.version ?? '—'),
-    stat('Blips', DATA.blips?.length ?? 0),
+    stat('Framework', DATA.connect?.framework || 'ESX Legacy'),
+    stat('Player slots', DATA.connect?.maxClients ?? 48),
+    stat('Latest pass', latest?.version ?? '—'),
+    stat('Locations', DATA.businesses?.length ?? DATA.blips?.length ?? 0),
+    stat('Resources live', rc.enabled ?? '—'),
     stat('Paycheck', (DATA.economy?.paycheckMinutes ?? '—') + ' min'),
     stat('Starting bank', '$' + (DATA.economy?.startingBank ?? 0).toLocaleString()),
-    stat('Mode', DATA.public ? 'Public view' : 'Staff view'),
+    stat('Last sync', DATA.generatedAt?.slice(0, 16) ?? '—'),
   ].join('');
-  el('latest-notes').textContent = DATA.latestNotes || '—';
+
+  const verEl = el('overview-pass-version');
+  const titleEl = el('overview-pass-title');
+  const bodyEl = el('overview-latest-body');
+  if (latest) {
+    if (verEl) verEl.textContent = latest.version || '';
+    if (titleEl) titleEl.textContent = (latest.title || '').replace(/\*\*/g, '');
+    if (bodyEl) {
+      const snippet = latest.overview || latest.body?.slice(0, 1200) || '';
+      bodyEl.innerHTML = formatUpdateBody(snippet);
+    }
+  } else if (bodyEl) {
+    bodyEl.innerHTML = '<p class="hint">Run Build-DashboardData.ps1 on your server PC to pull UPDATE-LOG.md</p>';
+  }
+
+  const notesEl = el('latest-notes');
+  if (notesEl) notesEl.textContent = DATA.latestNotes || 'No deploy notes synced.';
+
+  const highlights = DATA.latestHighlights?.length
+    ? DATA.latestHighlights
+    : (latest ? extractHighlightsClient(latest) : []);
+  el('overview-highlights').innerHTML = highlights.length
+    ? highlights.map((h) => `<li><strong>${esc(h.title)}</strong>${h.detail ? ` — ${esc(h.detail)}` : ''}</li>`).join('')
+    : '<li class="hint">Sync dashboard for changelog highlights</li>';
+
+  el('overview-timeline').innerHTML = passes.slice(0, 5).map((p) => `
+    <div class="timeline-item">
+      <span class="pill">${esc(p.version)}</span>
+      <strong>${esc((p.title || '').replace(/\*\*/g, ''))}</strong>
+      <p class="hint">${esc((p.overview || '').slice(0, 140))}</p>
+    </div>`).join('') || '<p class="hint">No update passes in sync data.</p>';
+}
+
+function extractHighlightsClient(pass) {
+  const text = pass.overview || pass.body || '';
+  const out = [];
+  for (const m of text.matchAll(/\|\s*\*\*([^*|]+)\*\*\s*\|\s*([^|\n]+)\|/g)) {
+    out.push({ title: m[1].trim(), detail: m[2].trim() });
+    if (out.length >= 6) break;
+  }
+  return out;
 }
 
 function renderUpdates() {
-  el('updates-list').innerHTML = (DATA?.updatePasses || []).map((p, i) => `
+  el('updates-list').innerHTML = getUpdatePasses().map((p, i) => `
     <details class="update-card" ${i === 0 ? 'open' : ''}>
-      <summary><span>${esc(p.title)}</span><span class="ver">${esc(p.version)}</span></summary>
+      <summary><span>${esc((p.title || '').replace(/\*\*/g, ''))}</span><span class="ver">${esc(p.version)}</span></summary>
       <div class="update-body">${formatUpdateBody(p.body || p.overview || '')}</div>
     </details>
   `).join('') || '<p class="hint">Run Build-DashboardData.ps1 to pull UPDATE-LOG.md</p>';
 }
 
 function formatUpdateBody(text) {
+  if (!text) return '';
   return esc(text)
     .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
+    .replace(/^### (.+)$/gm, '<h5>$1</h5>')
     .replace(/^## (.+)$/gm, '<h4>$1</h4>')
+    .replace(/^\|(.+)\|$/gm, (line) => {
+      if (/^\|[\s\-:|]+\|$/.test(line)) return '';
+      const cells = line.split('|').filter(Boolean).map((c) => c.trim());
+      if (cells.length < 2) return line;
+      return `<div class="md-row"><span>${cells[0]}</span><span>${cells.slice(1).join(' ')}</span></div>`;
+    })
     .replace(/^- (.+)$/gm, '<li>$1</li>')
     .replace(/(<li>.*<\/li>\n?)+/g, (m) => `<ul class="check-list">${m}</ul>`)
+    .replace(/`([^`]+)`/g, '<code>$1</code>')
     .replace(/\n/g, '<br>');
 }
 
@@ -393,12 +515,34 @@ function renderMap() {
 
 function renderResources() {
   if (!DATA?.resources) return;
-  el('enabled-count').textContent = DATA.resources.enabled?.length;
-  el('disabled-count').textContent = DATA.resources.disabled?.length;
-  el('enabled-list').innerHTML = (DATA.resources.enabled || []).map((n) => `<span class="chip">${esc(n)}</span>`).join('');
-  el('disabled-list').innerHTML = (DATA.resources.disabled || []).map((d) =>
-    `<div class="disabled-row"><span class="mono">${esc(d.name)}</span><span class="reason">${esc(d.reason)}</span></div>`
-  ).join('');
+  const enabled = DATA.resources.enabled || [];
+  const disabled = DATA.resources.disabled || [];
+  el('enabled-count').textContent = enabled.length;
+  el('disabled-count').textContent = disabled.length;
+
+  el('resource-stats').innerHTML = [
+    stat('Enabled', enabled.length),
+    stat('Disabled', disabled.length),
+    stat('Total tracked', enabled.length + disabled.length),
+    stat('Blocked mods', DATA.blockedMods?.length ?? 0),
+  ].join('');
+
+  const renderLists = (filter = '') => {
+    const q = filter.toLowerCase();
+    const fe = enabled.filter((n) => !q || n.toLowerCase().includes(q));
+    const fd = disabled.filter((d) => !q || d.name.toLowerCase().includes(q) || (d.reason || '').toLowerCase().includes(q));
+    el('enabled-list').innerHTML = fe.map((n) => `<span class="chip">${esc(n)}</span>`).join('') || '<p class="hint">No matches</p>';
+    el('disabled-list').innerHTML = fd.map((d) =>
+      `<div class="disabled-row"><span class="mono">${esc(d.name)}</span><span class="reason">${esc(d.reason || 'commented out')}</span></div>`
+    ).join('') || '<p class="hint">No disabled resources match</p>';
+  };
+
+  renderLists();
+  const search = el('resource-search');
+  if (search && !search._bound) {
+    search._bound = true;
+    search.addEventListener('input', () => renderLists(search.value));
+  }
 }
 
 function renderBranding() {
@@ -416,32 +560,89 @@ function tableFromObj(obj) {
 
 function renderCommands() {
   const cmds = DATA?.quickCommands || [];
-  el('command-list').innerHTML = cmds.map((c) => `<button type="button" class="cmd-btn" data-cmd="${esc(c)}">${esc(c)}</button>`).join('');
+  const restarts = cmds.filter((c) => c.startsWith('restart') || c.startsWith('ensure'));
+  const ingame = cmds.filter((c) => c.startsWith('/'));
+  el('command-list').innerHTML = `
+    ${restarts.length ? `<h4 class="section-sub">Resource restarts</h4><div class="command-grid">${restarts.map((c) => cmdBtn(c)).join('')}</div>` : ''}
+    ${ingame.length ? `<h4 class="section-sub">In-game / txAdmin</h4><div class="command-grid">${ingame.map((c) => cmdBtn(c)).join('')}</div>` : ''}`;
   el('command-list').querySelectorAll('.cmd-btn').forEach((b) => b.addEventListener('click', () => { copyText(b.dataset.cmd); track('command_copy', { panel: 'commands' }); }));
 }
 
+function cmdBtn(c) {
+  return `<button type="button" class="cmd-btn" data-cmd="${esc(c)}">${esc(c)}</button>`;
+}
+
 function renderStaff() {
+  const passes = getUpdatePasses();
+  const latest = passes[0];
+  el('staff-stats').innerHTML = [
+    stat('Last sync', DATA?.generatedAt?.slice(0, 16) ?? '—'),
+    stat('Enabled resources', DATA?.resources?.enabled?.length ?? '—'),
+    stat('Disabled', DATA?.resources?.disabled?.length ?? '—'),
+    stat('Latest pass', latest?.version ?? '—'),
+  ].join('');
+
   el('staff-tools').innerHTML = [
-    ['Analytics', 'Traffic, logins, panel usage', 'analytics'],
-    ['Resources', 'Enabled/disabled scripts', 'resources'],
-    ['Commands', 'txAdmin restart list', 'commands'],
-    ['Map', 'Blip IDs + gotobiz', 'map'],
-  ].map(([t, d, p]) => `<div class="feature-card" style="cursor:pointer" data-go="${p}"><h4>${esc(t)}</h4><p>${esc(d)}</p></div>`).join('');
+    ['Analytics', 'Traffic, logins, panel usage', 'analytics', '📊'],
+    ['Resources', 'Enabled/disabled scripts', 'resources', '📦'],
+    ['Commands', 'txAdmin restart list', 'commands', '⌨️'],
+    ['Map & blips', 'IDs + /gotobiz teleports', 'map', '🗺️'],
+    ['Branding', 'Resource + location names', 'branding', '🏷️'],
+    ['Blocked mods', 'Missing deps / entitlements', 'blocked', '🚫'],
+  ].map(([t, d, p, icon]) => `
+    <div class="feature-card staff-tool-card" data-go="${p}">
+      <span class="feature-icon">${icon}</span><h4>${esc(t)}</h4><p>${esc(d)}</p>
+    </div>`).join('');
   el('staff-tools').querySelectorAll('[data-go]').forEach((c) => c.addEventListener('click', () => showPanel(c.dataset.go)));
 
-  const cmds = (DATA?.quickCommands || []).slice(0, 12);
-  el('staff-commands').innerHTML = cmds.map((c) => `<button type="button" class="cmd-btn" data-cmd="${esc(c)}">${esc(c)}</button>`).join('');
+  const cmds = (DATA?.quickCommands || []).slice(0, 16);
+  el('staff-commands').innerHTML = cmds.map((c) => cmdBtn(c)).join('');
   el('staff-commands').querySelectorAll('.cmd-btn').forEach((b) => b.addEventListener('click', () => copyText(b.dataset.cmd)));
+
+  el('staff-docs').innerHTML = (DATA?.docs || []).map((d) =>
+    `<li><strong>${esc(d.label)}</strong> <span class="hint mono">${esc(d.path)}</span></li>`
+  ).join('') || '<li class="hint">Docs list syncs from Build-DashboardData.ps1</li>';
+
+  const staffUpdate = el('staff-latest-update');
+  if (staffUpdate && latest) {
+    staffUpdate.innerHTML = formatUpdateBody(latest.overview || latest.body?.slice(0, 1500) || '');
+  }
 }
 
 function renderBlocked() {
-  el('blocked-list').innerHTML = (DATA?.blockedMods || []).map((b) =>
-    `<div class="blocked-item"><strong>${esc(b.name)}</strong><span class="reason">${esc(b.reason)}</span></div>`
-  ).join('');
+  const blocked = DATA?.blockedMods || [];
+  el('blocked-list').innerHTML = `
+    <p class="hint" style="margin-bottom:0.75rem">${blocked.length} mods blocked or commented out due to missing dependencies.</p>
+    ${blocked.map((b) =>
+      `<div class="blocked-item"><strong>${esc(b.name)}</strong><span class="reason">${esc(b.reason)}</span></div>`
+    ).join('')}`;
 }
 
 function renderSettings() {
-  el('session-debug').textContent = JSON.stringify(ME?.user || { role: 'guest' }, null, 2);
+  el('session-debug').textContent = JSON.stringify({
+    user: ME?.user || { role: 'guest' },
+    oauthReady: ME?.oauthReady,
+    panels: ME?.panels,
+  }, null, 2);
+
+  el('settings-stats').innerHTML = [
+    stat('Data synced', DATA?.generatedAt?.slice(0, 16) ?? 'Never'),
+    stat('OAuth', ME?.oauthReady ? 'Ready' : 'Not ready'),
+    stat('Your role', ME?.user?.appRole ?? 'guest'),
+    stat('Portal URL', (DATA?.portal?.websiteUrl || location.origin).replace(/^https?:\/\//, '')),
+  ].join('');
+
+  el('settings-env').innerHTML = [
+    ['Discord OAuth', ME?.authConfigured ? '✓ Configured' : '✗ Missing'],
+    ['Login', ME?.oauthReady ? '✓ Ready' : '✗ Need client secret'],
+    ['Data sync', DATA?.generatedAt ? `✓ ${DATA.generatedAt}` : '✗ Run Sync-PortalToRender.ps1'],
+    ['CFX join', DATA?.portal?.cfxJoinCode?.includes('YOUR') ? '⚠ Set portal.lua' : '✓ Set'],
+  ].map(([k, v]) => `<div class="env-row"><span>${esc(k)}</span><span>${esc(v)}</span></div>`).join('');
+
+  const paths = DATA?.paths || {};
+  el('settings-paths').innerHTML = `<table><tbody>${Object.entries(paths).map(([k, v]) =>
+    `<tr><td><code>${esc(k)}</code></td><td class="mono hint">${esc(v)}</td></tr>`
+  ).join('')}</tbody></table>`;
 }
 
 async function loadAnalytics() {
@@ -510,6 +711,7 @@ function renderAll() {
   renderEconomy();
   renderMap();
   setupSearch();
+  renderTeam();
   if (hasRole('admin')) {
     renderResources();
     renderBranding();
@@ -518,7 +720,6 @@ function renderAll() {
     renderSettings();
   }
   if (hasRole('staff')) renderStaff();
-  if (hasRole('member')) renderTeam();
 }
 
 async function init() {

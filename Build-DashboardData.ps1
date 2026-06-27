@@ -46,23 +46,31 @@ function Parse-Businesses([string]$text) {
 }
 
 function Parse-UpdatePasses([string]$md) {
-    $passes = @()
-    $parts = [regex]::Split($md, '(?=^\*\*\d{1,2} \w+ \d{4} · Enhancement Pass v\d+\*\*)', 'Multiline')
-    foreach ($part in $parts) {
-        if ($part -notmatch 'Enhancement Pass v(\d+)') { continue }
-        $title = ([regex]::Match($part, '^\*\*(.+?)\*\*', 'Multiline')).Groups[1].Value
+    $passes = [System.Collections.ArrayList]@()
+    # Tolerate ·, em-dash, or ?? between date and "Enhancement Pass"
+    $pattern = '\*\*(\d{1,2} \w+ \d{4}.+?Enhancement Pass v(\d+))\*\*'
+    $passMatches = [regex]::Matches($md, $pattern)
+    for ($i = 0; $i -lt $passMatches.Count; $i++) {
+        $start = $passMatches[$i].Index
+        $end = if ($i + 1 -lt $passMatches.Count) { $passMatches[$i + 1].Index } else { $md.Length }
+        $section = $md.Substring($start, $end - $start).Trim()
+        $title = $passMatches[$i].Groups[1].Value
+        $ver = $passMatches[$i].Groups[2].Value
         $overview = ''
-        if ($part -match '## Overview\s*\r?\n\r?\n(.+?)(?=\r?\n---|\r?\n## )') {
+        if ($section -match '## Overview\s*\r?\n\r?\n([\s\S]+?)(?=\r?\n---|\r?\n## |\z)') {
             $overview = $Matches[1].Trim()
+        } elseif ($section -match '## ([^\r\n]+)\s*\r?\n\r?\n([\s\S]+?)(?=\r?\n---|\r?\n## |\r?\n\*\*|\z)') {
+            $bodyText = $Matches[2].Trim()
+            $overview = ($bodyText -replace '\r?\n', ' ').Substring(0, [Math]::Min(320, $bodyText.Length))
         }
-        $passes += [ordered]@{
-            version = "v$($Matches[1])"
-            title = $title
+        [void]$passes.Add([ordered]@{
+            version = "v$ver"
+            title = "**$title**"
             overview = $overview
-            body = $part.Trim()
-        }
+            body = $section
+        })
     }
-    return $passes
+    return @($passes.ToArray())
 }
 
 function Parse-Credits([string]$text) {
@@ -278,7 +286,7 @@ $data = [ordered]@{
     businesses = Parse-Businesses $businessText
     blips = $blips
     resources = Parse-ServerResources $serverCfgText
-    updatePasses = Parse-UpdatePasses (Read-Text $updateLog)
+    updatePasses = @(Parse-UpdatePasses (Read-Text $updateLog))
     latestNotes = (Read-Text $updateNotes).Trim()
     blockedMods = $blocked
     quickCommands = $quickCommands

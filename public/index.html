@@ -136,15 +136,36 @@
 
     <section id="panel-team" class="panel" data-min-role="member">
       <h2>Team & Discord roles</h2>
-      <p class="hint">Portal access is synced from your Discord roles.</p>
-      <div id="team-roles" class="role-grid"></div>
+      <p class="hint">Leadership credits and portal access synced from your Discord roles.</p>
+      <h3 class="section-sub">Leadership</h3>
+      <div id="team-leadership" class="card-grid three"></div>
+      <h3 class="section-sub">Portal access tiers</h3>
+      <div id="team-tiers" class="stack"></div>
+      <div id="team-your-access" class="card your-access-card" hidden></div>
     </section>
 
     <!-- MEMBER+ -->
     <section id="panel-overview" class="panel" data-min-role="member">
       <h2>Server overview</h2>
       <div class="stat-grid" id="stat-grid"></div>
-      <div class="card"><h3>Latest update</h3><pre id="latest-notes" class="notes-block"></pre></div>
+      <div class="split-panels">
+        <div class="card">
+          <div class="card-head"><h3>Latest server update</h3><span id="overview-pass-version" class="pill"></span></div>
+          <p id="overview-pass-title" class="accent-text"></p>
+          <div id="overview-latest-body" class="update-body prose"></div>
+          <button type="button" class="btn ghost btn-sm" data-panel="updates">Full update history</button>
+        </div>
+        <div class="card">
+          <h3>Deploy notes</h3>
+          <pre id="latest-notes" class="notes-block compact"></pre>
+          <h3 style="margin-top:1rem">Highlights</h3>
+          <ul id="overview-highlights" class="check-list"></ul>
+        </div>
+      </div>
+      <div class="card" style="margin-top:1rem">
+        <h3>Recent enhancement passes</h3>
+        <div id="overview-timeline" class="timeline"></div>
+      </div>
     </section>
 
     <section id="panel-updates" class="panel" data-min-role="guest">
@@ -180,13 +201,20 @@
 
     <section id="panel-staff" class="panel" data-min-role="staff">
       <h2>Staff hub</h2>
+      <div class="stat-grid" id="staff-stats"></div>
       <div class="card-grid three" id="staff-tools"></div>
-      <div class="card"><h3>Quick restarts</h3><div id="staff-commands" class="command-grid"></div></div>
+      <div class="split-panels">
+        <div class="card"><h3>Quick restarts</h3><div id="staff-commands" class="command-grid"></div></div>
+        <div class="card"><h3>Server docs</h3><ul id="staff-docs" class="doc-list"></ul></div>
+      </div>
+      <div class="card" style="margin-top:1rem"><h3>Latest changes (from server sync)</h3><div id="staff-latest-update" class="update-body"></div></div>
     </section>
 
     <!-- ADMIN+ -->
     <section id="panel-resources" class="panel" data-min-role="admin">
       <h2>Resources</h2>
+      <div class="stat-grid" id="resource-stats"></div>
+      <input type="search" id="resource-search" class="admin-search" placeholder="Filter resources..." autocomplete="off" />
       <div class="split-panels">
         <div class="card"><h3>Enabled <span id="enabled-count" class="badge"></span></h3><div id="enabled-list" class="chip-grid"></div></div>
         <div class="card"><h3>Disabled <span id="disabled-count" class="badge warn"></span></h3><div id="disabled-list" class="stack compact"></div></div>
@@ -213,14 +241,19 @@
 
     <section id="panel-settings" class="panel" data-min-role="admin">
       <h2>Portal settings</h2>
-      <div class="card prose">
-        <h3>Render deployment</h3>
-        <p>Set environment variables in Render dashboard. See <code>RENDER-SETUP.md</code> in the repo.</p>
-        <h3>Sync server data</h3>
-        <p>Run locally: <code>Push-DashboardToRender.ps1</code> after <code>Build-DashboardData.ps1</code></p>
-        <h3>Your session</h3>
-        <pre id="session-debug" class="notes-block"></pre>
+      <div class="stat-grid" id="settings-stats"></div>
+      <div class="split-panels">
+        <div class="card prose">
+          <h3>Deployment</h3>
+          <p>Hosted on Render · synced from your FiveM PC via <code>Sync-PortalToRender.ps1</code></p>
+          <div id="settings-env" class="env-grid"></div>
+        </div>
+        <div class="card prose">
+          <h3>Your session</h3>
+          <pre id="session-debug" class="notes-block"></pre>
+        </div>
       </div>
+      <div class="card" style="margin-top:1rem"><h3>Server paths (sync source)</h3><div id="settings-paths" class="table-wrap"></div></div>
     </section>
   </main>
 

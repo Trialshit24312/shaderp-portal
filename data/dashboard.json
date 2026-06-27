@@ -1,5 +1,5 @@
 {
-    "generatedAt":  "2026-06-27 02:23:40",
+    "generatedAt":  "2026-06-27 02:29:45",
     "branding":  {
                      "resources":  {
                                        "kq_powerwashing":  "ShadeRP Power Washing",
@@ -69,104 +69,6 @@
                     "framework":  "ESX Legacy"
                 },
     "site":  {
-                 "faq":  [
-                             {
-                                 "q":  "How do I join the server?",
-                                 "a":  "Join Discord first, read the rules, then use the Connect link on this portal (cfx.re/join code). You need licensed GTA V and FiveM installed."
-                             },
-                             {
-                                 "q":  "What framework does ShadeRP use?",
-                                 "a":  "ESX Legacy with ox_inventory, ox_target, ox_lib, Wasabi scripts for PD/EMS, and pyh job scripts for civilian work."
-                             },
-                             {
-                                 "q":  "How do I get a job?",
-                                 "a":  "Visit job locations on the map (PD, EMS, mechanics) or use the ShadeRP Job Tablet for trucking, Gruppe 6, contacts, and boosting."
-                             },
-                             {
-                                 "q":  "How does the economy work?",
-                                 "a":  "Paychecks every 15 minutes while on duty. Starting bank $15,000 and cash $750. Side jobs pay via reputation in pyh scripts."
-                             },
-                             {
-                                 "q":  "What is this portal for?",
-                                 "a":  "Public info for players plus staff tools. Login with Discord to unlock panels based on your server roles."
-                             },
-                             {
-                                 "q":  "Who develops ShadeRP?",
-                                 "a":  "Owner \u0026 lead developer runs the server and all custom setup. See the Team page for credits."
-                             }
-                         ],
-                 "keybinds":  [
-                                  {
-                                      "key":  "F1",
-                                      "action":  "Phone (lb-phone)"
-                                  },
-                                  {
-                                      "key":  "F2",
-                                      "action":  "Inventory (ox_inventory)"
-                                  },
-                                  {
-                                      "key":  "F3",
-                                      "action":  "Emote / animations"
-                                  },
-                                  {
-                                      "key":  "F5",
-                                      "action":  "Job tablet (pyh-tablet)"
-                                  },
-                                  {
-                                      "key":  "F6",
-                                      "action":  "Billing (codem-billing)"
-                                  },
-                                  {
-                                      "key":  "F7",
-                                      "action":  "Police radar (in cruiser)"
-                                  },
-                                  {
-                                      "key":  "T",
-                                      "action":  "Chat"
-                                  },
-                                  {
-                                      "key":  "Z",
-                                      "action":  "Radio / voice proximity"
-                                  },
-                                  {
-                                      "key":  "M",
-                                      "action":  "Map / pause menu"
-                                  }
-                              ],
-                 "rules":  [
-                               {
-                                   "title":  "Serious roleplay",
-                                   "body":  "Stay in character at all times in public. No random deathmatch, cop baiting, or breaking character for OOC drama."
-                               },
-                               {
-                                   "title":  "Respect \u0026 maturity",
-                                   "body":  "Treat players and staff with respect. Harassment, slurs, hate speech, or toxicity is zero tolerance."
-                               },
-                               {
-                                   "title":  "No cheating or exploits",
-                                   "body":  "No mod menus, money glitches, duping, or bug abuse. EZAC and staff review logs."
-                               },
-                               {
-                                   "title":  "New Life Rule (NLR)",
-                                   "body":  "After respawning you forget the events that led to your death. Do not return to the scene for revenge."
-                               },
-                               {
-                                   "title":  "Combat \u0026 initiation",
-                                   "body":  "Give clear RP initiation before hostile actions. Value your life — do not fight unrealistic odds."
-                               },
-                               {
-                                   "title":  "Crime \u0026 police",
-                                   "body":  "Crime must have RP reason and escalation. Cop baiting and unrealistic robberies are not allowed."
-                               },
-                               {
-                                   "title":  "Meta \u0026 powergaming",
-                                   "body":  "No Discord/streams info in-game. No forcing outcomes other players cannot respond to."
-                               },
-                               {
-                                   "title":  "Microphone",
-                                   "body":  "Working microphone required for most RP. Push-to-talk recommended."
-                               }
-                           ],
                  "features":  [
                                   {
                                       "icon":  "🚔",
@@ -176,51 +78,804 @@
                                   {
                                       "icon":  "🏥",
                                       "title":  "Pillbox EMS",
-                                      "desc":  "Wasabi ambulance, billing, medical RP"
+                                      "desc":  "Wasabi ambulance, billing, medical roleplay"
                                   },
                                   {
                                       "icon":  "🚛",
-                                      "title":  "Civilian jobs",
+                                      "title":  "Civilian economy",
                                       "desc":  "Trucking, Gruppe 6, fishing, lumberjack, oil rig"
                                   },
                                   {
                                       "icon":  "📱",
                                       "title":  "Phone \u0026 tablet",
-                                      "desc":  "lb-phone, ShadeRP job tablet, contacts shop"
+                                      "desc":  "lb-phone, ShadeRP job tablet, contacts black market"
                                   },
                                   {
                                       "icon":  "💰",
                                       "title":  "Balanced economy",
-                                      "desc":  "Tiered salaries, side hustles, pawn shop"
+                                      "desc":  "$15k bank start · 15 min paychecks · pawn shop"
                                   },
                                   {
-                                      "icon":  "🗺️",
-                                      "title":  "Curated map",
-                                      "desc":  "HWC blips, proximity MLOs, branded locations"
+                                      "icon":  "🌃",
+                                      "title":  "Curated city",
+                                      "desc":  "HWC blips, proximity MLOs, After Hours events"
                                   }
                               ],
-                 "tagline":  "Serious ESX Legacy roleplay — economy, jobs, and a staff-run city."
+                 "faq":  [
+                             {
+                                 "q":  "How do I join ShadeRP?",
+                                 "a":  "1) Join Discord at discord.gg/sbnu98HYAZ · 2) Read rules in Discord and on this portal · 3) Install FiveM + licensed GTA V · 4) Connect via the cfx.re link on the Connect page."
+                             },
+                             {
+                                 "q":  "Is ShadeRP whitelisted?",
+                                 "a":  "Check Discord for current whitelist status. Join the server, read #announcements, and follow any application steps staff post."
+                             },
+                             {
+                                 "q":  "What framework do you use?",
+                                 "a":  "ESX Legacy with ox_inventory, ox_target, and ox_lib. Economy and jobs are tuned in shade-config."
+                             },
+                             {
+                                 "q":  "How do I get a job?",
+                                 "a":  "Whitelisted jobs (PD, EMS): apply in Discord. Civilians: visit job hubs on the map or use the ShadeRP Job Tablet (pyh-tablet item) for trucking, Gruppe 6, contacts, and boosting."
+                             },
+                             {
+                                 "q":  "Where is the police station / hospital?",
+                                 "a":  "ShadeRP Mission Row PD and ShadeRP Pillbox Hospital — see the Locations page for coords and map blips in-game (/hwcblips)."
+                             },
+                             {
+                                 "q":  "How does money work?",
+                                 "a":  "New characters start with $750 cash and $15,000 bank. Paychecks every 15 minutes on duty. Side jobs (trucking, fishing, etc.) pay through pyh reputation systems."
+                             },
+                             {
+                                 "q":  "What phone script do you use?",
+                                 "a":  "lb-phone (ShadeRP Phone). Press F1 in-game. Billing uses F6 (codem-billing)."
+                             },
+                             {
+                                 "q":  "Who runs ShadeRP?",
+                                 "a":  "Owner \u0026 lead developer \u003c@1170463252698902561\u003e — sole developer. Co-owner \u003c@940681605670916148\u003e. OST by \u003c@423024169584689162\u003e. See Team page."
+                             },
+                             {
+                                 "q":  "How do I report a player or bug?",
+                                 "a":  "Open a ticket in Discord. Do not call people out in public chat or streams."
+                             },
+                             {
+                                 "q":  "What is this website?",
+                                 "a":  "The ShadeRP community portal — public info for players plus staff tools. Login with Discord to unlock role-based admin panels."
+                             }
+                         ],
+                 "tagline":  "Realistic ESX Legacy roleplay — FiveM · Server · Fun · Roleplay · Realistic",
+                 "jobGuide":  [
+                                  {
+                                      "id":  "police",
+                                      "name":  "ShadeRP LSPD",
+                                      "category":  "Government",
+                                      "how":  "Apply via Discord · Mission Row PD · MDT + radar on duty"
+                                  },
+                                  {
+                                      "id":  "ambulance",
+                                      "name":  "ShadeRP Pillbox EMS",
+                                      "category":  "Government",
+                                      "how":  "Apply via Discord · Pillbox Hospital · billing + medical RP"
+                                  },
+                                  {
+                                      "id":  "mechanic",
+                                      "name":  "ShadeRP Mechanics",
+                                      "category":  "Business",
+                                      "how":  "Bennys, Ride Out, Gear Head — jg-mechanic tuning \u0026 repairs"
+                                  },
+                                  {
+                                      "id":  "pyh_trucking",
+                                      "name":  "ShadeRP Trucking",
+                                      "category":  "Civilian",
+                                      "how":  "Job tablet · reputation contracts · trucking hub blip"
+                                  },
+                                  {
+                                      "id":  "pyh_gruppe6",
+                                      "name":  "ShadeRP Gruppe 6",
+                                      "category":  "Civilian",
+                                      "how":  "Group system + tablet · co-op armored transport"
+                                  },
+                                  {
+                                      "id":  "pyh_fishing",
+                                      "name":  "ShadeRP Fishing",
+                                      "category":  "Civilian",
+                                      "how":  "pyh / wasabi fishing spots · sell your catch"
+                                  },
+                                  {
+                                      "id":  "pyh_lumberjack",
+                                      "name":  "ShadeRP Lumberjack",
+                                      "category":  "Civilian",
+                                      "how":  "Harvest timber · sell at lumberjack hub"
+                                  },
+                                  {
+                                      "id":  "fetchq_oil",
+                                      "name":  "ShadeRP Oil Rig",
+                                      "category":  "Civilian",
+                                      "how":  "Offshore oil rig job · fetchq-oil"
+                                  },
+                                  {
+                                      "id":  "kq_powerwashing",
+                                      "name":  "ShadeRP Power Washing",
+                                      "category":  "Civilian",
+                                      "how":  "Contract jobs · kq_powerwashing"
+                                  },
+                                  {
+                                      "id":  "pyh_boosting",
+                                      "name":  "ShadeRP Boosting",
+                                      "category":  "Illegal",
+                                      "how":  "Tablet + chip · underground vehicle contracts"
+                                  },
+                                  {
+                                      "id":  "wasabi_mining",
+                                      "name":  "ShadeRP Mining",
+                                      "category":  "Civilian",
+                                      "how":  "Mine ore · process and sell"
+                                  },
+                                  {
+                                      "id":  "it_drugs",
+                                      "name":  "ShadeRP Drugs",
+                                      "category":  "Illegal",
+                                      "how":  "Production \u0026 street sales — serious criminal RP only"
+                                  },
+                                  {
+                                      "id":  "uwucafe",
+                                      "name":  "UwU Cat Cafe",
+                                      "category":  "Business",
+                                      "how":  "pls_jobsystem · food service RP"
+                                  }
+                              ],
+                 "keybinds":  [
+                                  {
+                                      "key":  "F1",
+                                      "action":  "Open phone (lb-phone)"
+                                  },
+                                  {
+                                      "key":  "F2",
+                                      "action":  "Open inventory (ox_inventory)"
+                                  },
+                                  {
+                                      "key":  "F3",
+                                      "action":  "Emotes / animations"
+                                  },
+                                  {
+                                      "key":  "F5",
+                                      "action":  "Job tablet (pyh-tablet — trucking, Gruppe 6, contacts)"
+                                  },
+                                  {
+                                      "key":  "F6",
+                                      "action":  "Billing menu (codem-billing)"
+                                  },
+                                  {
+                                      "key":  "F7",
+                                      "action":  "Police radar (in cruiser — lgd-policeradar)"
+                                  },
+                                  {
+                                      "key":  "T",
+                                      "action":  "Chat"
+                                  },
+                                  {
+                                      "key":  "Z",
+                                      "action":  "Proximity voice (pma-voice)"
+                                  },
+                                  {
+                                      "key":  "M",
+                                      "action":  "Map / pause menu (gen_pausev2)"
+                                  },
+                                  {
+                                      "key":  "U",
+                                      "action":  "Vehicle controls (0r-carcontrol)"
+                                  },
+                                  {
+                                      "key":  "LEFT ALT",
+                                      "action":  "Third eye / target (ox_target)"
+                                  },
+                                  {
+                                      "key":  "X",
+                                      "action":  "Hands up / cancel action"
+                                  }
+                              ],
+                 "rules":  [
+                               {
+                                   "title":  "1. Serious \u0026 realistic roleplay",
+                                   "body":  "Stay in character at all times in public. ShadeRP is realistic RP — your character should behave like a real person in Los Santos. No arcade behavior."
+                               },
+                               {
+                                   "title":  "2. Respect everyone",
+                                   "body":  "Treat players and staff with respect. Harassment, slurs, hate speech, discrimination, or toxicity is zero tolerance — instant ban."
+                               },
+                               {
+                                   "title":  "3. No RDM / VDM",
+                                   "body":  "Random deathmatch and vehicle deathmatch are forbidden. You must have proper RP initiation before any hostile action."
+                               },
+                               {
+                                   "title":  "4. New Life Rule (NLR)",
+                                   "body":  "After you die or respawn, you forget the events leading to your death. Do not return to the scene, seek revenge, or pass info to others about that situation."
+                               },
+                               {
+                                   "title":  "5. Value your life (Fear RP)",
+                                   "body":  "If someone has a weapon on you or you are outnumbered, comply. Do not fight unrealistic odds or act like you are invincible."
+                               },
+                               {
+                                   "title":  "6. RP initiation \u0026 escalation",
+                                   "body":  "Crime and conflict need clear verbal or text initiation and logical escalation. Give the other party time to respond."
+                               },
+                               {
+                                   "title":  "7. No cop baiting",
+                                   "body":  "Do not intentionally provoke police for a chase or shootout with no RP reason. Criminal activity must make sense for your character."
+                               },
+                               {
+                                   "title":  "8. No metagaming",
+                                   "body":  "Do not use Discord, streams, clips, or OOC info in-character. What your character knows must come from in-game events only."
+                               },
+                               {
+                                   "title":  "9. No powergaming / fail RP",
+                                   "body":  "Do not force outcomes other players cannot respond to. No unrealistic actions (e.g. surviving impossible injuries, ignoring restraints)."
+                               },
+                               {
+                                   "title":  "10. No cheating or exploits",
+                                   "body":  "Mod menus, money glitches, duping, bug abuse, or bypassing anticheat (EZAC) is permanent ban territory. Report bugs — do not exploit them."
+                               },
+                               {
+                                   "title":  "11. Microphone required",
+                                   "body":  "A working microphone is required for most RP. Push-to-talk is recommended. Text RP is limited — check Discord for exceptions."
+                               },
+                               {
+                                   "title":  "12. Discord first",
+                                   "body":  "Join discord.gg/sbnu98HYAZ before playing. Read all Discord rules and announcements — they are part of server policy."
+                               },
+                               {
+                                   "title":  "13. Staff decisions are final",
+                                   "body":  "Staff may intervene in scenes to preserve RP quality. Argue respectfully in tickets — not in public chat."
+                               }
+                           ],
+                 "about":  {
+                               "stack":  [
+                                             "ESX Legacy framework",
+                                             "ox_inventory · ox_target · ox_lib",
+                                             "Wasabi Police / EMS / MDT",
+                                             "lb-phone · ShadeRP Job Tablet",
+                                             "HWC map blips · proximity MLO loading",
+                                             "Discord logging · EZAC anticheat"
+                                         ],
+                               "headline":  "ShadeRP — ESX Legacy Roleplay",
+                               "intro":  "ShadeRP is a serious, realistic ESX Legacy roleplay server built on ox_inventory, Wasabi PD/EMS, pyh civilian jobs, and a curated mod list managed through shade-config.",
+                               "memberCount":  "~50+ community members",
+                               "whitelist":  "Join Discord and read the rules before connecting. Whitelist info posted in Discord."
+                           }
              },
     "credits":  [
                     {
                         "id":  "ownerDeveloper",
                         "discordId":  "1170463252698902561",
+                        "displayName":  "ᴋ",
+                        "username":  "kovert7554",
                         "role":  "Owner \u0026 Lead Developer",
-                        "note":  "Built and develops ShadeRP — the only developer on the server."
+                        "note":  "Built and develops ShadeRP — the only developer on the server. All custom setup, ESX porting, and city configuration."
                     },
                     {
                         "id":  "coOwner",
                         "discordId":  "940681605670916148",
+                        "displayName":  "Co-Owner",
+                        "username":  "",
                         "role":  "Co-Owner",
-                        "note":  "Server ownership and leadership."
+                        "note":  "Server ownership, leadership, and community direction."
                     },
                     {
                         "id":  "music",
                         "discordId":  "423024169584689162",
+                        "displayName":  "OST Artist",
+                        "username":  "",
                         "role":  "Original Soundtrack",
-                        "note":  "Loading screen and ShadeRP music."
+                        "note":  "Loading screen music — Till I\\"
                     }
                 ],
+    "plsJobs":  [
+                    {
+                        "job":  "police",
+                        "label":  "ShadeRP LSPD",
+                        "area":  60,
+                        "coords":  {
+                                       "x":  608.03,
+                                       "y":  1.08,
+                                       "z":  82.76
+                                   },
+                        "register":  {
+                                         "x":  606.5,
+                                         "y":  3.0,
+                                         "z":  82.76
+                                     },
+                        "bossmenu":  {
+                                         "x":  608.22,
+                                         "y":  10.63,
+                                         "z":  91.54
+                                     },
+                        "stashes":  [
+                                        {
+                                            "id":  "police_locker_vpd",
+                                            "label":  "Personal Locker",
+                                            "coords":  {
+                                                           "x":  553.83,
+                                                           "y":  29.47,
+                                                           "z":  69.36
+                                                       },
+                                            "slots":  50,
+                                            "weight":  100000,
+                                            "job":  true
+                                        }
+                                    ],
+                        "craftings":  [
+
+                                      ],
+                        "shops":  [
+
+                                  ],
+                        "props":  [
+
+                                  ],
+                        "blips":  [
+
+                                  ],
+                        "balance":  0
+                    },
+                    {
+                        "job":  "ambulance",
+                        "label":  "ShadeRP Pillbox Hospital",
+                        "area":  50,
+                        "coords":  {
+                                       "x":  311.2,
+                                       "y":  -592.4,
+                                       "z":  43.3
+                                   },
+                        "register":  {
+                                         "x":  314.0,
+                                         "y":  -590.0,
+                                         "z":  43.3
+                                     },
+                        "bossmenu":  {
+                                         "x":  311.2,
+                                         "y":  -592.4,
+                                         "z":  43.3
+                                     },
+                        "stashes":  [
+                                        {
+                                            "id":  "ems_locker_nteam",
+                                            "label":  "EMS Locker",
+                                            "coords":  {
+                                                           "x":  306.0,
+                                                           "y":  -601.0,
+                                                           "z":  43.3
+                                                       },
+                                            "slots":  50,
+                                            "weight":  100000,
+                                            "job":  true
+                                        }
+                                    ],
+                        "craftings":  [
+                                          {
+                                              "id":  "ems_kitchen_nteam",
+                                              "label":  "Staff Kitchen",
+                                              "coords":  {
+                                                             "x":  298.0,
+                                                             "y":  -598.0,
+                                                             "z":  43.3
+                                                         },
+                                              "items":  [
+                                                            {
+                                                                "itemName":  "coffee",
+                                                                "itemCount":  1,
+                                                                "ingedience":  [
+                                                                                   {
+                                                                                       "itemName":  "water",
+                                                                                       "itemCount":  1
+                                                                                   }
+                                                                               ]
+                                                            }
+                                                        ]
+                                          }
+                                      ],
+                        "shops":  [
+
+                                  ],
+                        "props":  [
+
+                                  ],
+                        "blips":  [
+
+                                  ],
+                        "balance":  0
+                    },
+                    {
+                        "job":  "mechanic",
+                        "label":  "ShadeRP Bennys",
+                        "area":  45,
+                        "coords":  {
+                                       "x":  -205.5,
+                                       "y":  -1308.2,
+                                       "z":  31.3
+                                   },
+                        "register":  {
+                                         "x":  -200.0,
+                                         "y":  -1310.0,
+                                         "z":  31.3
+                                     },
+                        "bossmenu":  {
+                                         "x":  -205.5,
+                                         "y":  -1308.2,
+                                         "z":  31.3
+                                     },
+                        "stashes":  [
+                                        {
+                                            "id":  "mechanic_bennys_stash",
+                                            "label":  "Parts Storage",
+                                            "coords":  {
+                                                           "x":  -200.5,
+                                                           "y":  -1314.0,
+                                                           "z":  31.3
+                                                       },
+                                            "slots":  50,
+                                            "weight":  150000,
+                                            "job":  true
+                                        }
+                                    ],
+                        "craftings":  [
+
+                                      ],
+                        "shops":  [
+                                      {
+                                          "id":  "mechanic_bennys_shop",
+                                          "label":  "Parts Shop",
+                                          "coords":  {
+                                                         "x":  -208.0,
+                                                         "y":  -1330.0,
+                                                         "z":  31.3
+                                                     },
+                                          "items":  [
+                                                        {
+                                                            "itemName":  "repairkit",
+                                                            "price":  150
+                                                        },
+                                                        {
+                                                            "itemName":  "cleaningkit",
+                                                            "price":  50
+                                                        }
+                                                    ]
+                                      }
+                                  ],
+                        "props":  [
+
+                                  ],
+                        "blips":  [
+
+                                  ],
+                        "balance":  0
+                    },
+                    {
+                        "job":  "mechanic",
+                        "label":  "Ride Out Customs",
+                        "area":  45,
+                        "coords":  {
+                                       "x":  1175.0,
+                                       "y":  2640.0,
+                                       "z":  37.8
+                                   },
+                        "register":  {
+                                         "x":  1178.0,
+                                         "y":  2638.0,
+                                         "z":  37.8
+                                     },
+                        "bossmenu":  {
+                                         "x":  1172.0,
+                                         "y":  2642.0,
+                                         "z":  37.8
+                                     },
+                        "stashes":  [
+                                        {
+                                            "id":  "mechanic_rideout_stash",
+                                            "label":  "Workshop Storage",
+                                            "coords":  {
+                                                           "x":  1180.0,
+                                                           "y":  2645.0,
+                                                           "z":  37.8
+                                                       },
+                                            "slots":  50,
+                                            "weight":  150000,
+                                            "job":  true
+                                        }
+                                    ],
+                        "craftings":  [
+
+                                      ],
+                        "shops":  [
+
+                                  ],
+                        "props":  [
+
+                                  ],
+                        "blips":  [
+
+                                  ],
+                        "balance":  0
+                    },
+                    {
+                        "job":  "uwucafe",
+                        "label":  "UwU Cat Cafe",
+                        "area":  40,
+                        "coords":  {
+                                       "x":  -580.0,
+                                       "y":  -1060.0,
+                                       "z":  22.3
+                                   },
+                        "register":  {
+                                         "x":  -583.37,
+                                         "y":  -1060.80,
+                                         "z":  22.34
+                                     },
+                        "bossmenu":  {
+                                         "x":  -597.07,
+                                         "y":  -1053.40,
+                                         "z":  22.34
+                                     },
+                        "stashes":  [
+                                        {
+                                            "id":  "uwucafe_storage",
+                                            "label":  "Kitchen Storage",
+                                            "coords":  {
+                                                           "x":  -588.59,
+                                                           "y":  -1066.42,
+                                                           "z":  22.34
+                                                       },
+                                            "slots":  50,
+                                            "weight":  100000,
+                                            "job":  true
+                                        }
+                                    ],
+                        "craftings":  [
+                                          {
+                                              "id":  "uwucafe_kitchen",
+                                              "label":  "Kitchen",
+                                              "coords":  {
+                                                             "x":  -590.0,
+                                                             "y":  -1062.0,
+                                                             "z":  22.34
+                                                         },
+                                              "items":  [
+                                                            {
+                                                                "itemName":  "coffee",
+                                                                "itemCount":  1,
+                                                                "ingedience":  [
+                                                                                   {
+                                                                                       "itemName":  "water",
+                                                                                       "itemCount":  1
+                                                                                   }
+                                                                               ]
+                                                            },
+                                                            {
+                                                                "itemName":  "burger",
+                                                                "itemCount":  1,
+                                                                "ingedience":  [
+                                                                                   {
+                                                                                       "itemName":  "bread",
+                                                                                       "itemCount":  1
+                                                                                   },
+                                                                                   {
+                                                                                       "itemName":  "meat",
+                                                                                       "itemCount":  1
+                                                                                   }
+                                                                               ]
+                                                            }
+                                                        ]
+                                          }
+                                      ],
+                        "shops":  [
+
+                                  ],
+                        "props":  [
+
+                                  ],
+                        "blips":  [
+
+                                  ],
+                        "balance":  0
+                    },
+                    {
+                        "job":  "slaughterer",
+                        "label":  "Pizza Paleto",
+                        "area":  40,
+                        "coords":  {
+                                       "x":  -289.0,
+                                       "y":  6198.0,
+                                       "z":  31.5
+                                   },
+                        "register":  {
+                                         "x":  -286.0,
+                                         "y":  6196.0,
+                                         "z":  31.5
+                                     },
+                        "bossmenu":  {
+                                         "x":  -292.0,
+                                         "y":  6200.0,
+                                         "z":  31.5
+                                     },
+                        "stashes":  [
+                                        {
+                                            "id":  "pizza_paleto_stash",
+                                            "label":  "Pantry",
+                                            "coords":  {
+                                                           "x":  -284.0,
+                                                           "y":  6202.0,
+                                                           "z":  31.5
+                                                       },
+                                            "slots":  40,
+                                            "weight":  80000,
+                                            "job":  true
+                                        }
+                                    ],
+                        "craftings":  [
+                                          {
+                                              "id":  "pizza_paleto_kitchen",
+                                              "label":  "Pizza Oven",
+                                              "coords":  {
+                                                             "x":  -287.0,
+                                                             "y":  6204.0,
+                                                             "z":  31.5
+                                                         },
+                                              "items":  [
+                                                            {
+                                                                "itemName":  "pizza",
+                                                                "itemCount":  1,
+                                                                "ingedience":  [
+                                                                                   {
+                                                                                       "itemName":  "bread",
+                                                                                       "itemCount":  1
+                                                                                   },
+                                                                                   {
+                                                                                       "itemName":  "cheese",
+                                                                                       "itemCount":  1
+                                                                                   }
+                                                                               ]
+                                                            }
+                                                        ]
+                                          }
+                                      ],
+                        "shops":  [
+
+                                  ],
+                        "props":  [
+
+                                  ],
+                        "blips":  [
+
+                                  ],
+                        "balance":  0
+                    },
+                    {
+                        "job":  "mechanic",
+                        "label":  "Gear Head Customs",
+                        "area":  50,
+                        "coords":  {
+                                       "x":  68.24,
+                                       "y":  -1748.52,
+                                       "z":  29.32
+                                   },
+                        "register":  {
+                                         "x":  72.0,
+                                         "y":  -1746.0,
+                                         "z":  29.32
+                                     },
+                        "bossmenu":  {
+                                         "x":  64.0,
+                                         "y":  -1750.0,
+                                         "z":  29.32
+                                     },
+                        "stashes":  [
+                                        {
+                                            "id":  "mechanic_gearhead_stash",
+                                            "label":  "Gear Head Storage",
+                                            "coords":  {
+                                                           "x":  70.0,
+                                                           "y":  -1752.0,
+                                                           "z":  29.32
+                                                       },
+                                            "slots":  50,
+                                            "weight":  150000,
+                                            "job":  true
+                                        }
+                                    ],
+                        "craftings":  [
+
+                                      ],
+                        "shops":  [
+
+                                  ],
+                        "props":  [
+
+                                  ],
+                        "blips":  [
+
+                                  ],
+                        "balance":  0
+                    }
+                ],
+    "jobGuide":  [
+                     {
+                         "id":  "police",
+                         "name":  "ShadeRP LSPD",
+                         "category":  "Government",
+                         "how":  "Apply via Discord · Mission Row PD · MDT + radar on duty"
+                     },
+                     {
+                         "id":  "ambulance",
+                         "name":  "ShadeRP Pillbox EMS",
+                         "category":  "Government",
+                         "how":  "Apply via Discord · Pillbox Hospital · billing + medical RP"
+                     },
+                     {
+                         "id":  "mechanic",
+                         "name":  "ShadeRP Mechanics",
+                         "category":  "Business",
+                         "how":  "Bennys, Ride Out, Gear Head — jg-mechanic tuning \u0026 repairs"
+                     },
+                     {
+                         "id":  "pyh_trucking",
+                         "name":  "ShadeRP Trucking",
+                         "category":  "Civilian",
+                         "how":  "Job tablet · reputation contracts · trucking hub blip"
+                     },
+                     {
+                         "id":  "pyh_gruppe6",
+                         "name":  "ShadeRP Gruppe 6",
+                         "category":  "Civilian",
+                         "how":  "Group system + tablet · co-op armored transport"
+                     },
+                     {
+                         "id":  "pyh_fishing",
+                         "name":  "ShadeRP Fishing",
+                         "category":  "Civilian",
+                         "how":  "pyh / wasabi fishing spots · sell your catch"
+                     },
+                     {
+                         "id":  "pyh_lumberjack",
+                         "name":  "ShadeRP Lumberjack",
+                         "category":  "Civilian",
+                         "how":  "Harvest timber · sell at lumberjack hub"
+                     },
+                     {
+                         "id":  "fetchq_oil",
+                         "name":  "ShadeRP Oil Rig",
+                         "category":  "Civilian",
+                         "how":  "Offshore oil rig job · fetchq-oil"
+                     },
+                     {
+                         "id":  "kq_powerwashing",
+                         "name":  "ShadeRP Power Washing",
+                         "category":  "Civilian",
+                         "how":  "Contract jobs · kq_powerwashing"
+                     },
+                     {
+                         "id":  "pyh_boosting",
+                         "name":  "ShadeRP Boosting",
+                         "category":  "Illegal",
+                         "how":  "Tablet + chip · underground vehicle contracts"
+                     },
+                     {
+                         "id":  "wasabi_mining",
+                         "name":  "ShadeRP Mining",
+                         "category":  "Civilian",
+                         "how":  "Mine ore · process and sell"
+                     },
+                     {
+                         "id":  "it_drugs",
+                         "name":  "ShadeRP Drugs",
+                         "category":  "Illegal",
+                         "how":  "Production \u0026 street sales — serious criminal RP only"
+                     },
+                     {
+                         "id":  "uwucafe",
+                         "name":  "UwU Cat Cafe",
+                         "category":  "Business",
+                         "how":  "pls_jobsystem · food service RP"
+                     }
+                 ],
     "economy":  {
                     "offDutyMultiplier":  0.65,
                     "startingCash":  750,

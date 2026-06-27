@@ -67,20 +67,42 @@ function Parse-UpdatePasses([string]$md) {
 
 function Parse-Credits([string]$text) {
     $list = @()
-    foreach ($m in [regex]::Matches($text, '(\w+)\s*=\s*\{\s*discordId\s*=\s*''([^'']+)'',\s*role\s*=\s*''([^'']+)'',\s*note\s*=\s*''([^'']+)''')) {
+    foreach ($block in [regex]::Matches($text, '(\w+)\s*=\s*\{([^{}]+)\}')) {
+        $inner = $block.Groups[2].Value
+        $get = {
+            param($k)
+            $m = [regex]::Match($inner, "$k\s*=\s*'([^']*)'")
+            if ($m.Success) { return $m.Groups[1].Value }
+            return ''
+        }
+        $discordId = & $get 'discordId'
+        if (-not $discordId) { continue }
         $list += [ordered]@{
-            id = $m.Groups[1].Value
-            discordId = $m.Groups[2].Value
-            role = $m.Groups[3].Value
-            note = $m.Groups[4].Value
+            id = $block.Groups[1].Value
+            discordId = $discordId
+            displayName = & $get 'displayName'
+            username = & $get 'username'
+            role = & $get 'role'
+            note = & $get 'note'
         }
     }
     return $list
 }
 
 function Parse-PortalSite([string]$text) {
-    $site = @{ tagline = ''; rules = @(); faq = @(); keybinds = @(); features = @() }
+    $site = @{ tagline = ''; about = @{}; rules = @(); faq = @(); keybinds = @(); features = @(); jobGuide = @() }
     if ($text -match "tagline\s*=\s*'([^']+)'") { $site.tagline = $Matches[1] }
+    if ($text -match "headline\s*=\s*'([^']+)'") { $site.about.headline = $Matches[1] }
+    if ($text -match "intro\s*=\s*'([^']+)'") { $site.about.intro = $Matches[1] }
+    if ($text -match "whitelist\s*=\s*'([^']+)'") { $site.about.whitelist = $Matches[1] }
+    if ($text -match "memberCount\s*=\s*'([^']+)'") { $site.about.memberCount = $Matches[1] }
+    $stack = @()
+    foreach ($m in [regex]::Matches($text, "stack\s*=\s*\{([^}]+)\}")) {
+        foreach ($line in [regex]::Matches($m.Groups[1].Value, "'([^']+)'")) {
+            $stack += $line.Groups[1].Value
+        }
+    }
+    if ($stack.Count) { $site.about.stack = $stack }
     foreach ($m in [regex]::Matches($text, "title\s*=\s*'([^']+)',\s*body\s*=\s*'([^']+)'")) {
         $site.rules += [ordered]@{ title = $m.Groups[1].Value; body = $m.Groups[2].Value }
     }
@@ -92,6 +114,12 @@ function Parse-PortalSite([string]$text) {
     }
     foreach ($m in [regex]::Matches($text, "icon\s*=\s*'([^']+)',\s*title\s*=\s*'([^']+)',\s*desc\s*=\s*'([^']+)'")) {
         $site.features += [ordered]@{ icon = $m.Groups[1].Value; title = $m.Groups[2].Value; desc = $m.Groups[3].Value }
+    }
+    foreach ($m in [regex]::Matches($text, "id\s*=\s*'([^']+)',\s*name\s*=\s*'([^']+)',\s*category\s*=\s*'([^']+)',\s*how\s*=\s*'([^']+)'")) {
+        $site.jobGuide += [ordered]@{
+            id = $m.Groups[1].Value; name = $m.Groups[2].Value
+            category = $m.Groups[3].Value; how = $m.Groups[4].Value
+        }
     }
     return $site
 }
@@ -222,13 +250,29 @@ $docs = @(
     @{ label = 'Vehicle Spawn Codes'; path = 'tools/SHADE-QUICK-SPAWN-CODES.md' }
 )
 
+$site = Parse-PortalSite $siteText
+$discordExport = Join-Path $cfg 'portal_discord_export.json'
+if (Test-Path -LiteralPath $discordExport) {
+    $exp = Get-Content -LiteralPath $discordExport -Raw | ConvertFrom-Json
+    if ($exp.rules) { $site.rules = @($exp.rules) }
+    if ($exp.faq) { $site.faq = @($exp.faq) }
+}
+
+$plsJobs = @()
+$jobsJson = Join-Path $resRoot 'pls_jobsystem\server\jobs.json'
+if (Test-Path -LiteralPath $jobsJson) {
+    $plsJobs = Get-Content -LiteralPath $jobsJson -Raw | ConvertFrom-Json
+}
+
 $data = [ordered]@{
     generatedAt = (Get-Date -Format 'yyyy-MM-dd HH:mm:ss')
     branding = $branding
     portal = $portal
     connect = $connect
-    site = Parse-PortalSite $siteText
+    site = $site
     credits = Parse-Credits $creditsText
+    plsJobs = @($plsJobs)
+    jobGuide = $site.jobGuide
     economy = $economy
     salaries = $salaries
     businesses = Parse-Businesses $businessText

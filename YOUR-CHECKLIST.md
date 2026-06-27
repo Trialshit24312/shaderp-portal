@@ -38,12 +38,14 @@ Edit content (optional but recommended):
 
 ## 3. Sync data to Render
 
-From PowerShell:
-
 ```powershell
 cd F:\txData\QBCore_A9FD7A.base\tools\shaderp-dashboard
-$env:PORTAL_URL = "https://YOUR-APP.onrender.com"
-$env:SYNC_API_KEY = "paste-from-render"
+
+# Optional: pull #rules and #faq from Discord (needs bot token + channel IDs in portal_content.lua)
+$env:DISCORD_BOT_TOKEN = "your-bot-token"
+$env:DISCORD_GUILD_ID = "1357838976299565087"
+.\Fetch-DiscordContent.ps1   # lists channels if IDs empty
+
 .\Sync-PortalToRender.ps1
 ```
 

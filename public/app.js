@@ -166,21 +166,19 @@ function renderHome() {
 }
 
 function renderAbout() {
+  const a = DATA?.site?.about || {};
   const b = DATA?.branding || {};
   el('about-content').innerHTML = `
-    <p><strong>${esc(b.serverName || 'ShadeRP')}</strong> — ${esc(DATA?.site?.tagline || b.tagline || 'ESX Legacy roleplay')}.</p>
-    <h3>What we run</h3>
-    <ul class="check-list">
-      <li>ESX Legacy + ox_inventory + ox_target</li>
-      <li>Wasabi PD / EMS / MDT — Mission Row & Pillbox</li>
-      <li>pyh job tablet — trucking, Gruppe 6, contacts, boosting</li>
-      <li>lb-phone, codem-billing, HWC map blips</li>
-      <li>Central config via shade-config (branding, economy, portal)</li>
-    </ul>
-    <h3>Stack highlights</h3>
-    <div class="chip-grid">${(DATA?.resources?.enabled || []).slice(0, 24).map((n) => `<span class="chip">${esc(n)}</span>`).join('') || '<span class="hint">Login as staff or sync dashboard for full resource list.</span>'}</div>
-    <h3>Portal access</h3>
-    <p>Discord login unlocks member, staff, and admin panels based on your server roles.</p>
+    <p><strong>${esc(a.headline || b.serverName || 'ShadeRP')}</strong></p>
+    <p>${esc(a.intro || b.tagline || '')}</p>
+    ${a.whitelist ? `<p class="hint">${esc(a.whitelist)}</p>` : ''}
+    ${a.memberCount ? `<p class="hint">${esc(a.memberCount)} on Discord</p>` : ''}
+    <h3>Tech stack</h3>
+    <ul class="check-list">${(a.stack || []).map((s) => `<li>${esc(s)}</li>`).join('') || '<li>ESX Legacy + OX stack</li>'}</ul>
+    <h3>Whitelisted businesses (in-city)</h3>
+    <div class="chip-grid">${(DATA?.plsJobs || []).map((j) => `<span class="chip">${esc(j.label)}</span>`).join('') || '<span class="hint">Sync dashboard for job list</span>'}</div>
+    <h3>Discord</h3>
+    <p><a href="${esc(a.discordInvite || b.discord || ME?.discordInvite)}" target="_blank" rel="noopener">Join ShadeRP Discord</a> — rules, applications, and announcements.</p>
   `;
 }
 
@@ -201,7 +199,7 @@ function renderFaq() {
 function renderCredits() {
   const credits = DATA?.credits || [];
   el('credits-grid').innerHTML = credits.length
-    ? credits.map((c) => `<div class="feature-card credit-card"><h4>${esc(c.role)}</h4><p>${esc(c.note)}</p><span class="pill mono">&lt;@${esc(c.discordId)}&gt;</span></div>`).join('')
+    ? credits.map((c) => `<div class="feature-card credit-card"><h4>${esc(c.role)}</h4>${c.displayName ? `<p class="accent-text">${esc(c.displayName)}${c.username ? ` (@${esc(c.username)})` : ''}</p>` : ''}<p>${esc(c.note)}</p><span class="pill mono">Discord: ${esc(c.discordId)}</span></div>`).join('')
     : '<p class="hint">Team credits in shade-config/config/credits.lua</p>';
 }
 
@@ -254,6 +252,13 @@ function renderConnect() {
 }
 
 function renderJobs() {
+  const guide = DATA?.jobGuide || [];
+  if (guide.length) {
+    el('jobs-grid').innerHTML = guide.map((j) =>
+      `<div class="feature-card"><span class="pill">${esc(j.category)}</span><h4>${esc(j.name)}</h4><p>${esc(j.how)}</p></div>`
+    ).join('');
+    return;
+  }
   const branding = DATA?.branding?.resources || {};
   const jobEntries = [
     { key: 'wasabi_police', cat: 'Government', desc: 'MDT, radar, Mission Row PD MLO' },

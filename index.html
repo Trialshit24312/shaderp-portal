@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>ShadeRP — Server Control Panel</title>
+  <link rel="icon" href="assets/shaderp-logo.png" type="image/png" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <div class="bg-glow"></div>
+  <aside class="sidebar">
+    <div class="brand">
+      <img src="assets/shaderp-logo.png" alt="ShadeRP logo" class="brand-logo" />
+      <div>
+        <h1>ShadeRP</h1>
+        <p class="tagline">Server Control Panel</p>
+      </div>
+    </div>
+    <nav id="nav">
+      <button class="nav-btn active" data-panel="overview">Overview</button>
+      <button class="nav-btn" data-panel="updates">Updates</button>
+      <button class="nav-btn" data-panel="economy">Economy</button>
+      <button class="nav-btn" data-panel="map">Map & Blips</button>
+      <button class="nav-btn" data-panel="resources">Resources</button>
+      <button class="nav-btn" data-panel="branding">Branding</button>
+      <button class="nav-btn" data-panel="commands">Commands</button>
+      <button class="nav-btn" data-panel="blocked">Blocked</button>
+    </nav>
+    <div class="sidebar-footer">
+      <a id="discord-link" href="#" target="_blank" rel="noopener" class="discord-btn">Discord</a>
+      <p class="sync-time" id="sync-time">Loading…</p>
+    </div>
+  </aside>
+
+  <main class="content">
+    <header class="topbar">
+      <div class="search-wrap">
+        <input type="search" id="global-search" placeholder="Search locations, resources, updates…" autocomplete="off" />
+      </div>
+      <button type="button" id="refresh-btn" class="ghost-btn">Refresh data</button>
+    </header>
+
+    <section id="panel-overview" class="panel active">
+      <h2>Overview</h2>
+      <div class="stat-grid" id="stat-grid"></div>
+      <div class="card">
+        <h3>Latest update notes</h3>
+        <pre id="latest-notes" class="notes-block"></pre>
+      </div>
+    </section>
+
+    <section id="panel-updates" class="panel">
+      <h2>Enhancement passes</h2>
+      <div id="updates-list" class="stack"></div>
+    </section>
+
+    <section id="panel-economy" class="panel">
+      <h2>Economy</h2>
+      <div class="stat-grid" id="economy-stats"></div>
+      <div class="card">
+        <h3>Job salaries (on-duty, per paycheck)</h3>
+        <div id="salary-table" class="table-wrap"></div>
+      </div>
+    </section>
+
+    <section id="panel-map" class="panel">
+      <h2>Map blips & admin teleport</h2>
+      <p class="hint">HWC blips in-game: <code>/hwcblips</code> · Admin teleport: <code>/gotobiz [id]</code></p>
+      <div id="map-table" class="table-wrap"></div>
+    </section>
+
+    <section id="panel-resources" class="panel">
+      <h2>Resources</h2>
+      <div class="split-panels">
+        <div class="card">
+          <h3>Enabled <span id="enabled-count" class="badge"></span></h3>
+          <div id="enabled-list" class="chip-grid"></div>
+        </div>
+        <div class="card">
+          <h3>Disabled <span id="disabled-count" class="badge warn"></span></h3>
+          <div id="disabled-list" class="stack compact"></div>
+        </div>
+      </div>
+    </section>
+
+    <section id="panel-branding" class="panel">
+      <h2>Branding registry</h2>
+      <div class="split-panels">
+        <div class="card">
+          <h3>Resources</h3>
+          <div id="brand-resources" class="table-wrap"></div>
+        </div>
+        <div class="card">
+          <h3>Locations</h3>
+          <div id="brand-locations" class="table-wrap"></div>
+        </div>
+      </div>
+    </section>
+
+    <section id="panel-commands" class="panel">
+      <h2>Quick commands</h2>
+      <p class="hint">Click to copy · run in txAdmin console unless noted</p>
+      <div id="command-list" class="command-grid"></div>
+      <div class="card">
+        <h3>Documentation</h3>
+        <ul id="doc-links" class="doc-list"></ul>
+      </div>
+    </section>
+
+    <section id="panel-blocked" class="panel">
+      <h2>Blocked & pending mods</h2>
+      <div id="blocked-list" class="stack"></div>
+      <div class="card warn-card">
+        <h3>Security reminder</h3>
+        <p>Run <code>tools/Remove-LeakedScriptBackdoors.ps1</code> after importing leaked scripts. EZAC is first in server.cfg.</p>
+      </div>
+    </section>
+  </main>
+
+  <div id="toast" class="toast" hidden>Copied</div>
+  <script src="app.js"></script>
+</body>
+</html>

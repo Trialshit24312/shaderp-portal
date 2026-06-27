@@ -1,0 +1,9 @@
+node_modules/
+.env
+data/analytics.json
+data/sessions.json
+*.log
+.DS_Store
+Thumbs.db
+# Local-only sync secrets (optional file some users create)
+portal-sync.local.json

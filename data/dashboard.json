@@ -1,0 +1,831 @@
+{
+    "generatedAt":  "2026-06-27 01:58:49",
+    "branding":  {
+                     "resources":  {
+                                       "kq_powerwashing":  "ShadeRP Power Washing",
+                                       "codem_billing":  "ShadeRP Billing",
+                                       "wasabi_police":  "ShadeRP Mission Row PD",
+                                       "pawnshop":  "ShadeRP Pawn Shop",
+                                       "pyh_tablet":  "ShadeRP Job Tablet",
+                                       "lb_phone":  "ShadeRP Phone",
+                                       "jg_mechanic":  "ShadeRP Mechanics",
+                                       "pyh_contacts":  "ShadeRP Contacts",
+                                       "lb_tablet":  "ShadeRP Tablet",
+                                       "pls_jobsystem":  "ShadeRP Job Locations",
+                                       "it_drugs":  "ShadeRP Drugs",
+                                       "wasabi_mdt":  "ShadeRP MDT",
+                                       "fetchq_oil":  "ShadeRP Oil Rig",
+                                       "wasabi_fishing":  "ShadeRP Fishing (Wasabi)",
+                                       "lgd_policeradar":  "ShadeRP Police Radar",
+                                       "pyh_mosley":  "ShadeRP Mosley Auto",
+                                       "shade_airdrops":  "ShadeRP Care Packages",
+                                       "Spoogy_TrapPhone":  "ShadeRP Street Sales",
+                                       "pyh_lumberjack":  "ShadeRP Lumberjack",
+                                       "shade_lspd_pd":  "ShadeRP Mission Row PD",
+                                       "pyh_groupsystem":  "ShadeRP Group System",
+                                       "pyh_fishing":  "ShadeRP Fishing",
+                                       "hwc_blips":  "ShadeRP Map Blips",
+                                       "rup_vehiclespawner":  "ShadeRP Vehicle Spawner",
+                                       "pyh_trucking":  "ShadeRP Trucking",
+                                       "portis_afterhours":  "ShadeRP After Hours",
+                                       "pyh_boosting":  "ShadeRP Boosting",
+                                       "pyh_gruppe6":  "ShadeRP Gruppe 6",
+                                       "wasabi_mining":  "ShadeRP Mining (Wasabi)",
+                                       "wasabi_ambulance":  "ShadeRP Pillbox EMS",
+                                       "kq_jobcontracts":  "ShadeRP Job Contracts"
+                                   },
+                     "serverName":  "ShadeRP",
+                     "portalUrl":  "https://shaderp-portal.onrender.com",
+                     "locations":  {
+                                       "pd":  "ShadeRP Mission Row PD",
+                                       "bank":  "ShadeRP Pacific Bank",
+                                       "pdm":  "ShadeRP PDM",
+                                       "gruppe6":  "ShadeRP Gruppe 6 HQ",
+                                       "prison":  "ShadeRP Bolingbroke Prison",
+                                       "lumberjack":  "ShadeRP Lumberjack",
+                                       "mosley":  "ShadeRP Mosley Auto",
+                                       "powerwash":  "ShadeRP Power Washing",
+                                       "oilrig":  "ShadeRP Oil Rig",
+                                       "bennys":  "ShadeRP Bennys",
+                                       "trucking":  "ShadeRP Trucking Hub",
+                                       "racetrack":  "ShadeRP Race Track",
+                                       "mall":  "ShadeRP MV Mall",
+                                       "pawnshop":  "ShadeRP Pawn Shop",
+                                       "hospital":  "ShadeRP Pillbox Hospital"
+                                   },
+                     "discord":  "https://discord.gg/sbnu98HYAZ",
+                     "tagline":  "ESX Legacy Roleplay"
+                 },
+    "portal":  {
+                   "discordInvite":  "https://discord.gg/sbnu98HYAZ",
+                   "websiteUrl":  "https://shaderp-portal.onrender.com",
+                   "cfxJoinUrl":  "cfx.re/join/YOUR-CODE",
+                   "cfxJoinCode":  "YOUR-CODE"
+               },
+    "connect":  {
+                    "port":  20256,
+                    "maxClients":  48,
+                    "hostname":  "ShadeRP — ESX Legacy Roleplay",
+                    "framework":  "ESX Legacy"
+                },
+    "economy":  {
+                    "offDutyMultiplier":  0.65,
+                    "startingCash":  750,
+                    "unemployed":  400,
+                    "paycheckMinutes":  15,
+                    "startingBank":  15000
+                },
+    "salaries":  {
+                     "taxi":  [
+                                  300,
+                                  450,
+                                  650,
+                                  850,
+                                  0
+                              ],
+                     "ambulance":  [
+                                       400,
+                                       650,
+                                       900,
+                                       1200
+                                   ],
+                     "police":  [
+                                    450,
+                                    650,
+                                    900,
+                                    1200,
+                                    1500
+                                ],
+                     "unemployed":  [
+                                        400
+                                    ],
+                     "mechanic":  [
+                                      350,
+                                      500,
+                                      750,
+                                      950,
+                                      0
+                                  ]
+                 },
+    "businesses":  [
+                       {
+                           "id":  "police",
+                           "label":  "ShadeRP Mission Row PD",
+                           "category":  "Government",
+                           "coords":  {
+                                          "y":  -981.92,
+                                          "z":  30.69,
+                                          "x":  441.73
+                                      },
+                           "gotobiz":  "/gotobiz 1"
+                       },
+                       {
+                           "id":  "hospital",
+                           "label":  "ShadeRP Pillbox Hospital",
+                           "category":  "Medical",
+                           "coords":  {
+                                          "y":  -583.14,
+                                          "z":  44.2,
+                                          "x":  324.15
+                                      },
+                           "gotobiz":  "/gotobiz 2"
+                       },
+                       {
+                           "id":  "mechanic",
+                           "label":  "ShadeRP Bennys / LSC",
+                           "category":  "Mechanic",
+                           "coords":  {
+                                          "y":  -1308.2,
+                                          "z":  31.3,
+                                          "x":  -205.5
+                                      },
+                           "gotobiz":  "/gotobiz 3"
+                       },
+                       {
+                           "id":  "pdm",
+                           "label":  "ShadeRP PDM",
+                           "category":  "Dealership",
+                           "coords":  {
+                                          "y":  -1096.5,
+                                          "z":  26.4,
+                                          "x":  -56
+                                      },
+                           "gotobiz":  "/gotobiz 4"
+                       },
+                       {
+                           "id":  "pawnshop",
+                           "label":  "ShadeRP Pawn Shop",
+                           "category":  "Services",
+                           "coords":  {
+                                          "y":  -1084.84,
+                                          "z":  29.41,
+                                          "x":  326.47
+                                      },
+                           "gotobiz":  "/gotobiz 5"
+                       },
+                       {
+                           "id":  "oilrig",
+                           "label":  "ShadeRP Oil Rig",
+                           "category":  "Jobs",
+                           "coords":  {
+                                          "y":  -3253.4,
+                                          "z":  7.1,
+                                          "x":  1196.93
+                                      },
+                           "gotobiz":  "/gotobiz 6"
+                       },
+                       {
+                           "id":  "powerwash",
+                           "label":  "ShadeRP Power Washing",
+                           "category":  "Jobs",
+                           "coords":  {
+                                          "y":  -2287.85,
+                                          "z":  29.51,
+                                          "x":  1010.37
+                                      },
+                           "gotobiz":  "/gotobiz 7"
+                       },
+                       {
+                           "id":  "trucking",
+                           "label":  "ShadeRP Trucking Hub",
+                           "category":  "Jobs",
+                           "coords":  {
+                                          "y":  122.62,
+                                          "z":  79.18,
+                                          "x":  56.54
+                                      },
+                           "gotobiz":  "/gotobiz 8"
+                       },
+                       {
+                           "id":  "gruppe6",
+                           "label":  "ShadeRP Gruppe 6 HQ",
+                           "category":  "Jobs",
+                           "coords":  {
+                                          "y":  -670.84,
+                                          "z":  32.34,
+                                          "x":  -20.63
+                                      },
+                           "gotobiz":  "/gotobiz 9"
+                       },
+                       {
+                           "id":  "lumberjack",
+                           "label":  "ShadeRP Lumberjack",
+                           "category":  "Jobs",
+                           "coords":  {
+                                          "y":  5368.69,
+                                          "z":  69.77,
+                                          "x":  -574.32
+                                      },
+                           "gotobiz":  "/gotobiz 10"
+                       },
+                       {
+                           "id":  "mosley",
+                           "label":  "ShadeRP Mosley Auto",
+                           "category":  "Jobs",
+                           "coords":  {
+                                          "y":  -1665.95,
+                                          "z":  27.92,
+                                          "x":  -10.57
+                                      },
+                           "gotobiz":  "/gotobiz 11"
+                       },
+                       {
+                           "id":  "bank",
+                           "label":  "ShadeRP Pacific Bank",
+                           "category":  "Services",
+                           "coords":  {
+                                          "y":  220,
+                                          "z":  106.3,
+                                          "x":  241
+                                      },
+                           "gotobiz":  "/gotobiz 12"
+                       },
+                       {
+                           "id":  "prison",
+                           "label":  "ShadeRP Bolingbroke Prison",
+                           "category":  "Government",
+                           "coords":  {
+                                          "y":  2585,
+                                          "z":  45.7,
+                                          "x":  1845
+                                      },
+                           "gotobiz":  "/gotobiz 13"
+                       },
+                       {
+                           "id":  "mvmall",
+                           "label":  "ShadeRP MV Mall",
+                           "category":  "Shopping",
+                           "coords":  {
+                                          "y":  -915,
+                                          "z":  32,
+                                          "x":  -224
+                                      },
+                           "gotobiz":  "/gotobiz 14"
+                       },
+                       {
+                           "id":  "racetrack",
+                           "label":  "ShadeRP Race Track",
+                           "category":  "Entertainment",
+                           "coords":  {
+                                          "y":  3072,
+                                          "z":  41,
+                                          "x":  1024
+                                      },
+                           "gotobiz":  "/gotobiz 15"
+                       }
+                   ],
+    "blips":  [
+                  {
+                      "id":  "1",
+                      "name":  "ShadeRP Mission Row PD",
+                      "category":  "government",
+                      "coords":  {
+                                     "x":  441.73,
+                                     "y":  -981.92,
+                                     "z":  30.69
+                                 }
+                  },
+                  {
+                      "id":  "2",
+                      "name":  "ShadeRP Pillbox Hospital",
+                      "category":  "emergency",
+                      "coords":  {
+                                     "x":  324.15,
+                                     "y":  -583.14,
+                                     "z":  44.20
+                                 }
+                  },
+                  {
+                      "id":  "3",
+                      "name":  "ShadeRP Bennys / LSC",
+                      "category":  "services",
+                      "coords":  {
+                                     "x":  -205.5,
+                                     "y":  -1308.2,
+                                     "z":  31.3
+                                 }
+                  },
+                  {
+                      "id":  "4",
+                      "name":  "ShadeRP PDM",
+                      "category":  "shops",
+                      "coords":  {
+                                     "x":  -56.0,
+                                     "y":  -1096.5,
+                                     "z":  26.4
+                                 }
+                  },
+                  {
+                      "id":  "5",
+                      "name":  "ShadeRP Pawn Shop",
+                      "category":  "shops",
+                      "coords":  {
+                                     "x":  326.47,
+                                     "y":  -1084.84,
+                                     "z":  29.41
+                                 }
+                  },
+                  {
+                      "id":  "6",
+                      "name":  "ShadeRP Oil Rig",
+                      "category":  "services",
+                      "coords":  {
+                                     "x":  1196.93,
+                                     "y":  -3253.40,
+                                     "z":  7.10
+                                 }
+                  },
+                  {
+                      "id":  "7",
+                      "name":  "ShadeRP Pacific Bank",
+                      "category":  "services",
+                      "coords":  {
+                                     "x":  241.0,
+                                     "y":  220.0,
+                                     "z":  106.3
+                                 }
+                  },
+                  {
+                      "id":  "8",
+                      "name":  "ShadeRP Bolingbroke Prison",
+                      "category":  "government",
+                      "coords":  {
+                                     "x":  1845.0,
+                                     "y":  2585.0,
+                                     "z":  45.7
+                                 }
+                  },
+                  {
+                      "id":  "9",
+                      "name":  "ShadeRP MV Mall",
+                      "category":  "shops",
+                      "coords":  {
+                                     "x":  -224.0,
+                                     "y":  -915.0,
+                                     "z":  32.0
+                                 }
+                  },
+                  {
+                      "id":  "10",
+                      "name":  "ShadeRP Race Track",
+                      "category":  "entertainment",
+                      "coords":  {
+                                     "x":  1024.0,
+                                     "y":  3072.0,
+                                     "z":  41.0
+                                 }
+                  },
+                  {
+                      "id":  "11",
+                      "name":  "ShadeRP Trucking Hub",
+                      "category":  "jobs",
+                      "coords":  {
+                                     "x":  56.54,
+                                     "y":  122.62,
+                                     "z":  79.18
+                                 }
+                  },
+                  {
+                      "id":  "12",
+                      "name":  "ShadeRP Gruppe 6 HQ",
+                      "category":  "jobs",
+                      "coords":  {
+                                     "x":  -20.63,
+                                     "y":  -670.84,
+                                     "z":  32.34
+                                 }
+                  },
+                  {
+                      "id":  "13",
+                      "name":  "ShadeRP Lumberjack",
+                      "category":  "jobs",
+                      "coords":  {
+                                     "x":  -574.32,
+                                     "y":  5368.69,
+                                     "z":  69.77
+                                 }
+                  },
+                  {
+                      "id":  "14",
+                      "name":  "ShadeRP Mosley Auto",
+                      "category":  "jobs",
+                      "coords":  {
+                                     "x":  -10.57,
+                                     "y":  -1665.95,
+                                     "z":  27.92
+                                 }
+                  },
+                  {
+                      "id":  "15",
+                      "name":  "ShadeRP Power Washing",
+                      "category":  "jobs",
+                      "coords":  {
+                                     "x":  1010.37,
+                                     "y":  -2287.85,
+                                     "z":  29.51
+                                 }
+                  }
+              ],
+    "resources":  {
+                      "disabled":  [
+                                       {
+                                           "name":  "vr-10system",
+                                           "reason":  "QB-only (GetCoreObject); needs ESX rewrite"
+                                       },
+                                       {
+                                           "name":  "toxic-garbageV4",
+                                           "reason":  "QB-only"
+                                       },
+                                       {
+                                           "name":  "jomidar-admin",
+                                           "reason":  "requires qb-core"
+                                       },
+                                       {
+                                           "name":  "ak4y-dailyWheel",
+                                           "reason":  "QB-only"
+                                       },
+                                       {
+                                           "name":  "tf-paintball",
+                                           "reason":  "QB-only"
+                                       },
+                                       {
+                                           "name":  "prime-vangelico",
+                                           "reason":  "QB-only"
+                                       },
+                                       {
+                                           "name":  "dgl_jewelry",
+                                           "reason":  "QB-only"
+                                       },
+                                       {
+                                           "name":  "jomidar-roofrunning",
+                                           "reason":  "requires qb-core"
+                                       },
+                                       {
+                                           "name":  "toxic-chopshopV4",
+                                           "reason":  "QB-only"
+                                       },
+                                       {
+                                           "name":  "fivem-blackmarket",
+                                           "reason":  "QB-only"
+                                       },
+                                       {
+                                           "name":  "toxic-NoclipEffect",
+                                           "reason":  "QB-only"
+                                       },
+                                       {
+                                           "name":  "rz-vape",
+                                           "reason":  "QB-only"
+                                       },
+                                       {
+                                           "name":  "op-vehiclerobbery",
+                                           "reason":  "QB-only (hardcoded qb-core)"
+                                       },
+                                       {
+                                           "name":  "spoodyFraud",
+                                           "reason":  "QB-only"
+                                       },
+                                       {
+                                           "name":  "mbt_emote_menu",
+                                           "reason":  "requires rpemotes-reborn"
+                                       },
+                                       {
+                                           "name":  "origen_pausemenu",
+                                           "reason":  "QB-only"
+                                       },
+                                       {
+                                           "name":  "s4-realisticdisease",
+                                           "reason":  "missing entitlement"
+                                       },
+                                       {
+                                           "name":  "spikescript",
+                                           "reason":  "QB-only"
+                                       },
+                                       {
+                                           "name":  "jomidar-ammorobbery",
+                                           "reason":  "QB-only"
+                                       },
+                                       {
+                                           "name":  "pixel-poster",
+                                           "reason":  "missing CFX entitlement — enable after purchasing license"
+                                       },
+                                       {
+                                           "name":  "ja_towing",
+                                           "reason":  "loaded by map-master-loader"
+                                       },
+                                       {
+                                           "name":  "sprays",
+                                           "reason":  "empty folder on E:\\4 new mods"
+                                       },
+                                       {
+                                           "name":  "savana-restaurant",
+                                           "reason":  "enable after adding uwucafe/restaurant ESX jobs"
+                                       },
+                                       {
+                                           "name":  "inside-tastyeats",
+                                           "reason":  "mysql-async — needs oxmysql port"
+                                       },
+                                       {
+                                           "name":  "s4-carcontrol",
+                                           "reason":  "duplicate of 0r-carcontrol"
+                                       },
+                                       {
+                                           "name":  "ch_anticheat",
+                                           "reason":  "replaced by EZAC"
+                                       },
+                                       {
+                                           "name":  "omes_banking",
+                                           "reason":  "removed — use codem-billing (line ~158)"
+                                       },
+                                       {
+                                           "name":  "energy_rideoutcustoms",
+                                           "reason":  "MLO — disabled with stream:mapsEnabled 0"
+                                       },
+                                       {
+                                           "name":  "wz-methlab",
+                                           "reason":  "MLO interior — disabled with stream:mapsEnabled 0"
+                                       },
+                                       {
+                                           "name":  "jomidar-ui",
+                                           "reason":  "QB-only (requires qb-core)"
+                                       },
+                                       {
+                                           "name":  "NopixelV4NPCDialogue",
+                                           "reason":  "QB-only (requires qb-core HideText export)"
+                                       },
+                                       {
+                                           "name":  "lunar_cryptomining",
+                                           "reason":  "heavy DB loops; enable when tuned"
+                                       },
+                                       {
+                                           "name":  "lunar_drugscreator_props",
+                                           "reason":  "lunar disabled — using it-drugs"
+                                       },
+                                       {
+                                           "name":  "lunar_bridge",
+                                           "reason":  "corrupted cl_main.lua (syntax error at EOF)"
+                                       },
+                                       {
+                                           "name":  "lunar_drugscreator",
+                                           "reason":  "requires lunar_bridge"
+                                       },
+                                       {
+                                           "name":  "devm-snatchables",
+                                           "reason":  "requires devm-bridge (not installed)"
+                                       },
+                                       {
+                                           "name":  "lvl_fingerprint",
+                                           "reason":  "needs lvl_bridge"
+                                       },
+                                       {
+                                           "name":  "av_multijob",
+                                           "reason":  "conflicts with wasabi_multijob"
+                                       },
+                                       {
+                                           "name":  "wais-studio",
+                                           "reason":  "QB-only (requires qb-core)"
+                                       }
+                                   ],
+                      "enabled":  [
+                                      "EZAC",
+                                      "weaponanimationoverhaul",
+                                      "chat",
+                                      "spawnmanager",
+                                      "sessionmanager",
+                                      "hardcap",
+                                      "stream-loader-core",
+                                      "connectqueue",
+                                      "baseevents",
+                                      "ox_lib",
+                                      "shade-config",
+                                      "HWC_Blips_V2",
+                                      "shade-discord",
+                                      "sent-utils",
+                                      "origen_notify",
+                                      "oxmysql",
+                                      "_SQL_Scripts",
+                                      "es_extended",
+                                      "izzy-appearance",
+                                      "esx_skin",
+                                      "[core]",
+                                      "codem-billing",
+                                      "ox_target",
+                                      "x-fuel",
+                                      "ox_inventory",
+                                      "pickle_policetools",
+                                      "codewave-sneaker-business",
+                                      "codewave-sneaker-phone",
+                                      "frkn-doorlock",
+                                      "PolyZone",
+                                      "pma-voice",
+                                      "bl_bridge",
+                                      "mm_radio",
+                                      "tuff-loading",
+                                      "tuff-hud",
+                                      "gen_pausev2",
+                                      "yarn",
+                                      "webpack",
+                                      "screenshot-basic",
+                                      "xsound",
+                                      "jim_bridge",
+                                      "jim-payments",
+                                      "ps_lib",
+                                      "sd-policeradar",
+                                      "helicam",
+                                      "Vehiclegear",
+                                      "interact-sound",
+                                      "17mov_FpsBooster",
+                                      "rup-vehiclespawner",
+                                      "heavy-stream-loader",
+                                      "vehicle-master-loader",
+                                      "map-master-loader",
+                                      "shade-proximity-mlo",
+                                      "shade-lspd-pd",
+                                      "addon-stream-loader",
+                                      "police-lspd-livery",
+                                      "jg-vehiclemileage",
+                                      "jg-handling",
+                                      "jg-mechanic",
+                                      "0r-carcontrol",
+                                      "tn-cruise-control",
+                                      "gruppe6van",
+                                      "pls_jobsystem",
+                                      "tw-electrician",
+                                      "pyh-tablet",
+                                      "pyh-groupsystem",
+                                      "pyh-trucking",
+                                      "pyh-gruppe6job",
+                                      "pyh-fishing",
+                                      "pyh-lumberjack",
+                                      "pyh-mosleyjob",
+                                      "pyh-boosting",
+                                      "pyh-contacts",
+                                      "wasabi_bridge",
+                                      "wasabi_snack_props",
+                                      "object_gizmo",
+                                      "wasabi_mdt",
+                                      "wasabi_police",
+                                      "wasabi_ambulance",
+                                      "wasabi_evidences",
+                                      "wasabi_adminmenu",
+                                      "wasabi_multijob",
+                                      "wasabi_nfc",
+                                      "wasabi_deathdrop",
+                                      "wasabi_autopilot",
+                                      "wasabi_vehiclenames",
+                                      "wasabi_fishing",
+                                      "wasabi_mining",
+                                      "wasabi_oxshops",
+                                      "wasabi_elevators",
+                                      "wasabi_backpack",
+                                      "wasabi_crutch",
+                                      "wasabi_carlock",
+                                      "0r_lib",
+                                      "0r-craft",
+                                      "memorygame",
+                                      "hacking",
+                                      "pl-atmrob",
+                                      "toxic-dialogV4",
+                                      "viper_carbomb",
+                                      "toxic-towV4",
+                                      "it_bridge",
+                                      "it-drugs",
+                                      "interact",
+                                      "net",
+                                      "skillchecks",
+                                      "j-textui",
+                                      "chHyperSound",
+                                      "toxic-logo",
+                                      "tf-pvptext",
+                                      "f5_safezones",
+                                      "lb-tabletprop",
+                                      "lb-tablet",
+                                      "lb-phoneprop",
+                                      "lb-phone",
+                                      "ggc-weapons",
+                                      "weapon-skin-knife",
+                                      "ravn-logs",
+                                      "babymodsems",
+                                      "qs-crime-creator",
+                                      "jg-mechanic-props",
+                                      "jg-textui",
+                                      "0r-nailshop",
+                                      "0r-illegalpack",
+                                      "codem-craft",
+                                      "complete_carplay",
+                                      "d_dyno",
+                                      "DD_UI_Aimstyle",
+                                      "ENDA",
+                                      "ENDA_01",
+                                      "fuksus-crafting",
+                                      "kq_link",
+                                      "kq_emergency",
+                                      "kq_powerwashing",
+                                      "kq_jobcontracts",
+                                      "fetchq-oil",
+                                      "shade-airdrops",
+                                      "portis-afterhours",
+                                      "1017-dev-pawnshop",
+                                      "lgd-policeradar",
+                                      "DoItDigital_Police_Weapon_Pack_V1",
+                                      "tenfgdc",
+                                      "orbit-hideincar",
+                                      "plt_robbery_creator",
+                                      "plt_robbery_creator_minigames",
+                                      "Spoogy_TrapPhone",
+                                      "xRadar",
+                                      "ab-handling",
+                                      "pyh-interaction",
+                                      "pyh-status",
+                                      "balenciaga_weapon_packv7",
+                                      "fivem-discord-hour-logger",
+                                      "smartfires"
+                                  ]
+                  },
+    "updatePasses":  {
+                         "version":  "v9",
+                         "title":  "18 June 2026 · Enhancement Pass v9",
+                         "overview":  "",
+                         "body":  "# ShadeRP — Server Update Log\r\n\r\n**18 June 2026 · Enhancement Pass v9**\r\n\r\n---\r\n\r\n## ShadeRP Portal v2 — Render + Discord + Analytics\r\n\r\nFull-stack community portal replacing the static dashboard.\r\n\r\n| Feature | Detail |\r\n|---------|--------|\r\n| **Hosting** | Node/Express — deploy to [Render](https://render.com) via `render.yaml` |\r\n| **Theme** | Dark-only UI (`#06080c` base, cyan accent) |\r\n| **Auth** | Discord OAuth2 + guild role sync |\r\n| **Roles** | guest → member → moderator → staff → developer → admin → owner |\r\n| **Analytics** | Page views, logins, panel tracking, Chart.js graphs (staff+) |\r\n| **Public** | Home, About, Jobs, Connect, Updates (no login) |\r\n| **Sync** | `Push-DashboardToRender.ps1` uploads server config to cloud |\r\n\r\n**Setup guide:** `tools/shaderp-dashboard/RENDER-SETUP.md`\r\n\r\n**Local:**\r\n```\r\ncd tools/shaderp-dashboard\r\ncopy .env.example .env\r\nnpm start\r\n```\r\n\r\n---\r\n\r\n**18 June 2026 · Enhancement Pass v8**\r\n\r\n---\r\n\r\n## Overview\r\n\r\nNew **ShadeRP Control Panel** — a local admin website that syncs from your live server configs. Also added an official **ShadeRP logo** for Discord, dashboard, and branding assets.\r\n\r\n---\r\n\r\n## Admin dashboard\r\n\r\n| Item | Path |\r\n|------|------|\r\n| Website (XAMPP) | **http://localhost/shaderp/** |\r\n| Source | `tools/shaderp-dashboard/` |\r\n| Sync script | `tools/shaderp-dashboard/Build-DashboardData.ps1` |\r\n| Start local | `Start-Dashboard.ps1 -OpenBrowser` (port 8787) |\r\n| Deploy XAMPP | `Deploy-Xampp.ps1` |\r\n\r\n**Panels:** Overview · Updates (v1–v7) · Economy · Map blips + `/gotobiz` · Enabled/disabled resources · Branding registry · Quick commands · Blocked mods\r\n\r\nData pulls from: `shade-config`, `server.cfg`, `HWC_Blips_V2/blips.json`, `UPDATE-LOG.md`\r\n\r\n---\r\n\r\n## Logo\r\n\r\n- File: `resources/[standalone]/shade-config/assets/shaderp-logo.png`\r\n- Copy: `tools/shaderp-dashboard/assets/shaderp-logo.png`\r\n- Use for Discord server icon, loading screen, txAdmin banner\r\n\r\n---\r\n\r\n**18 June 2026 · Enhancement Pass v7**\r\n\r\n---\r\n\r\n## Overview\r\n\r\nThe pyh **job tablet** is back online for ESX. Contacts shop purchases and billing presets were broken or misconfigured — both are fixed.\r\n\r\n---\r\n\r\n## pyh-tablet ESX enable\r\n\r\n| Fix | Detail |\r\n|-----|--------|\r\n| Config | `ESX` + `ox_inventory` |\r\n| Bug | `Config.Framewework` typo prevented `ESX.RegisterUsableItem(\u0027tablet\u0027)` |\r\n| UX | ox_lib notifications + progress bars |\r\n| server.cfg | **`ensure pyh-tablet`** before pyh-groupsystem |\r\n\r\nTablet apps: Gruppe 6, Trucking, Contacts, Groups, Boosting (chip-gated).\r\n\r\n---\r\n\r\n## pyh-contacts ESX fixes\r\n\r\n| Issue | Fix |\r\n|-------|-----|\r\n| Inventory config | `qb-inventory` → **OX** |\r\n| `payItem` ESX branch | Was empty — now charges cash/bank + adds via ox_inventory |\r\n| Item images/labels | `getImage` / `getLabel` now work on ESX |\r\n\r\n---\r\n\r\n## codem-billing\r\n\r\n- Ambulance/mechanic presets → proper EMS + repair invoices\r\n- Job display names → ShadeRP branding\r\n- Notifications → ox_lib\r\n\r\n---\r\n\r\n## Restart commands\r\n\r\n```\r\nensure pyh-tablet\r\nrestart pyh-tablet\r\nrestart pyh-contacts\r\nrestart pyh-groupsystem\r\nrestart codem-billing\r\nrestart ox_inventory\r\nrestart shade-config\r\n```\r\n\r\nPost Discord update: `tools/Post-ServerUpdate.ps1 -Version v7`\r\n\r\n---\r\n\r\n**18 June 2026 · Enhancement Pass v6**\r\n\r\n---\r\n\r\n## Overview\r\n\r\nFinal branding sweep across job locations, UI labels, and vehicle menus. **pyh-groupsystem** is ported to ESX and re-enabled so Gruppe 6 co-op groups work again.\r\n\r\n---\r\n\r\n## pyh-groupsystem ESX port\r\n\r\n| Change | Detail |\r\n|--------|--------|\r\n| Framework | `qb-core` → **ESX Legacy** (`es_extended`) |\r\n| Callbacks | `ESX.RegisterServerCallback` / `ESX.TriggerServerCallback` |\r\n| Notifications | **ox_lib** with ShadeRP title |\r\n| Player names | `xPlayer.getName()` |\r\n| server.cfg | **`ensure pyh-groupsystem`** (before pyh-trucking / gruppe6) |\r\n\r\nGruppe 6 uses `exports[\"pyh-groupsystem\"]:GroupEvent()` — without this resource, group deliveries silently fail.\r\n\r\n---\r\n\r\n## Branding v6\r\n\r\n| File | Change |\r\n|------|--------|\r\n| `pls_jobsystem/server/jobs.json` | Artex VPD → **ShadeRP LSPD**, NTeam → **ShadeRP Pillbox**, Bennys → **ShadeRP Bennys** |\r\n| `pyh-trucking/shared/config.lua` | Contract names → **ShadeRP City** |\r\n| `shade-config/config/vehicles.lua` | **ShadeRP PD Pack** category |\r\n| `rup-vehiclespawner/config.lua` | Fleet preset key synced |\r\n| `ls-phone/configs/config_client.lua` | WiFi label → **ShadeRP LSPD** |\r\n| `gen_pausev2/config.lua` | Pause map text → Explore **ShadeRP** |\r\n| `wasabi_fishing/configuration/strings.lua` | Blip → **ShadeRP Fish Market** |\r\n| `wasabi_mining/configuration/strings.lua` | Blips → **ShadeRP Mine** / **ShadeRP Mining Sales** |\r\n| `pd-stang/fxmanifest.lua` | **ShadeRP PD Mustang** |\r\n| `shade-config/config/branding.lua` | Added groupsystem, wasabi fishing/mining, pls_jobsystem |\r\n\r\n---\r\n\r\n## Restart commands\r\n\r\n```\r\nensure pyh-groupsystem\r\nrestart pyh-groupsystem\r\nrestart pls_jobsystem\r\nrestart pyh-trucking\r\nrestart pyh-gruppe6job\r\nrestart shade-config\r\nrestart rup-vehiclespawner\r\nrestart gen_pausev2\r\nrestart wasabi_fishing\r\nrestart wasabi_mining\r\nrestart ls-phone\r\n```\r\n\r\nPost Discord update: `tools/Post-ServerUpdate.ps1 -Version v6`\r\n\r\n---\r\n\r\n**18 June 2026 · Enhancement Pass v5**\r\n\r\n---\r\n\r\n## Overview\r\n\r\nThis pass balances the economy for long-term RP, wires all major logging into shade-config Discord webhooks, and fills out the city map with ShadeRP-branded blips and admin teleport locations.\r\n\r\n---\r\n\r\n## Economy (`shade-config/config/economy.lua` + SQL)\r\n\r\n| Setting | Before | After |\r\n|---------|--------|-------|\r\n| Starting bank | $50,000 | **$15,000** |\r\n| Starting cash | — | **$750** |\r\n| Paycheck interval | 7 min | **15 min** |\r\n| Off-duty multiplier | 50% | **65%** |\r\n| Unemployed welfare | $200 | **$400** |\r\n| LSPD salaries (grades 0–4) | $20–$100 | **$450–$1,500** |\r\n| EMS salaries | $20–$80 | **$400–$1,200** |\r\n| Mechanic salaries | $12–$48 | **$350–$950** |\r\n\r\n**SQL:** `tools/SQL/shaderp-economy-v5.sql` — run against `es_extended`  \r\n**ESX:** `es_extended/shared/config/main.lua` + `logs.lua` (paycheck logging enabled)\r\n\r\n---\r\n\r\n## Logging (`shade-config/config/logging.lua`)\r\n\r\n| System | What it logs | Discord channel |\r\n|--------|----------------|-----------------|\r\n| **ravn-logs** | Join/leave, deaths, PvP, chat, weapons, explosions | server / admin / bans |\r\n| **shade-discord** | Resource starts, `/shadeupdate` | updates |\r\n| **ESX** | Paychecks, `/setjob`, `/car`, money commands | admin |\r\n| **hour-logger** | `/clock-in police\\|ems\\|mechanic` | admin |\r\n\r\nNDJSON file retention: **14 days** (`ravn-logs/logs/`)\r\n\r\n---\r\n\r\n## City setup\r\n\r\n### HWC map blips (15 total)\r\n\r\n| # | Location |\r\n|---|----------|\r\n| 1–10 | PD, Pillbox, Bennys, PDM, Pawn, Oil Rig, Bank, Prison, Mall, Track |\r\n| 11–15 | Trucking, Gruppe 6, Lumberjack, Mosley Auto, Power Washing |\r\n\r\nManage in-game: **`/hwcblips`**  \r\nAdmin teleport: **`/gotobiz [id]`** (see `shade-config/config/businesses.lua`)\r\n\r\n### Branding cleanup\r\n\r\n- Removed NTeam / Artex hospital references from businesses + world config\r\n- lb-phone map: **ShadeRP PD** + **ShadeRP Pillbox**\r\n- DB job labels → ShadeRP naming\r\n\r\n---\r\n\r\n## Restart commands\r\n\r\n```\r\nrestart shade-config\r\nrestart es_extended\r\nrestart HWC_Blips_V2\r\nrestart ravn-logs\r\nrestart lb-phone\r\nrestart wasabi_multijob\r\n```\r\n\r\nPost Discord update: `tools/Post-ServerUpdate.ps1` (reads `UPDATE-NOTES.txt`)\r\n\r\n---\r\n\r\n**18 June 2026 · Enhancement Pass v4**\r\n\r\n---\r\n\r\n## ESX bug fixes\r\n\r\n| Script | Fix |\r\n|--------|-----|\r\n| **pyh-boosting** | Contract transfer used hardcoded `QBCore.Functions.GetPlayerByCitizenId` — now framework-aware via `GetPlayerByIdentifier()` |\r\n| **pyh-gruppe6job** | ESX reputation callback called QBCore API (crash) — fixed; `g6cashbag` usable item + progress bar added for ESX |\r\n| **pyh-fishing** | Inventory was `qb-inventory` — set to `OX` for ox_inventory |\r\n| **wasabi_multijob** | Boss menus moved from Artex VPD / NTeam → Mission Row PD + Pillbox coords |\r\n| **jg-mechanic** | Disabled duplicate shop blips (HWC_Blips_V2 handles map) |\r\n\r\n---\r\n\r\n## Branding v4\r\n\r\n- `shade-config/config/branding.lua` — pyh jobs, jg-mechanic, bennys/lsc locations\r\n- HWC blip #3 renamed → **ShadeRP Bennys / LSC**\r\n- pyh job + jg-mechanic manifest descriptions updated to ShadeRP names\r\n\r\n**Restart affected resources:**\r\n```\r\nrestart shade-config\r\nrestart wasabi_multijob\r\nrestart pyh-boosting\r\nrestart pyh-gruppe6job\r\nrestart pyh-fishing\r\nrestart jg-mechanic\r\nrestart HWC_Blips_V2\r\n```\r\n\r\n---\r\n\r\n**18 June 2026 · Enhancement Pass v3**\r\n\r\n---\r\n\r\n## SQL imported (es_extended)\r\n\r\nAll pending SQL has been run against MariaDB:\r\n\r\n| Script | Tables / data |\r\n|--------|----------------|\r\n| shade-airdrops/airdrops.sql | airdrop routes, tiers, settings |\r\n| kq_powerwashing esx_job.sql | `powerwashing` job |\r\n| 1017-dev-pawnshop/pawnshop_stock.sql | pawnshop marketplace |\r\n| portis-afterhours/sql/install.sql | after hours events |\r\n| izzy-appearance/database.sql | saved_skins, playerskins |\r\n\r\n---\r\n\r\n## Map blips → HWC_Blips_V2\r\n\r\n- Removed shade-config business blip system (`showBlips`, `/biz`, `/addbusiness`, server blip registry)\r\n- **HWC_Blips_V2** deployed — admins use `/hwcblips` to manage blips\r\n- Pre-seeded 10 ShadeRP location blips in `HWC_Blips_V2/blips.json` (PD, hospital, shops, oil rig, etc.)\r\n- Disabled duplicate blips in **wasabi_police**, **fetchq-oil** (static job blips)\r\n- `/gotobiz [id]` kept as admin teleport helper only\r\n\r\n---\r\n\r\n## New E6 mods added\r\n\r\n| Resource | Purpose |\r\n|----------|---------|\r\n| HWC_Blips_V2 | Central map blip manager |\r\n| lgd-policeradar | Police radar HUD (ESX, F7 toggle) |\r\n| DoItDigital_Police_Weapon_Pack_V1 | PD weapon stream pack |\r\n| tenfgdc | Obey Ten-F GDC addon vehicle |\r\n\r\n---\r\n\r\n## New Mission Row PD (E6)\r\n\r\n- Deployed **shade-lspd-pd** — full LSPD interior MLO (E:\\6 New Mods)\r\n- **Boot loads at startup** — only this map at boot (fast + stable)\r\n- **wasabi_police**, **lb-phone** coords at Mission Row\r\n- Old Artex VPD maps moved to **proximity-only** (won\u0027t load unless someone goes there)\r\n\r\n| Location | Coords |\r\n|----------|--------|\r\n| PD front / duty | 441.73, -981.92, 30.69 |\r\n| Armory | 482.45, -995.27, 30.69 |\r\n| Garage | 452.73, -1017.52, 28.47 |\r\n| Helipad | 449.17, -981.22, 43.69 |\r\n\r\n---\r\n\r\n## E6 mods deployed\r\n\r\n| Resource | ShadeRP name | Status |\r\n|----------|--------------|--------|\r\n| shade-lspd-pd | Mission Row PD | Boot load |\r\n| fetchq-oil + map | Oil Rig job | Live, map proximity |\r\n| kq_powerwashing + MLO | Power Washing | SQL done |\r\n| kq_jobcontracts | Job contracts | Live |\r\n| shade-airdrops | Care Packages | Live |\r\n| portis-afterhours | After Hours (lb-phone app) | SQL done |\r\n| HWC_Blips_V2 | Map blips | Live — `/hwcblips` |\r\n| lgd-policeradar | Police radar | Live |\r\n| DoItDigital_Police_Weapon_Pack_V1 | PD weapons | Live |\r\n| tenfgdc | Ten-F GDC | Live |\r\n| cfx-helnius-fleeca-bank | Fleeca MLO | Proximity |\r\n| TiboMLO_pdm_lts_v2 | PDM MLO | Proximity |\r\n| wxmaps_racetrack | Race track | Proximity |\r\n| hwpatrolbdb | HW Patrol MLO | Proximity |\r\n| IM3D Street Enhancer v1/v2 | Street props | Proximity |\r\n\r\n**Blocked (missing deps):** nn restaurants (nn_bridge), offload_smash_grab (community_bridge), b3ast_weed, energy_redline\r\n\r\n---\r\n\r\n## Startup time — target ~8 min (was ~30 min)\r\n\r\n| Change | Effect |\r\n|--------|--------|\r\n| Boot maps = **shade-lspd-pd only** | No 90-map stagger at boot |\r\n| All other MLOs → **proximity load** | Load when players visit |\r\n| `stream:skipClothingPhase2 1` | Skip 2nd clothing wave at boot |\r\n| Vehicle loader trimmed | Deferred showcase/illegal cars to addon loader |\r\n| Pauses reduced 35–45% | Faster stagger across loaders |\r\n\r\n**Join when console shows:** `[heavy-stream-loader] Phase 1 done — safe to join`\r\n\r\n---\r\n\r\n## Quick reference\r\n\r\n| Action | Command |\r\n|--------|---------|\r\n| Map blips (admin) | `/hwcblips` |\r\n| Admin teleport | `/gotobiz [id]` |\r\n| Police radar | **F7** (in emergency vehicle) |\r\n| Drugs hub | `/drugs` |\r\n| Vehicle menu | **F6** |\r\n| MDT | `/mdt` |\r\n| Phone | Use phone item |\r\n\r\n---\r\n\r\n*Config: `resources/[standalone]/shade-config/config/` · Blips: `HWC_Blips_V2/blips.json` · Proximity zones: `shade-proximity-mlo/config/zones.lua`*"
+                     },
+    "latestNotes":  "ShadeRP **Enhancement Pass v9** — public portal on Render + Discord roles + analytics.\r\r\n\r\r\n## ShadeRP Portal v2 (Render-ready)\r\r\n- **Dark theme** UI — deeper blacks, grid overlay, cyan accents\r\r\n- **Discord OAuth login** — roles synced from your server (owner / admin / staff / member)\r\r\n- **Analytics dashboard** — page views, logins, panel usage, 14-day charts (staff+)\r\r\n- **Public pages** — Home, About, Jobs, Connect, Updates\r\r\n- **Role-gated staff panels** — resources, commands, branding (admin+)\r\r\n\r\r\n## Deploy to Render\r\r\n1. Push `tools/shaderp-dashboard/` to GitHub\r\r\n2. Create Render Web Service (see `RENDER-SETUP.md`)\r\r\n3. Set Discord OAuth + `PORTAL_ROLE_MAP` env vars\r\r\n4. Sync data: `Push-DashboardToRender.ps1`\r\r\n\r\r\n## Local dev\r\r\n```\r\r\ncd tools\\shaderp-dashboard\r\r\ncopy .env.example .env\r\r\nnpm start\r\r\n```\r\r\nOpen http://localhost:8787\r\r\n\r\r\n## Discord setup required\r\r\n- Developer Portal app + OAuth redirect URL\r\r\n- Bot token + Guild ID\r\r\n- Map role IDs → portal roles in `PORTAL_ROLE_MAP`",
+    "blockedMods":  [
+                        {
+                            "name":  "nn (nn_bridge)",
+                            "reason":  "Missing bridge dependency"
+                        },
+                        {
+                            "name":  "offload_smash_grab",
+                            "reason":  "community_bridge required"
+                        },
+                        {
+                            "name":  "b3ast_weed",
+                            "reason":  "Bridge dependency"
+                        },
+                        {
+                            "name":  "energy_redline",
+                            "reason":  "Entitlement / loader"
+                        },
+                        {
+                            "name":  "lvl_fingerprint",
+                            "reason":  "lvl_bridge required"
+                        },
+                        {
+                            "name":  "HWC_Blips_V2 / tenfgdc",
+                            "reason":  "CFX entitlement if missing"
+                        },
+                        {
+                            "name":  "pixel-poster",
+                            "reason":  "CFX license required"
+                        }
+                    ],
+    "quickCommands":  [
+                          "restart shade-config",
+                          "restart es_extended",
+                          "restart HWC_Blips_V2",
+                          "restart pyh-tablet",
+                          "restart pyh-contacts",
+                          "restart pyh-groupsystem",
+                          "restart ravn-logs",
+                          "/gotobiz [1-15]",
+                          "/hwcblips",
+                          "/vehiclemenu"
+                      ],
+    "docs":  [
+                 {
+                     "path":  "tools/UPDATE-LOG.md",
+                     "label":  "Update Log"
+                 },
+                 {
+                     "path":  "tools/COMMANDS.md",
+                     "label":  "Commands"
+                 },
+                 {
+                     "path":  "tools/security-audit-2026-06-18.md",
+                     "label":  "Security Audit"
+                 },
+                 {
+                     "path":  "tools/GIVEITEM-REFERENCE.md",
+                     "label":  "Give Item Reference"
+                 },
+                 {
+                     "path":  "tools/SHADE-QUICK-SPAWN-CODES.md",
+                     "label":  "Vehicle Spawn Codes"
+                 }
+             ],
+    "paths":  {
+                  "serverCfg":  "F:\\txData\\QBCore_A9FD7A.base\\server.cfg",
+                  "shadeConfig":  "F:\\txData\\QBCore_A9FD7A.base\\resources\\[standalone]\\shade-config\\config",
+                  "database":  "mysql://root:@127.0.0.1:3306/es_extended",
+                  "base":  "F:\\txData\\QBCore_A9FD7A.base"
+              },
+    "logging":  {
+                    "channels":  [
+                                     "server",
+                                     "admin",
+                                     "bans",
+                                     "updates",
+                                     "tests"
+                                 ],
+                    "ravnRetentionDays":  14
+                }
+}

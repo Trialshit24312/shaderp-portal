@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="ShadeRP — ESX Legacy roleplay community portal, staff dashboard, and server analytics." />
+  <meta name="theme-color" content="#06080c" />
+  <title>ShadeRP Portal</title>
+  <link rel="icon" href="/assets/shaderp-logo.png" type="image/png" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="/styles.css" />
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js" defer></script>
+</head>
+<body>
+  <div class="bg-grid"></div>
+  <div class="bg-glow"></div>
+
+  <aside class="sidebar" id="sidebar">
+    <div class="brand">
+      <img src="/assets/shaderp-logo.png" alt="ShadeRP" class="brand-logo" />
+      <div>
+        <h1 id="portal-name">ShadeRP</h1>
+        <p class="tagline" id="portal-tagline">Community Portal</p>
+      </div>
+    </div>
+    <nav id="nav"></nav>
+    <div class="sidebar-footer">
+      <a id="discord-link" href="#" target="_blank" rel="noopener" class="discord-btn">Join Discord</a>
+      <p class="sync-time" id="sync-time">—</p>
+    </div>
+  </aside>
+
+  <main class="content">
+    <header class="topbar">
+      <button type="button" class="menu-toggle" id="menu-toggle" aria-label="Menu">☰</button>
+      <div class="search-wrap">
+        <input type="search" id="global-search" placeholder="Search…" autocomplete="off" />
+      </div>
+      <div class="user-bar" id="user-bar">
+        <a href="/auth/discord" class="btn-discord" id="login-btn">Login with Discord</a>
+      </div>
+    </header>
+
+    <!-- PUBLIC -->
+    <section id="panel-home" class="panel active" data-min-role="guest">
+      <div class="hero">
+        <div class="hero-text">
+          <span class="pill">ESX Legacy · Serious RP</span>
+          <h2>Welcome to <span class="accent" id="hero-name">ShadeRP</span></h2>
+          <p id="hero-desc">Community portal for updates, jobs, economy info, and staff tools — synced with Discord roles.</p>
+          <div class="hero-actions">
+            <a id="hero-discord" href="#" class="btn primary" target="_blank">Join Discord</a>
+            <a id="hero-portal" href="#" class="btn ghost" target="_blank" hidden>Open Portal</a>
+            <a href="/auth/discord" class="btn ghost" id="hero-login">Staff Login</a>
+          </div>
+        </div>
+        <div class="hero-stats" id="hero-stats"></div>
+      </div>
+      <div class="card-grid" id="feature-cards"></div>
+    </section>
+
+    <section id="panel-about" class="panel" data-min-role="guest">
+      <h2>About ShadeRP</h2>
+      <div class="card prose" id="about-content"></div>
+    </section>
+
+    <section id="panel-jobs" class="panel" data-min-role="guest">
+      <h2>Jobs & activities</h2>
+      <p class="hint">Legal work, side hustles, and whitelisted departments.</p>
+      <div id="jobs-grid" class="card-grid three"></div>
+    </section>
+
+    <section id="panel-connect" class="panel" data-min-role="guest">
+      <h2>Connect</h2>
+      <div id="connect-meta"></div>
+      <div class="connect-grid">
+        <div class="card">
+          <h3>FiveM Direct Connect</h3>
+          <p class="mono copy-block" data-copy="cfx.re/join/YOUR-CODE" id="connect-cfx">cfx.re/join/YOUR-CODE</p>
+          <p class="hint">Set in shade-config/config/portal.lua then sync.</p>
+        </div>
+        <div class="card">
+          <h3>Community Portal</h3>
+          <p><a id="connect-portal-link" href="#" target="_blank" rel="noopener">Open portal</a></p>
+          <p class="hint">Jobs, updates, staff tools — login with Discord.</p>
+        </div>
+        <div class="card">
+          <h3>Discord</h3>
+          <p><a id="connect-discord-link" href="https://discord.gg/sbnu98HYAZ" target="_blank" rel="noopener">Join Discord</a></p>
+        </div>
+      </div>
+      <div class="card" style="margin-top:1rem">
+        <h3>Requirements</h3>
+        <ul class="check-list">
+          <li>Licensed GTA V + FiveM</li>
+          <li>Discord account in our server</li>
+          <li>Microphone for serious RP</li>
+          <li>Read rules before playing</li>
+        </ul>
+      </div>
+    </section>
+
+    <section id="panel-team" class="panel" data-min-role="member">
+      <h2>Team & Discord roles</h2>
+      <p class="hint">Portal access is synced from your Discord roles.</p>
+      <div id="team-roles" class="role-grid"></div>
+    </section>
+
+    <!-- MEMBER+ -->
+    <section id="panel-overview" class="panel" data-min-role="member">
+      <h2>Server overview</h2>
+      <div class="stat-grid" id="stat-grid"></div>
+      <div class="card"><h3>Latest update</h3><pre id="latest-notes" class="notes-block"></pre></div>
+    </section>
+
+    <section id="panel-updates" class="panel" data-min-role="guest">
+      <h2>Update history</h2>
+      <div id="updates-list" class="stack"></div>
+    </section>
+
+    <section id="panel-economy" class="panel" data-min-role="member">
+      <h2>Economy</h2>
+      <div class="stat-grid" id="economy-stats"></div>
+      <div class="card"><h3>Job salaries</h3><div id="salary-table" class="table-wrap"></div></div>
+    </section>
+
+    <section id="panel-map" class="panel" data-min-role="member">
+      <h2>Map & locations</h2>
+      <p class="hint">In-game: <code>/hwcblips</code> · Staff teleport: <code>/gotobiz [id]</code></p>
+      <div id="map-table" class="table-wrap"></div>
+    </section>
+
+    <!-- STAFF+ -->
+    <section id="panel-analytics" class="panel" data-min-role="staff">
+      <h2>Analytics</h2>
+      <div class="stat-grid" id="analytics-stats"></div>
+      <div class="chart-row">
+        <div class="card chart-card"><h3>Traffic (14 days)</h3><canvas id="chart-traffic"></canvas></div>
+        <div class="card chart-card"><h3>By role</h3><canvas id="chart-roles"></canvas></div>
+      </div>
+      <div class="split-panels">
+        <div class="card"><h3>Top panels</h3><div id="top-panels" class="table-wrap"></div></div>
+        <div class="card"><h3>Recent activity</h3><div id="recent-events" class="event-list"></div></div>
+      </div>
+    </section>
+
+    <section id="panel-staff" class="panel" data-min-role="staff">
+      <h2>Staff hub</h2>
+      <div class="card-grid three" id="staff-tools"></div>
+      <div class="card"><h3>Quick restarts</h3><div id="staff-commands" class="command-grid"></div></div>
+    </section>
+
+    <!-- ADMIN+ -->
+    <section id="panel-resources" class="panel" data-min-role="admin">
+      <h2>Resources</h2>
+      <div class="split-panels">
+        <div class="card"><h3>Enabled <span id="enabled-count" class="badge"></span></h3><div id="enabled-list" class="chip-grid"></div></div>
+        <div class="card"><h3>Disabled <span id="disabled-count" class="badge warn"></span></h3><div id="disabled-list" class="stack compact"></div></div>
+      </div>
+    </section>
+
+    <section id="panel-branding" class="panel" data-min-role="admin">
+      <h2>Branding registry</h2>
+      <div class="split-panels">
+        <div class="card"><h3>Resources</h3><div id="brand-resources" class="table-wrap"></div></div>
+        <div class="card"><h3>Locations</h3><div id="brand-locations" class="table-wrap"></div></div>
+      </div>
+    </section>
+
+    <section id="panel-commands" class="panel" data-min-role="admin">
+      <h2>Console commands</h2>
+      <div id="command-list" class="command-grid"></div>
+    </section>
+
+    <section id="panel-blocked" class="panel" data-min-role="admin">
+      <h2>Blocked mods</h2>
+      <div id="blocked-list" class="stack"></div>
+    </section>
+
+    <section id="panel-settings" class="panel" data-min-role="admin">
+      <h2>Portal settings</h2>
+      <div class="card prose">
+        <h3>Render deployment</h3>
+        <p>Set environment variables in Render dashboard. See <code>RENDER-SETUP.md</code> in the repo.</p>
+        <h3>Sync server data</h3>
+        <p>Run locally: <code>Push-DashboardToRender.ps1</code> after <code>Build-DashboardData.ps1</code></p>
+        <h3>Your session</h3>
+        <pre id="session-debug" class="notes-block"></pre>
+      </div>
+    </section>
+  </main>
+
+  <div id="toast" class="toast" hidden>Copied</div>
+  <script src="/app.js" type="module"></script>
+</body>
+</html>

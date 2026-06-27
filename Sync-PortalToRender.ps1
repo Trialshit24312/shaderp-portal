@@ -9,6 +9,14 @@ param(
 $tools = Join-Path $BasePath 'tools\shaderp-dashboard'
 
 & (Join-Path $tools 'Apply-PortalLinks.ps1') -BasePath $BasePath
+
+if ($env:DISCORD_BOT_TOKEN) {
+    Write-Host 'Discord bot token found — fetching rules/FAQ from Discord...'
+    & (Join-Path $tools 'Fetch-DiscordContent.ps1') -BasePath $BasePath
+} else {
+    Write-Host 'Tip: set DISCORD_BOT_TOKEN in .env to auto-pull #rules and #faq from Discord.'
+}
+
 & (Join-Path $tools 'Build-DashboardData.ps1') -BasePath $BasePath
 
 if ($SkipPush) {

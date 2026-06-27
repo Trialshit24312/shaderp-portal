@@ -33,6 +33,20 @@ function Parse-ChannelIds([string]$text) {
     return $ids
 }
 
+function Find-ChannelByName($channels, [string[]]$names) {
+    foreach ($name in $names) {
+        $n = $name.ToLower()
+        $hit = $channels | Where-Object {
+            $_.type -in 0, 5, 15 -and (
+                ($_.name -replace '[^\w-]', '').ToLower() -eq ($n -replace '[^\w-]', '') -or
+                $_.name.ToLower() -like "*$n*"
+            )
+        } | Select-Object -First 1
+        if ($hit) { return $hit.id }
+    }
+    return $null
+}
+
 function Get-ChannelMessages([string]$channelId, [int]$limit = 20) {
     if (-not $channelId) { return @() }
     $uri = "https://discord.com/api/v10/channels/$channelId/messages?limit=$limit"
@@ -74,15 +88,34 @@ function Split-FaqLines([string]$content) {
 
 $cfgText = Get-Content -LiteralPath $portalLua -Raw -Encoding UTF8
 $channelIds = Parse-ChannelIds $cfgText
+$allChannels = Get-DiscordJson "https://discord.com/api/v10/guilds/$GuildId/channels"
+
+if (-not $channelIds.rules) {
+    $channelIds.rules = Find-ChannelByName $allChannels @(
+        $env:DISCORD_CHANNEL_RULES, 'rules', 'server-rules', 'rule'
+    )
+}
+if (-not $channelIds.faq) {
+    $channelIds.faq = Find-ChannelByName $allChannels @(
+        $env:DISCORD_CHANNEL_FAQ, 'faq', 'questions', 'help'
+    )
+}
+if (-not $channelIds.announcements) {
+    $channelIds.announcements = Find-ChannelByName $allChannels @(
+        $env:DISCORD_CHANNEL_ANNOUNCEMENTS, 'announcements', 'announcement', 'news', 'updates'
+    )
+}
+
+if ($channelIds.rules) { Write-Host "Rules channel: $($channelIds.rules)" }
+if ($channelIds.faq) { Write-Host "FAQ channel: $($channelIds.faq)" }
 
 if (-not $channelIds.rules -and -not $channelIds.faq) {
     Write-Host ''
     Write-Host 'Add channel IDs to portal_content.lua → discordChannels section, e.g.:'
     Write-Host "  rules = '1234567890123456789',"
     Write-Host ''
-    Write-Host 'Listing guild channels (copy IDs for rules/faq/announcements):'
-    $channels = Get-DiscordJson "https://discord.com/api/v10/guilds/$GuildId/channels"
-    $channels | Where-Object { $_.type -in 0, 5, 15 } | Sort-Object { $_.position } | ForEach-Object {
+    Write-Host 'Listing guild channels (copy IDs into portal_content.lua discordChannels if auto-detect fails):'
+    $allChannels | Where-Object { $_.type -in 0, 5, 15 } | Sort-Object { $_.position } | ForEach-Object {
         Write-Host ("  {0,-22} id={1}" -f $_.name, $_.id)
     }
     exit 0

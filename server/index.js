@@ -12,26 +12,28 @@ import {
   fetchDiscordUser,
   buildUserSession,
   fetchGuildRoles,
-  roleIdToNameMap,
 } from './discord.js';
 import { trackPageView, trackEvent, getAnalyticsSummary } from './analytics.js';
+import { getPortalEnv, isAuthConfigured, isOAuthReady } from './env.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const ROOT = path.join(__dirname, '..');
 const PUBLIC = path.join(ROOT, 'public');
 const DATA_FILE = path.join(ROOT, 'data', 'dashboard.json');
 
+const portalEnv = getPortalEnv();
+const roleMap = parseRoleMap(portalEnv.PORTAL_ROLE_MAP || '{}');
+
 const app = express();
 const PORT = process.env.PORT || 8787;
 const isProd = process.env.NODE_ENV === 'production';
-const roleMap = parseRoleMap(process.env.PORTAL_ROLE_MAP || '{}');
 
 app.set('trust proxy', 1);
 app.use(cookieParser());
 app.use(express.json({ limit: '2mb' }));
 app.use(
   session({
-    secret: process.env.SESSION_SECRET || 'dev-only-change-me',
+    secret: portalEnv.SESSION_SECRET || 'dev-only-change-me',
     resave: false,
     saveUninitialized: false,
     cookie: { secure: isProd, httpOnly: true, sameSite: 'lax', maxAge: 7 * 24 * 60 * 60 * 1000 },
@@ -56,26 +58,25 @@ function requireRole(minRole) {
 app.get('/health', (_req, res) => res.json({ ok: true, service: 'shaderp-portal' }));
 
 app.get('/auth/discord', (req, res) => {
-  const clientId = process.env.DISCORD_CLIENT_ID;
-  const callback = process.env.DISCORD_CALLBACK_URL;
-  if (!clientId || !callback) {
-    return res.status(503).send('Discord OAuth not configured.');
+  if (!isOAuthReady(portalEnv)) {
+    return res.status(503).send('Discord OAuth not configured — set DISCORD_CLIENT_SECRET on Render.');
   }
   req.session.returnTo = req.query.returnTo || '/';
-  res.redirect(getDiscordAuthUrl(clientId, callback));
+  res.redirect(getDiscordAuthUrl(portalEnv.DISCORD_CLIENT_ID, portalEnv.DISCORD_CALLBACK_URL));
 });
 
 app.get('/auth/discord/callback', async (req, res) => {
   try {
     const { code } = req.query;
     if (!code) return res.redirect('/?error=no_code');
+    if (!isOAuthReady(portalEnv)) return res.redirect('/?error=oauth_not_ready');
     const tokens = await exchangeCode(code, {
-      clientId: process.env.DISCORD_CLIENT_ID,
-      clientSecret: process.env.DISCORD_CLIENT_SECRET,
-      callbackUrl: process.env.DISCORD_CALLBACK_URL,
+      clientId: portalEnv.DISCORD_CLIENT_ID,
+      clientSecret: portalEnv.DISCORD_CLIENT_SECRET,
+      callbackUrl: portalEnv.DISCORD_CALLBACK_URL,
     });
     const discordUser = await fetchDiscordUser(tokens.access_token);
-    const user = await buildUserSession(discordUser, tokens.access_token, process.env, roleMap);
+    const user = await buildUserSession(discordUser, tokens.access_token, portalEnv, roleMap);
     req.session.user = user;
     trackEvent('login', { userId: user.id, role: user.appRole });
     res.redirect(req.session.returnTo || '/');
@@ -95,25 +96,26 @@ app.get('/api/me', (req, res) => {
     user,
     panels: user ? panelsForRole(user.appRole) : panelsForRole('guest'),
     roleLevel: user ? ROLE_LEVEL[user.appRole] : 0,
-    discordInvite: process.env.DISCORD_INVITE_URL || 'https://discord.gg/sbnu98HYAZ',
-    portal: { name: process.env.PORTAL_NAME || 'ShadeRP', tagline: process.env.PORTAL_TAGLINE || 'ESX Legacy Roleplay' },
-    authConfigured: !!(process.env.DISCORD_CLIENT_ID && process.env.DISCORD_GUILD_ID),
+    discordInvite: portalEnv.DISCORD_INVITE_URL,
+    portal: { name: portalEnv.PORTAL_NAME, tagline: portalEnv.PORTAL_TAGLINE },
+    authConfigured: isAuthConfigured(portalEnv),
+    oauthReady: isOAuthReady(portalEnv),
   });
 });
 
 app.get('/api/team', async (_req, res) => {
   try {
-    const guildRoles = await fetchGuildRoles(process.env.DISCORD_GUILD_ID, process.env.DISCORD_BOT_TOKEN);
+    const guildRoles = await fetchGuildRoles(portalEnv.DISCORD_GUILD_ID, portalEnv.DISCORD_BOT_TOKEN);
     res.json({
       roles: Object.entries(roleMap).map(([discordId, appRole]) => ({
         discordRoleId: discordId,
         appRole,
         discordName: guildRoles.find((r) => r.id === discordId)?.name || 'Configure role ID',
       })),
-      invite: process.env.DISCORD_INVITE_URL,
+      invite: portalEnv.DISCORD_INVITE_URL,
     });
   } catch {
-    res.json({ roles: [], invite: process.env.DISCORD_INVITE_URL });
+    res.json({ roles: [], invite: portalEnv.DISCORD_INVITE_URL });
   }
 });
 
@@ -129,11 +131,11 @@ app.get('/api/dashboard', (req, res) => {
       branding: data.branding,
       portal: data.portal,
       connect: data.connect,
-    site: data.site,
-    credits: data.credits,
-    jobGuide: data.jobGuide,
-    plsJobs: (data.plsJobs || []).map((j) => ({ label: j.label, job: j.job })),
-    businesses: data.businesses,
+      site: data.site,
+      credits: data.credits,
+      jobGuide: data.jobGuide,
+      plsJobs: (data.plsJobs || []).map((j) => ({ label: j.label, job: j.job })),
+      businesses: data.businesses,
       economy: {
         startingBank: data.economy?.startingBank,
         startingCash: data.economy?.startingCash,
@@ -155,7 +157,7 @@ app.get('/api/dashboard', (req, res) => {
 
 app.post('/api/dashboard/sync', (req, res) => {
   const key = req.headers['x-sync-key'] || req.query.key;
-  if (!process.env.SYNC_API_KEY || key !== process.env.SYNC_API_KEY) {
+  if (!portalEnv.SYNC_API_KEY || key !== portalEnv.SYNC_API_KEY) {
     return res.status(401).json({ error: 'Invalid sync key' });
   }
   const dir = path.dirname(DATA_FILE);
@@ -186,4 +188,5 @@ app.get('*', (req, res) => {
 
 app.listen(PORT, '0.0.0.0', () => {
   console.log(`ShadeRP Portal listening on port ${PORT}`);
+  console.log(`OAuth: ${isOAuthReady(portalEnv) ? 'ready' : 'needs DISCORD_CLIENT_SECRET on Render'}`);
 });

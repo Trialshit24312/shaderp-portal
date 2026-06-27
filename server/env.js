@@ -1,0 +1,46 @@
+/** ShadeRP portal env — Render often ships without Discord vars; apply safe public defaults. */
+const SHADERP = {
+  DISCORD_CLIENT_ID: '1520316047146746006',
+  DISCORD_GUILD_ID: '1357838976299565087',
+  DISCORD_INVITE_URL: 'https://discord.gg/sbnu98HYAZ',
+  PORTAL_URL: 'https://shaderp-website.onrender.com',
+  PORTAL_NAME: 'ShadeRP',
+  PORTAL_TAGLINE: 'ESX Legacy Roleplay',
+  PORTAL_OWNER_IDS: '1170463252698902561,940681605670916148',
+  PORTAL_ROLE_MAP:
+    '{"1358187333848924260":"owner","1478053644673749076":"owner","1403881048416321698":"admin","1482853698462941195":"admin","1474033054279405829":"admin","1474032455567675525":"admin","1474148037541761160":"developer","1474135398312706089":"developer","1479921052413853970":"developer","1474030129884823715":"staff","1474592310317547733":"staff","1474031386703953920":"moderator","1403880641074036736":"moderator","1438657854432350350":"moderator","1474031854905725050":"moderator","1358199486941364224":"member","1479976364336480460":"member"}',
+};
+
+function portalBaseUrl() {
+  if (process.env.DISCORD_CALLBACK_URL) {
+    return process.env.DISCORD_CALLBACK_URL.replace(/\/auth\/discord\/callback\/?$/, '');
+  }
+  return (process.env.PORTAL_URL || process.env.RENDER_EXTERNAL_URL || SHADERP.PORTAL_URL).replace(/\/$/, '');
+}
+
+export function getPortalEnv() {
+  const base = portalBaseUrl();
+  return {
+    NODE_ENV: process.env.NODE_ENV,
+    SESSION_SECRET: process.env.SESSION_SECRET,
+    DISCORD_CLIENT_ID: process.env.DISCORD_CLIENT_ID || SHADERP.DISCORD_CLIENT_ID,
+    DISCORD_CLIENT_SECRET: process.env.DISCORD_CLIENT_SECRET,
+    DISCORD_BOT_TOKEN: process.env.DISCORD_BOT_TOKEN,
+    DISCORD_GUILD_ID: process.env.DISCORD_GUILD_ID || SHADERP.DISCORD_GUILD_ID,
+    DISCORD_CALLBACK_URL: process.env.DISCORD_CALLBACK_URL || `${base}/auth/discord/callback`,
+    DISCORD_INVITE_URL: process.env.DISCORD_INVITE_URL || SHADERP.DISCORD_INVITE_URL,
+    PORTAL_OWNER_IDS: process.env.PORTAL_OWNER_IDS || SHADERP.PORTAL_OWNER_IDS,
+    PORTAL_ROLE_MAP: process.env.PORTAL_ROLE_MAP || SHADERP.PORTAL_ROLE_MAP,
+    PORTAL_NAME: process.env.PORTAL_NAME || SHADERP.PORTAL_NAME,
+    PORTAL_TAGLINE: process.env.PORTAL_TAGLINE || SHADERP.PORTAL_TAGLINE,
+    SYNC_API_KEY: process.env.SYNC_API_KEY,
+  };
+}
+
+export function isAuthConfigured(env) {
+  return !!(env.DISCORD_CLIENT_ID && env.DISCORD_GUILD_ID && env.DISCORD_CALLBACK_URL);
+}
+
+export function isOAuthReady(env) {
+  return isAuthConfigured(env) && !!env.DISCORD_CLIENT_SECRET;
+}

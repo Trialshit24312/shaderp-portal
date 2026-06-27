@@ -13,18 +13,20 @@ services:
       - key: SESSION_SECRET
         generateValue: true
       - key: DISCORD_CLIENT_ID
-        sync: false
+        value: "1520316047146746006"
+      - key: DISCORD_GUILD_ID
+        value: "1357838976299565087"
+      - key: DISCORD_CALLBACK_URL
+        value: https://shaderp-website.onrender.com/auth/discord/callback
+      - key: DISCORD_INVITE_URL
+        value: https://discord.gg/sbnu98HYAZ
+      - key: PORTAL_OWNER_IDS
+        value: "1170463252698902561,940681605670916148"
       - key: DISCORD_CLIENT_SECRET
         sync: false
       - key: DISCORD_BOT_TOKEN
         sync: false
-      - key: DISCORD_GUILD_ID
-        sync: false
-      - key: DISCORD_CALLBACK_URL
-        sync: false
       - key: SYNC_API_KEY
         generateValue: true
-      - key: DISCORD_INVITE_URL
-        value: https://discord.gg/sbnu98HYAZ
       - key: PORTAL_ROLE_MAP
         sync: false

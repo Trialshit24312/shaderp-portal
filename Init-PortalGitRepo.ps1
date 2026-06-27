@@ -30,12 +30,7 @@ $status = git status --porcelain
 if (-not $status) {
     Write-Host 'Nothing to commit.'
 } else {
-    git commit -m "$(cat <<'EOF'
-Add ShadeRP portal for Render deploy.
-
-Standalone Node portal with Discord OAuth, role sync, analytics, and dashboard sync — separate from the full FiveM server repo.
-EOF
-)"
+    git commit -m "Add ShadeRP portal for Render deploy." -m "Standalone Node portal with Discord OAuth, role sync, analytics, and dashboard sync — separate from the full FiveM server repo."
     Write-Host 'Committed portal files.'
 }
 

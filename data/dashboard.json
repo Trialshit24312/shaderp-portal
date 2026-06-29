@@ -1,5 +1,5 @@
 {
-    "generatedAt":  "2026-06-29 00:30:26",
+    "generatedAt":  "2026-06-29 01:02:52",
     "branding":  {
                      "resources":  {
                                        "kq_powerwashing":  "ShadeRP Power Washing",
@@ -1492,6 +1492,10 @@
                                            "reason":  "QB-only"
                                        },
                                        {
+                                           "name":  "weaponanimationoverhaul",
+                                           "reason":  "weapon-master-loader"
+                                       },
+                                       {
                                            "name":  "ja_towing",
                                            "reason":  "loaded by map-master-loader"
                                        },
@@ -1540,6 +1544,14 @@
                                            "reason":  "QB-only (requires qb-core HideText export)"
                                        },
                                        {
+                                           "name":  "ggc-weapons",
+                                           "reason":  "weapon-master-loader"
+                                       },
+                                       {
+                                           "name":  "weapon-skin-knife",
+                                           "reason":  "weapon-master-loader"
+                                       },
+                                       {
                                            "name":  "lunar_cryptomining",
                                            "reason":  "heavy DB loops — enable when tuned"
                                        },
@@ -1560,6 +1572,10 @@
                                            "reason":  "requires devm-bridge (not installed)"
                                        },
                                        {
+                                           "name":  "DoItDigital_Police_Weapon_Pack_V1",
+                                           "reason":  "weapon-master-loader"
+                                       },
+                                       {
                                            "name":  "av_multijob",
                                            "reason":  "conflicts with wasabi_multijob"
                                        },
@@ -1568,12 +1584,15 @@
                                            "reason":  "QB-only (requires qb-core)"
                                        },
                                        {
+                                           "name":  "balenciaga_weapon_packv7",
+                                           "reason":  "weapon-master-loader"
+                                       },
+                                       {
                                            "name":  "smartfires",
                                            "reason":  "QB-only (GetCoreObject on qb-core) — disable on ESX"
                                        }
                                    ],
                       "enabled":  [
-                                      "weaponanimationoverhaul",
                                       "chat",
                                       "spawnmanager",
                                       "sessionmanager",
@@ -1630,6 +1649,7 @@
                                       "shade-proximity-mlo",
                                       "shade-lspd-pd",
                                       "addon-stream-loader",
+                                      "weapon-master-loader",
                                       "jg-vehiclemileage",
                                       "jg-handling",
                                       "jg-mechanic",
@@ -1688,8 +1708,6 @@
                                       "lb-tablet",
                                       "lb-phoneprop",
                                       "lb-phone",
-                                      "ggc-weapons",
-                                      "weapon-skin-knife",
                                       "ravn-logs",
                                       "babymodsems",
                                       "qs-crime-creator",
@@ -1713,7 +1731,6 @@
                                       "portis-afterhours",
                                       "1017-dev-pawnshop",
                                       "lgd-policeradar",
-                                      "DoItDigital_Police_Weapon_Pack_V1",
                                       "tenfgdc",
                                       "community_bridge",
                                       "nn_bridge",
@@ -1731,11 +1748,16 @@
                                       "ab-handling",
                                       "pyh-interaction",
                                       "pyh-status",
-                                      "balenciaga_weapon_packv7",
                                       "fivem-discord-hour-logger"
                                   ]
                   },
     "updatePasses":  [
+                         {
+                             "version":  "v16",
+                             "title":  "**18 June 2026 · Enhancement Pass v16 — MLO fixes, weapon loader \u0026 queue hardening**",
+                             "overview":  "Fixes maps that failed to load (nested MLO folders, missing companion assets), adds a **weapon-master-loader** for all gun packs, and hardens the web queue for local dev so Ready on the portal actually lets you connect.",
+                             "body":  "**18 June 2026 · Enhancement Pass v16 — MLO fixes, weapon loader \u0026 queue hardening**\r\n\r\n---\r\n\r\n## Overview\r\n\r\nFixes maps that failed to load (nested MLO folders, missing companion assets), adds a **weapon-master-loader** for all gun packs, and hardens the web queue for local dev so Ready on the portal actually lets you connect.\r\n\r\n---\r\n\r\n## weapon-master-loader (new)\r\n\r\n| Pack | Notes |\r\n|------|--------|\r\n| weaponanimationoverhaul | Animation meta |\r\n| ggc-weapons | Core addon weapons |\r\n| DoItDigital_Police_Weapon_Pack_V1 | LSPD weapon pack |\r\n| balenciaga_weapon_packv7 | Custom guns |\r\n| echo-gunpack-v4 | Echo pack |\r\n| VonsWeaponPackV1 | Von pack |\r\n| weapon-skin-* (7) | Knife, pistol, SMG, carbine, etc. |\r\n\r\n**Resource:** `resources/[standalone]/weapon-master-loader/`  \r\n**Config:** `stream:weaponPacksEnabled 1` in `server.cfg`  \r\nIndividual gun `ensure` lines removed — loader starts packs after clothing phase 1.\r\n\r\n---\r\n\r\n## MLO / proximity fixes\r\n\r\n| Fix | Detail |\r\n|-----|--------|\r\n| **wxmaps_racetrack** | Hoisted nested manifest to top-level resource |\r\n| **wxmaps_commons** | Promoted to standalone (required with racetrack) |\r\n| **cfx-gabz-mapdata** | Loads before Gabz koi/hub/pdm/bennys batch |\r\n| **IM3D_Street_Enhancer_v1** | Hoisted same-name nested folder |\r\n| **Tools** | `tools/Fix-NestedResources.ps1` for future broken map folders |\r\n\r\nProximity zones updated in `shade-proximity-mlo/config/zones.lua`.\r\n\r\n---\r\n\r\n## Web queue (local dev)\r\n\r\n| Item | Detail |\r\n|------|--------|\r\n| **Lenient mode** | `shade:webQueueLenient 1` — allows connect if portal API unreachable |\r\n| **Dev defaults** | `webQueueRequired 0` + direct connect `127.0.0.1:20256` |\r\n| **shade-queue v1.0.1** | Startup config logging + clearer API error text |\r\n\r\n---\r\n\r\n## Resource name fixes\r\n\r\n| Item | Detail |\r\n|------|--------|\r\n| **shade-utils** | Now `provide \u0027sent-utils\u0027` for legacy script compatibility |\r\n| **balenciaga_weapon_packv7** | Removed circular self-dependency in fxmanifest |\r\n| **addon-stream-loader** | echo-gunpack moved to weapon-master-loader |\r\n\r\n---\r\n\r\n## Staff commands\r\n\r\n```\r\nproximitymlo_force gabz_hub_batch   # force-load Gabz MLO batch\r\nproximitymlo_force wx_racetrack     # force-load race track\r\nproximitymlo_status                 # list zone + resource states\r\n```\r\n\r\n**Post Discord:** `tools/Post-Changelog.ps1 -Version v16 -Everyone`\r\n\r\n---"
+                         },
                          {
                              "version":  "v15",
                              "title":  "**18 June 2026 · Enhancement Pass v15 — Web queue (LiquidRP-style)**",
@@ -1884,7 +1906,7 @@
                   "serverCfg":  "F:\\txData\\QBCore_A9FD7A.base\\server.cfg",
                   "shadeConfig":  "F:\\txData\\QBCore_A9FD7A.base\\resources\\[standalone]\\shade-config\\config",
                   "database":  "mysql://root:@127.0.0.1:3306/es_extended",
-                  "base":  "F:/txData/QBCore_A9FD7A.base"
+                  "base":  "F:\\txData\\QBCore_A9FD7A.base"
               },
     "logging":  {
                     "channels":  [

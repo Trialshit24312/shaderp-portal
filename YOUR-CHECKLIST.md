@@ -19,6 +19,8 @@ Complete these so the website is fully filled out and functional.
 | `PORTAL_OWNER_IDS` | Your Discord user ID |
 | `PORTAL_ROLE_MAP` | JSON mapping role IDs → staff/admin/owner |
 | `SYNC_API_KEY` | Long random string (copy for step 2) |
+| `QUEUE_API_KEY` | Same key as `shade:queueApiKey` in server.cfg (web queue) |
+| `QUEUE_ENABLED` | `1` |
 | `SESSION_SECRET` | Auto-generate on Render |
 | `DISCORD_INVITE_URL` | `https://discord.gg/sbnu98HYAZ` |
 
@@ -39,7 +41,7 @@ Edit content (optional but recommended):
 ## 3. Sync data to Render
 
 ```powershell
-cd F:\txData\QBCore_A9FD7A.base\tools\shaderp-dashboard
+cd F:\txData\ShadeRP.base\tools\shaderp-dashboard
 
 # Optional: pull #rules and #faq from Discord (needs bot token + channel IDs in portal_content.lua)
 $env:DISCORD_BOT_TOKEN = "your-bot-token"

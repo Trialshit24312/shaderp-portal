@@ -11,6 +11,7 @@ export const ROLE_LEVEL = {
 
 export const PANEL_ACCESS = {
   home: 0,
+  queue: 0,
   about: 0,
   jobs: 0,
   connect: 0,

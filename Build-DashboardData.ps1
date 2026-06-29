@@ -1,6 +1,6 @@
 # Regenerate dashboard.json from live ShadeRP server files
 param(
-    [string]$BasePath = 'F:\txData\QBCore_A9FD7A.base',
+    [string]$BasePath = 'F:\txData\ShadeRP.base',
     [string]$OutFile = ''
 )
 
@@ -47,8 +47,8 @@ function Parse-Businesses([string]$text) {
 
 function Parse-UpdatePasses([string]$md) {
     $passes = [System.Collections.ArrayList]@()
-    # Tolerate ·, em-dash, or ?? between date and "Enhancement Pass"
-    $pattern = '\*\*(\d{1,2} \w+ \d{4}.+?Enhancement Pass v(\d+))\*\*'
+    # Title may include subtitle after version: "**18 June 2026 · Enhancement Pass v15 — Web queue**"
+    $pattern = '\*\*(\d{1,2} \w+ \d{4}.+?Enhancement Pass v(\d+)[^*]*)\*\*'
     $passMatches = [regex]::Matches($md, $pattern)
     for ($i = 0; $i -lt $passMatches.Count; $i++) {
         $start = $passMatches[$i].Index
@@ -59,9 +59,16 @@ function Parse-UpdatePasses([string]$md) {
         $overview = ''
         if ($section -match '## Overview\s*\r?\n\r?\n([\s\S]+?)(?=\r?\n---|\r?\n## |\z)') {
             $overview = $Matches[1].Trim()
+            $overview = ($overview -split "`n" | Where-Object { $_ -match '\S' -and $_ -notmatch '^\|' -and $_ -notmatch '^\|-' } | Select-Object -First 2) -join ' '
+            if ($overview.Length -gt 320) { $overview = $overview.Substring(0, 320).Trim() + '…' }
         } elseif ($section -match '## ([^\r\n]+)\s*\r?\n\r?\n([\s\S]+?)(?=\r?\n---|\r?\n## |\r?\n\*\*|\z)') {
             $bodyText = $Matches[2].Trim()
-            $overview = ($bodyText -replace '\r?\n', ' ').Substring(0, [Math]::Min(320, $bodyText.Length))
+            $plain = ($bodyText -split "`n" | Where-Object {
+                $_ -match '\S' -and $_ -notmatch '^\|' -and $_ -notmatch '^\|[-:\s|]+\|$' -and $_ -notmatch '^```'
+            } | Select-Object -First 4) -join ' '
+            if ($plain) {
+                $overview = if ($plain.Length -gt 320) { $plain.Substring(0, 320).Trim() + '…' } else { $plain }
+            }
         }
         [void]$passes.Add([ordered]@{
             version = "v$ver"
@@ -98,7 +105,7 @@ function Parse-Credits([string]$text) {
 }
 
 function Parse-PortalSite([string]$text) {
-    $site = @{ tagline = ''; about = @{}; rules = @(); faq = @(); keybinds = @(); features = @(); jobGuide = @() }
+    $site = @{ tagline = ''; about = @{}; rules = @(); faq = @(); keybinds = @(); features = @(); whatsNew = @(); jobGuide = @() }
     if ($text -match "tagline\s*=\s*'([^']+)'") { $site.tagline = $Matches[1] }
     if ($text -match "headline\s*=\s*'([^']+)'") { $site.about.headline = $Matches[1] }
     if ($text -match "intro\s*=\s*'([^']+)'") { $site.about.intro = $Matches[1] }
@@ -122,6 +129,9 @@ function Parse-PortalSite([string]$text) {
     }
     foreach ($m in [regex]::Matches($text, "icon\s*=\s*'([^']+)',\s*title\s*=\s*'([^']+)',\s*desc\s*=\s*'([^']+)'")) {
         $site.features += [ordered]@{ icon = $m.Groups[1].Value; title = $m.Groups[2].Value; desc = $m.Groups[3].Value }
+    }
+    foreach ($m in [regex]::Matches($text, "badge\s*=\s*'([^']+)',\s*title\s*=\s*'([^']+)',\s*desc\s*=\s*'([^']+)'")) {
+        $site.whatsNew += [ordered]@{ badge = $m.Groups[1].Value; title = $m.Groups[2].Value; desc = $m.Groups[3].Value }
     }
     foreach ($m in [regex]::Matches($text, "id\s*=\s*'([^']+)',\s*name\s*=\s*'([^']+)',\s*category\s*=\s*'([^']+)',\s*how\s*=\s*'([^']+)'")) {
         $site.jobGuide += [ordered]@{

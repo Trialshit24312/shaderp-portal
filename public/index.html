@@ -52,14 +52,23 @@
           <h2>Welcome to <span class="accent" id="hero-name">ShadeRP</span></h2>
           <p id="hero-desc">Community portal for updates, jobs, economy info, and staff tools — synced with Discord roles.</p>
           <div class="hero-actions">
-            <a id="hero-connect" href="#" class="btn primary" data-panel="connect">How to join</a>
+            <button type="button" class="btn primary" data-panel="queue" id="hero-queue-btn">Join Queue</button>
+            <a id="hero-connect" href="#" class="btn ghost" data-panel="connect">How to connect</a>
             <a id="hero-discord" href="#" class="btn ghost" target="_blank">Join Discord</a>
-            <a href="/auth/discord" class="btn ghost" id="hero-login">Staff Login</a>
+            <a href="/auth/discord?returnTo=/queue" class="btn ghost" id="hero-login">Login</a>
           </div>
         </div>
         <div class="hero-stats" id="hero-stats"></div>
       </div>
+      <div id="home-queue-slot" class="queue-widget-host" data-queue-widget="hero"></div>
       <div class="card-grid" id="feature-cards"></div>
+      <div class="card whats-new-card" style="margin-top:1.25rem">
+        <div class="card-head-row">
+          <h3>What's new</h3>
+          <span class="pill accent">Latest features</span>
+        </div>
+        <div id="whats-new-list" class="whats-new-grid"></div>
+      </div>
       <div class="card" style="margin-top:1.25rem">
         <h3>Latest update</h3>
         <p id="home-latest" class="hint">—</p>
@@ -108,9 +117,26 @@
       <div id="jobs-whitelist" class="chip-grid"></div>
     </section>
 
+    <section id="panel-queue" class="panel" data-min-role="guest">
+      <h2>Join the server</h2>
+      <p class="hint">Login with Discord, join the queue, then connect to FiveM when your slot is ready — same flow as LiquidRP.</p>
+      <div id="queue-page-slot" class="queue-widget-host" data-queue-widget="page"></div>
+      <div class="card" style="margin-top:1.25rem">
+        <h3>How it works</h3>
+        <ol class="queue-steps">
+          <li><strong>Login</strong> — Use Discord so we can match your FiveM account.</li>
+          <li><strong>Join queue</strong> — Click Join Queue and keep this tab open (or check back).</li>
+          <li><strong>Wait for ready</strong> — You'll see your position and get a sound when it's your turn.</li>
+          <li><strong>Connect</strong> — Click Connect to FiveM or use the cfx.re link on the Connect page.</li>
+        </ol>
+        <p class="hint">Discord must be linked in FiveM (Settings → Linked accounts). Staff can use Priority Queue.</p>
+      </div>
+    </section>
+
     <section id="panel-connect" class="panel" data-min-role="guest">
       <h2>Connect</h2>
       <div id="connect-meta"></div>
+      <div id="connect-queue-slot" class="queue-widget-host" data-queue-widget="full"></div>
       <div class="connect-grid">
         <div class="card">
           <h3>FiveM Direct Connect</h3>
@@ -130,7 +156,8 @@
       <div class="card" style="margin-top:1rem">
         <h3>Requirements</h3>
         <ul class="check-list">
-          <li>Licensed GTA V + FiveM</li>
+          <li>Join the web queue on this site (Queue page) before connecting</li>
+          <li>Licensed GTA V + FiveM with Discord linked</li>
           <li>Discord account in our server</li>
           <li>Microphone for serious RP</li>
           <li>Read rules before playing</li>

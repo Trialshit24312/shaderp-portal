@@ -14,8 +14,9 @@ import {
   fetchGuildRoles,
 } from './discord.js';
 import { trackPageView, trackEvent, getAnalyticsSummary } from './analytics.js';
-import { getPortalEnv, isAuthConfigured, isOAuthReady } from './env.js';
+import { getPortalEnv, isAuthConfigured, isOAuthReady, portalBaseUrl } from './env.js';
 import { loadDashboardData, normalizeUpdatePasses, extractPassHighlights } from './dashboard.js';
+import { createQueueManager, queueApiKeyValid } from './queue.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const ROOT = path.join(__dirname, '..');
@@ -24,6 +25,7 @@ const DATA_FILE = path.join(ROOT, 'data', 'dashboard.json');
 
 const portalEnv = getPortalEnv();
 const roleMap = parseRoleMap(portalEnv.PORTAL_ROLE_MAP || '{}');
+const webQueue = createQueueManager({ enabled: portalEnv.QUEUE_ENABLED });
 
 const app = express();
 const PORT = process.env.PORT || 8787;
@@ -225,6 +227,85 @@ app.get('/api/analytics/summary', requireRole('staff'), (req, res) => {
   res.json(getAnalyticsSummary(Math.min(90, parseInt(req.query.days, 10) || 14)));
 });
 
+// —— Web queue (LiquidRP-style: login → join queue → connect when ready) ——
+app.get('/api/queue/config', (_req, res) => {
+  res.json({
+    enabled: webQueue.isEnabled(),
+    portalUrl: portalBaseUrl(),
+    ...webQueue.getPublicStats(),
+  });
+});
+
+app.get('/api/queue/me', (req, res) => {
+  const user = getUser(req);
+  if (!user) return res.status(401).json({ error: 'Login required' });
+  res.json(webQueue.getUserStatus(user.id));
+});
+
+app.post('/api/queue/join', (req, res) => {
+  const user = getUser(req);
+  if (!user) return res.status(401).json({ error: 'Login required' });
+  if (!webQueue.isEnabled()) return res.status(503).json({ error: 'Queue disabled' });
+  const lane = req.body?.lane === 'priority' ? 'priority' : 'normal';
+  const result = webQueue.join(user, lane);
+  if (result.error) return res.status(400).json(result);
+  trackEvent('queue_join', { userId: user.id, role: user.appRole, lane });
+  res.json(result);
+});
+
+app.post('/api/queue/leave', (req, res) => {
+  const user = getUser(req);
+  if (!user) return res.status(401).json({ error: 'Login required' });
+  webQueue.leave(user.id);
+  trackEvent('queue_leave', { userId: user.id });
+  res.json({ ok: true });
+});
+
+app.post('/api/queue/heartbeat', (req, res) => {
+  const user = getUser(req);
+  if (!user) return res.status(401).json({ error: 'Login required' });
+  const result = webQueue.heartbeat(user.id);
+  if (result.error) return res.status(404).json(result);
+  res.json(result);
+});
+
+app.get('/api/queue/server/verify', (req, res) => {
+  if (!queueApiKeyValid(req, portalEnv)) {
+    return res.status(401).json({ error: 'Invalid queue key' });
+  }
+  const discordId = req.query.discordId;
+  if (!discordId) return res.status(400).json({ error: 'discordId required' });
+  res.json(webQueue.verifyConnect(discordId));
+});
+
+app.post('/api/queue/server/sync', (req, res) => {
+  if (!queueApiKeyValid(req, portalEnv)) {
+    return res.status(401).json({ error: 'Invalid queue key' });
+  }
+  webQueue.syncServer(req.body || {});
+  res.json({ ok: true, stats: webQueue.getPublicStats() });
+});
+
+app.post('/api/queue/server/consume', (req, res) => {
+  if (!queueApiKeyValid(req, portalEnv)) {
+    return res.status(401).json({ error: 'Invalid queue key' });
+  }
+  const discordId = req.body?.discordId;
+  if (!discordId) return res.status(400).json({ error: 'discordId required' });
+  webQueue.consumeConnect(discordId);
+  res.json({ ok: true });
+});
+
+app.post('/api/queue/server/release', (req, res) => {
+  if (!queueApiKeyValid(req, portalEnv)) {
+    return res.status(401).json({ error: 'Invalid queue key' });
+  }
+  const discordId = req.body?.discordId;
+  if (!discordId) return res.status(400).json({ error: 'discordId required' });
+  webQueue.releaseConnecting(discordId);
+  res.json({ ok: true });
+});
+
 app.use(express.static(PUBLIC));
 app.get('*', (req, res) => {
   trackPageView({ path: req.path, userId: getUser(req)?.id, role: getUser(req)?.appRole });
@@ -234,4 +315,5 @@ app.get('*', (req, res) => {
 app.listen(PORT, '0.0.0.0', () => {
   console.log(`ShadeRP Portal listening on port ${PORT}`);
   console.log(`OAuth: ${isOAuthReady(portalEnv) ? 'ready' : 'needs DISCORD_CLIENT_SECRET on Render'}`);
+  console.log(`Web queue: ${webQueue.isEnabled() ? 'enabled' : 'disabled'}${portalEnv.QUEUE_API_KEY ? '' : ' (set QUEUE_API_KEY on Render)'}`);
 });

@@ -2,10 +2,14 @@
 let ME = null;
 let DATA = null;
 let charts = {};
+let QUEUE = null;
+let queuePollTimer = null;
+let queueWasReady = false;
 
 const NAV = [
   { section: 'Public' },
   { id: 'home', label: 'Home', min: 'guest' },
+  { id: 'queue', label: 'Queue', min: 'guest', highlight: true },
   { id: 'connect', label: 'Connect', min: 'guest' },
   { id: 'rules', label: 'Rules', min: 'guest' },
   { id: 'jobs', label: 'Jobs', min: 'guest' },
@@ -102,12 +106,17 @@ function renderUserBar() {
   }
 
   if (!ME.user) {
-    bar.innerHTML = `<a href="/auth/discord" class="btn-discord">Login with Discord</a>`;
+    bar.innerHTML = `<a href="/auth/discord?returnTo=/queue" class="btn-discord">Login with Discord</a>`;
     return;
   }
 
   const u = ME.user;
+  const q = QUEUE?.me;
+  const queueChip = q?.inQueue
+    ? `<button type="button" class="queue-chip${q.ready ? ' ready' : ''}" data-panel="queue">${q.ready ? 'Ready to connect' : `Queue #${q.position || '?'}`}</button>`
+    : '';
   bar.innerHTML = `
+    ${queueChip}
     <div class="user-chip">
       ${u.avatar ? `<img src="${esc(u.avatar)}" alt="" />` : ''}
       <span>${esc(u.globalName)}</span>
@@ -119,6 +128,7 @@ function renderUserBar() {
     await fetch('/auth/logout', { method: 'POST' });
     location.reload();
   };
+  bar.querySelector('.queue-chip')?.addEventListener('click', () => showPanel('queue'));
 }
 
 function renderNav() {
@@ -127,7 +137,8 @@ function renderNav() {
   nav.innerHTML = NAV.map((item) => {
     if (item.section) return `<div class="nav-section">${esc(item.section)}</div>`;
     const locked = !panels.has(item.id) && !hasRole(item.min);
-    return `<button type="button" class="nav-btn${locked ? ' locked' : ''}" data-panel="${item.id}" ${locked ? 'disabled' : ''}>${esc(item.label)}</button>`;
+    const hi = item.highlight ? ' nav-highlight' : '';
+    return `<button type="button" class="nav-btn${hi}${locked ? ' locked' : ''}" data-panel="${item.id}" ${locked ? 'disabled' : ''}>${esc(item.label)}</button>`;
   }).join('');
 
   nav.querySelectorAll('.nav-btn:not(.locked)').forEach((btn) => {
@@ -141,6 +152,7 @@ function showPanel(id) {
   track('panel_view', { panel: id });
   if (id === 'analytics' && hasRole('staff')) loadAnalytics();
   if (id === 'team') renderTeam();
+  if (id === 'queue' || id === 'connect' || id === 'home') renderQueueWidgets();
   el('sidebar')?.classList.remove('open');
 }
 
@@ -166,14 +178,27 @@ function renderHome() {
   ].map(([lbl, val]) => `<div class="hero-stat"><div class="val">${esc(val)}</div><div class="lbl">${esc(lbl)}</div></div>`).join('');
 
   const features = site.features?.length ? site.features : [
+    { icon: '🎮', title: 'Web queue', desc: 'Login & join queue before FiveM' },
     { icon: '📋', title: 'Rules', desc: 'Serious RP standards' },
     { icon: '💼', title: 'Jobs', desc: 'PD, EMS, trucking, and more' },
     { icon: '💰', title: 'Economy', desc: 'Balanced paychecks & side jobs' },
-    { icon: '🔐', title: 'Staff portal', desc: 'Discord-synced admin tools' },
   ];
   el('feature-cards').innerHTML = features.map((f) =>
     `<div class="feature-card"><div class="feature-icon">${esc(f.icon || '•')}</div><h4>${esc(f.title)}</h4><p>${esc(f.desc)}</p></div>`
   ).join('');
+
+  const whatsNew = site.whatsNew?.length ? site.whatsNew : [];
+  const whatsEl = el('whats-new-list');
+  if (whatsEl) {
+    whatsEl.innerHTML = whatsNew.length
+      ? whatsNew.map((w) =>
+        `<div class="whats-new-item">
+          <span class="${w.badge === 'Map' ? 'badge-map' : 'badge-new'}">${esc(w.badge || 'New')}</span>
+          <div><strong>${esc(w.title)}</strong><p>${esc(w.desc)}</p></div>
+        </div>`
+      ).join('')
+      : '<p class="hint">Sync portal content to see latest features.</p>';
+  }
 
   const latest = el('home-latest');
   if (latest) {
@@ -192,24 +217,32 @@ function renderServerStrip() {
   const hostname = DATA.connect?.hostname || 'ShadeRP';
   const slots = DATA.connect?.maxClients ?? 48;
   const framework = DATA.connect?.framework || 'ESX Legacy';
+  const qStats = QUEUE?.config || {};
+  const inQueue = qStats.inQueue ?? 0;
+  const queueLine = qStats.enabled !== false
+    ? `<button type="button" class="strip-link strip-queue" data-panel="queue">${inQueue} in queue · Join</button>`
+    : '';
 
   strip.innerHTML = `
     <div class="server-strip-inner">
       <div class="strip-item">
         <span class="strip-dot${pending ? ' warn' : ''}"></span>
-        <span>${esc(hostname)} · ${esc(framework)} · ${slots} slots</span>
+        <span>${esc(hostname)} · ${esc(framework)} · ${slots} slots${qStats.playersOnline != null ? ` · ${qStats.playersOnline} online` : ''}</span>
       </div>
       <div class="strip-actions">
+        ${queueLine}
         ${pending
     ? '<span class="strip-pill warn">CFX code pending</span>'
     : `<button type="button" class="strip-link copy-block" data-copy="${esc(cfx)}">${esc(cfx)}</button>`}
         <a href="${esc(discord)}" class="strip-link" target="_blank" rel="noopener">Discord</a>
-        <a href="${esc(portalUrl)}" class="strip-link" target="_blank" rel="noopener">Portal</a>
+        <button type="button" class="strip-link" data-panel="queue">Queue</button>
         <button type="button" class="strip-link" data-panel="connect">Connect</button>
       </div>
     </div>`;
   strip.querySelector('.copy-block')?.addEventListener('click', () => copyText(cfx));
-  strip.querySelector('[data-panel="connect"]')?.addEventListener('click', () => showPanel('connect'));
+  strip.querySelectorAll('[data-panel]').forEach((b) => {
+    b.addEventListener('click', () => showPanel(b.dataset.panel));
+  });
 }
 
 function renderFooter() {
@@ -228,6 +261,7 @@ function renderFooter() {
         <span class="hint">${esc(DATA.branding?.tagline || 'ESX Legacy Roleplay')}</span>
       </div>
       <nav class="footer-nav">
+        <button type="button" data-panel="queue">Queue</button>
         <button type="button" data-panel="rules">Rules</button>
         <button type="button" data-panel="jobs">Jobs</button>
         <button type="button" data-panel="connect">Connect</button>
@@ -331,6 +365,198 @@ function renderConnect() {
       </div>`;
     meta.querySelector('.copy-block')?.addEventListener('click', () => copyText(cfx));
   }
+}
+
+function getQueueViewModel() {
+  const cfg = QUEUE?.config || { enabled: true };
+  const me = QUEUE?.me || { inQueue: false };
+  const stats = me.stats || cfg;
+  const loggedIn = !!ME?.user;
+  const cfx = DATA?.portal?.cfxJoinUrl || 'cfx.re/join/YOUR-CODE';
+  const cfxFull = cfx.startsWith('http') ? cfx : `https://${cfx}`;
+  const returnTo = encodeURIComponent(location.pathname.includes('connect') ? '/connect' : '/queue');
+  return { cfg, me, stats, loggedIn, cfx, cfxFull, returnTo };
+}
+
+function queueStatsHtml(stats) {
+  return `
+    <div class="queue-stats">
+      <div class="queue-stat"><strong>${stats.inQueue ?? 0}</strong><span>Waiting</span></div>
+      <div class="queue-stat"><strong>${stats.ready ?? 0}</strong><span>Ready</span></div>
+      <div class="queue-stat"><strong>${stats.slotsAvailable ?? '—'}</strong><span>Slots free</span></div>
+    </div>`;
+}
+
+function queueActionsHtml(v, { showPriority = true } = {}) {
+  if (!v.loggedIn) {
+    return `
+      <p class="queue-login-msg">Login with Discord to join the server queue.</p>
+      <a href="/auth/discord?returnTo=${v.returnTo}" class="btn-discord">Login with Discord</a>`;
+  }
+  if (v.me.inQueue) {
+    const pos = v.me.ready ? 'Ready!' : `#${v.me.position || '?'}`;
+    const eta = v.me.ready
+      ? 'Your slot is ready — connect within 3 minutes.'
+      : `Estimated wait ~${v.me.etaMinutes || '?'} min · ${v.me.total || '?'} in queue`;
+    return `
+      <div class="queue-position">
+        <span class="queue-pos-num">${esc(pos)}</span>
+        <span class="queue-pos-label">${v.me.ready ? 'connect now' : 'in queue'}</span>
+      </div>
+      <p class="hint queue-eta-line">${esc(eta)}</p>
+      ${v.me.ready ? '<p class="hint queue-ready-line">You can now connect to the server.</p>' : ''}
+      <div class="hero-actions">
+        ${v.me.ready ? `<a href="${esc(v.cfxFull)}" class="btn primary" target="_blank" rel="noopener">Connect to FiveM</a>` : ''}
+        <button type="button" class="btn ghost" data-queue-action="leave">Leave Queue</button>
+      </div>`;
+  }
+  return `
+    ${queueStatsHtml(v.stats)}
+    <div class="hero-actions">
+      <button type="button" class="btn primary" data-queue-action="join">Join Queue</button>
+      ${showPriority && hasRole('staff') ? '<button type="button" class="btn ghost" data-queue-action="priority">Priority Queue</button>' : ''}
+    </div>`;
+}
+
+function buildQueueWidgetHtml(variant) {
+  const v = getQueueViewModel();
+  const pill = v.stats.playersOnline != null
+    ? `${v.stats.playersOnline}/${v.stats.maxSlots || 48} online · ${v.stats.inQueue || 0} queued`
+    : 'Queue active';
+
+  if (v.cfg.enabled === false) {
+    return `<div class="card queue-card queue-offline"><p class="hint">Server queue is temporarily offline. Try connecting directly or check Discord.</p></div>`;
+  }
+
+  if (variant === 'hero') {
+    const status = v.me.inQueue
+      ? (v.me.ready ? 'Ready — connect now!' : `In queue · position ${v.me.position || '?'}`)
+      : `${v.stats.inQueue ?? 0} players waiting`;
+    return `
+      <div class="card queue-card queue-hero">
+        <div class="queue-header">
+          <h3>Play ShadeRP</h3>
+          <span class="pill accent">${esc(status)}</span>
+        </div>
+        <p class="hint">Sign in with Discord and join the web queue before connecting to FiveM.</p>
+        ${queueActionsHtml(v, { showPriority: false })}
+      </div>`;
+  }
+
+  if (variant === 'compact') {
+    return `
+      <span class="queue-inline-pill">${esc(pill)}</span>
+      <button type="button" class="btn primary btn-sm" data-panel="queue">${v.me.inQueue ? 'View queue' : 'Join queue'}</button>`;
+  }
+
+  const title = variant === 'page' ? 'Server queue' : 'Server Queue';
+  return `
+    <div class="card queue-card">
+      <div class="queue-header">
+        <h3>${title}</h3>
+        <span class="pill">${esc(pill)}</span>
+      </div>
+      ${variant === 'full' ? '<p class="hint">Login with Discord, join the queue here, then connect when ready.</p>' : ''}
+      <div class="queue-block">${queueActionsHtml(v)}</div>
+    </div>`;
+}
+
+function renderQueueWidgets() {
+  document.querySelectorAll('[data-queue-widget]').forEach((host) => {
+    host.innerHTML = buildQueueWidgetHtml(host.dataset.queueWidget || 'full');
+    host.querySelector('[data-panel="queue"]')?.addEventListener('click', () => showPanel('queue'));
+  });
+
+  const me = QUEUE?.me;
+  if (me?.ready && !queueWasReady) {
+    playQueueReadySound();
+    toast('Queue ready — connect now!');
+    queueWasReady = true;
+  } else if (!me?.ready) {
+    queueWasReady = false;
+  }
+
+  renderUserBar();
+  if (DATA) renderServerStrip();
+}
+
+async function fetchQueueConfig() {
+  try {
+    const res = await fetch('/api/queue/config');
+    return await res.json();
+  } catch {
+    return { enabled: false };
+  }
+}
+
+async function fetchQueueMe() {
+  if (!ME?.user) return { inQueue: false };
+  try {
+    const res = await fetch('/api/queue/me');
+    if (res.status === 401) return { inQueue: false };
+    return await res.json();
+  } catch {
+    return { inQueue: false };
+  }
+}
+
+function playQueueReadySound() {
+  try {
+    const ctx = new (window.AudioContext || window.webkitAudioContext)();
+    const osc = ctx.createOscillator();
+    const gain = ctx.createGain();
+    osc.connect(gain);
+    gain.connect(ctx.destination);
+    osc.frequency.value = 880;
+    gain.gain.value = 0.08;
+    osc.start();
+    gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.4);
+    osc.stop(ctx.currentTime + 0.4);
+  } catch { /* ignore */ }
+}
+
+async function refreshQueue() {
+  QUEUE = QUEUE || {};
+  QUEUE.config = await fetchQueueConfig();
+  QUEUE.me = await fetchQueueMe();
+  renderQueueWidgets();
+}
+
+function startQueuePolling() {
+  clearInterval(queuePollTimer);
+  refreshQueue();
+  queuePollTimer = setInterval(refreshQueue, 8000);
+}
+
+async function queueJoin(lane = 'normal') {
+  if (!ME?.user) {
+    location.href = `/auth/discord?returnTo=${encodeURIComponent('/queue')}`;
+    return;
+  }
+  const res = await fetch('/api/queue/join', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ lane }),
+  });
+  const data = await res.json();
+  if (!res.ok) {
+    toast(data.error || 'Could not join queue');
+    return;
+  }
+  toast('Joined queue');
+  await refreshQueue();
+}
+
+async function queueLeave() {
+  await fetch('/api/queue/leave', { method: 'POST' });
+  toast('Left queue');
+  queueWasReady = false;
+  await refreshQueue();
+}
+
+async function queueHeartbeat() {
+  if (!ME?.user) return;
+  await fetch('/api/queue/heartbeat', { method: 'POST' });
 }
 
 function renderJobs() {
@@ -496,22 +722,112 @@ function renderUpdates() {
   `).join('') || '<p class="hint">Run Build-DashboardData.ps1 to pull UPDATE-LOG.md</p>';
 }
 
+function normalizeChangelogText(text) {
+  if (!text) return '';
+  return text
+    .replace(/\r\n/g, '\n')
+    .replace(/Â·/g, '·')
+    .replace(/â€"/g, '—')
+    .replace(/â†'/g, '→')
+    .replace(/â€œ/g, '"')
+    .replace(/â€\u009d/g, '"')
+    .replace(/â€˜/g, "'")
+    .replace(/â€™/g, "'");
+}
+
+function markdownTableToHtml(rows) {
+  const parseCells = (line) => line.split('|').map((c) => c.trim()).filter((c) => c.length > 0);
+  if (rows.length < 2) return '';
+  const header = parseCells(rows[0]);
+  const bodyRows = rows.slice(2).map(parseCells).filter((r) => r.length >= 2);
+  if (!header.length) return '';
+  const fmt = (s) => esc(s.replace(/\*\*(.+?)\*\*/g, '$1'));
+  return `<table class="changelog-table"><thead><tr>${header.map((h) => `<th>${fmt(h)}</th>`).join('')}</tr></thead><tbody>${bodyRows.map((r) => `<tr>${r.map((c) => `<td>${fmt(c)}</td>`).join('')}</tr>`).join('')}</tbody></table>`;
+}
+
 function formatUpdateBody(text) {
   if (!text) return '';
-  return esc(text)
-    .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
-    .replace(/^### (.+)$/gm, '<h5>$1</h5>')
-    .replace(/^## (.+)$/gm, '<h4>$1</h4>')
-    .replace(/^\|(.+)\|$/gm, (line) => {
-      if (/^\|[\s\-:|]+\|$/.test(line)) return '';
-      const cells = line.split('|').filter(Boolean).map((c) => c.trim());
-      if (cells.length < 2) return line;
-      return `<div class="md-row"><span>${cells[0]}</span><span>${cells.slice(1).join(' ')}</span></div>`;
-    })
-    .replace(/^- (.+)$/gm, '<li>$1</li>')
-    .replace(/(<li>.*<\/li>\n?)+/g, (m) => `<ul class="check-list">${m}</ul>`)
-    .replace(/`([^`]+)`/g, '<code>$1</code>')
-    .replace(/\n/g, '<br>');
+  text = normalizeChangelogText(text);
+  text = text.replace(/^\*\*[^*]+Enhancement Pass v\d+[^*]*\*\*\s*\n+/, '');
+  text = text.replace(/^---\s*\n+/, '');
+
+  const lines = text.split('\n');
+  let html = '';
+  let i = 0;
+  let listBuf = [];
+
+  const flushList = () => {
+    if (!listBuf.length) return;
+    html += `<ul class="check-list">${listBuf.map((li) => `<li>${esc(li).replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>').replace(/`([^`]+)`/g, '<code>$1</code>')}</li>`).join('')}</ul>`;
+    listBuf = [];
+  };
+
+  while (i < lines.length) {
+    const line = lines[i];
+    const trimmed = line.trim();
+
+    if (trimmed.startsWith('|')) {
+      flushList();
+      const tableLines = [];
+      while (i < lines.length && lines[i].trim().startsWith('|')) {
+        tableLines.push(lines[i].trim());
+        i += 1;
+      }
+      html += markdownTableToHtml(tableLines);
+      continue;
+    }
+
+    if (trimmed === '---') {
+      flushList();
+      html += '<hr class="changelog-hr" />';
+      i += 1;
+      continue;
+    }
+
+    if (trimmed.startsWith('## ')) {
+      flushList();
+      html += `<h4>${esc(trimmed.slice(3))}</h4>`;
+      i += 1;
+      continue;
+    }
+
+    if (trimmed.startsWith('### ')) {
+      flushList();
+      html += `<h5>${esc(trimmed.slice(4))}</h5>`;
+      i += 1;
+      continue;
+    }
+
+    if (trimmed.startsWith('- ')) {
+      listBuf.push(trimmed.slice(2));
+      i += 1;
+      continue;
+    }
+
+    if (trimmed.startsWith('```')) {
+      flushList();
+      i += 1;
+      const codeLines = [];
+      while (i < lines.length && !lines[i].trim().startsWith('```')) {
+        codeLines.push(lines[i]);
+        i += 1;
+      }
+      if (i < lines.length) i += 1;
+      html += `<pre class="notes-block compact">${esc(codeLines.join('\n'))}</pre>`;
+      continue;
+    }
+
+    if (trimmed) {
+      flushList();
+      const para = esc(trimmed)
+        .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
+        .replace(/`([^`]+)`/g, '<code>$1</code>');
+      html += `<p>${para}</p>`;
+    }
+    i += 1;
+  }
+  flushList();
+  return html;
 }
 
 function buildSearchIndex() {
@@ -768,6 +1084,7 @@ async function loadAnalytics() {
 function renderAll() {
   renderHome();
   renderConnect();
+  renderQueueWidgets();
   renderRules();
   renderJobs();
   renderLocations();
@@ -809,6 +1126,27 @@ async function init() {
 
   await loadMe();
   await loadDashboard();
+  startQueuePolling();
+  setInterval(queueHeartbeat, 45000);
+
+  document.body.addEventListener('click', (e) => {
+    const join = e.target.closest('[data-queue-action="join"]');
+    const priority = e.target.closest('[data-queue-action="priority"]');
+    const leave = e.target.closest('[data-queue-action="leave"]');
+    if (join) { e.preventDefault(); queueJoin('normal'); }
+    if (priority) { e.preventDefault(); queueJoin('priority'); }
+    if (leave) { e.preventDefault(); queueLeave(); }
+  });
+
+  el('hero-queue-btn')?.addEventListener('click', () => showPanel('queue'));
+
+  const pathPanel = location.pathname.replace(/^\//, '').split('/')[0];
+  if (['connect', 'queue'].includes(pathPanel)) {
+    showPanel(pathPanel);
+  } else if (location.hash === '#queue' || location.hash === '#connect') {
+    showPanel(location.hash.slice(1));
+  }
+
   track('page_view', { path: location.pathname });
 }
 

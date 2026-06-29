@@ -1,9 +1,8 @@
 {
-    "generatedAt":  "2026-06-27 15:31:31",
+    "generatedAt":  "2026-06-29 00:04:54",
     "branding":  {
                      "resources":  {
                                        "kq_powerwashing":  "ShadeRP Power Washing",
-                                       "fivem_discord_hour_logger":  "ShadeRP Duty Logger",
                                        "shade_config":  "ShadeRP Config",
                                        "codem_billing":  "ShadeRP Billing",
                                        "wasabi_police":  "ShadeRP Mission Row PD",
@@ -11,6 +10,7 @@
                                        "pawnshop":  "ShadeRP Pawn Shop",
                                        "pyh_tablet":  "ShadeRP Job Tablet",
                                        "lb_phone":  "ShadeRP Phone",
+                                       "shade_trapphone":  "ShadeRP Street Sales",
                                        "jg_mechanic":  "ShadeRP Mechanics",
                                        "pyh_contacts":  "ShadeRP Contacts",
                                        "lb_tablet":  "ShadeRP Tablet",
@@ -24,7 +24,7 @@
                                        "pyh_mosley":  "ShadeRP Mosley Auto",
                                        "HWC_Blips_V2":  "ShadeRP Map Blips",
                                        "shade_airdrops":  "ShadeRP Care Packages",
-                                       "Spoogy_TrapPhone":  "ShadeRP Street Sales",
+                                       "fivem_discord_hour_logger":  "ShadeRP Duty Logger",
                                        "ravn_logs":  "ShadeRP Logs",
                                        "pyh_lumberjack":  "ShadeRP Lumberjack",
                                        "shade_lspd_pd":  "ShadeRP Mission Row PD",
@@ -85,11 +85,38 @@
                     "framework":  "ESX Legacy"
                 },
     "site":  {
+                 "whatsNew":  [
+                                  {
+                                      "badge":  "New",
+                                      "title":  "Restaurant system",
+                                      "desc":  "Player-owned kitchens, recipes, and delivery via nn — ShadeRP bridge layer included."
+                                  },
+                                  {
+                                      "badge":  "New",
+                                      "title":  "Smash \u0026 Grab",
+                                      "desc":  "Vehicle loot side activity with police dispatch integration."
+                                  },
+                                  {
+                                      "badge":  "New",
+                                      "title":  "PD fingerprint scanner",
+                                      "desc":  "Open-source ESX scanner — no paid bridge required."
+                                  },
+                                  {
+                                      "badge":  "New",
+                                      "title":  "Rentable billboards",
+                                      "desc":  "Businesses advertise on city billboards through pixel-poster."
+                                  },
+                                  {
+                                      "badge":  "Map",
+                                      "title":  "Redline \u0026 weed MLOs",
+                                      "desc":  "energy_redline customs and b3ast_weed processing locations live."
+                                  }
+                              ],
                  "features":  [
                                   {
                                       "icon":  "🚔",
                                       "title":  "Mission Row PD",
-                                      "desc":  "Wasabi police, MDT, radar, Shade LSPD MLO"
+                                      "desc":  "Wasabi police, MDT, radar, fingerprint scanner"
                                   },
                                   {
                                       "icon":  "🏥",
@@ -97,30 +124,34 @@
                                       "desc":  "Wasabi ambulance, billing, medical roleplay"
                                   },
                                   {
+                                      "icon":  "🍔",
+                                      "title":  "Restaurants",
+                                      "desc":  "nn kitchens, POS, delivery, and owner RP"
+                                  },
+                                  {
                                       "icon":  "🚛",
                                       "title":  "Civilian economy",
-                                      "desc":  "Trucking, Gruppe 6, fishing, lumberjack, oil rig"
+                                      "desc":  "Trucking, Gruppe 6, fishing, oil rig, power wash"
                                   },
                                   {
                                       "icon":  "📱",
                                       "title":  "Phone \u0026 tablet",
-                                      "desc":  "lb-phone, ShadeRP job tablet, contacts black market"
-                                  },
-                                  {
-                                      "icon":  "💰",
-                                      "title":  "Balanced economy",
-                                      "desc":  "$15k bank start · 15 min paychecks · pawn shop"
+                                      "desc":  "lb-phone, ShadeRP job tablet, contacts market"
                                   },
                                   {
                                       "icon":  "🌃",
                                       "title":  "Curated city",
-                                      "desc":  "HWC blips, proximity MLOs, After Hours events"
+                                      "desc":  "HWC blips, billboards, smash \u0026 grab, proximity MLOs"
                                   }
                               ],
                  "faq":  [
                              {
                                  "q":  "How do I join ShadeRP?",
-                                 "a":  "1) Join Discord at discord.gg/sbnu98HYAZ · 2) Read rules in Discord and on this portal · 3) Install FiveM + licensed GTA V · 4) Connect via the cfx.re link on the Connect page."
+                                 "a":  "1) Join Discord at discord.gg/sbnu98HYAZ · 2) Read rules on this portal · 3) Login here with Discord and go to the Queue page · 4) Join the web queue, wait until ready, then connect via FiveM (cfx.re link on Connect page). Discord must be linked in FiveM settings."
+                             },
+                             {
+                                 "q":  "What is the web queue?",
+                                 "a":  "Before connecting to FiveM you must login on this website with Discord and join the server queue. When your position is ready, connect using the button or cfx.re link. Staff members can use Priority Queue."
                              },
                              {
                                  "q":  "Is ShadeRP whitelisted?",
@@ -157,6 +188,18 @@
                              {
                                  "q":  "What is this website?",
                                  "a":  "The ShadeRP community portal — public info for players plus staff tools. Login with Discord to unlock role-based admin panels."
+                             },
+                             {
+                                 "q":  "How do restaurants work?",
+                                 "a":  "NANO restaurant script (nn) — own or work at player restaurants, cook recipes, POS, and delivery. Staff set locations in-city after SQL import."
+                             },
+                             {
+                                 "q":  "What is smash \u0026 grab?",
+                                 "a":  "Random vehicle loot events around the city — smash windows and grab valuables. Police may get dispatch alerts. Side illegal income with RP risk."
+                             },
+                             {
+                                 "q":  "How do PD fingerprints work?",
+                                 "a":  "On-duty LSPD use the fingerprint scanner item near a suspect. They hold to scan; you see name, DOB, and BOLO status on the ShadeRP PD scanner UI."
                              }
                          ],
                  "tagline":  "Realistic ESX Legacy roleplay — FiveM · Server · Fun · Roleplay · Realistic",
@@ -238,6 +281,30 @@
                                       "name":  "ShadeRP UwU Cat Cafe",
                                       "category":  "Business",
                                       "how":  "pls_jobsystem · food service RP"
+                                  },
+                                  {
+                                      "id":  "nn_restaurants",
+                                      "name":  "ShadeRP Restaurants",
+                                      "category":  "Business",
+                                      "how":  "nn script · cook, POS, delivery · owner RP"
+                                  },
+                                  {
+                                      "id":  "smash_grab",
+                                      "name":  "Smash \u0026 Grab",
+                                      "category":  "Illegal",
+                                      "how":  "offload_smash_grab · vehicle loot · dispatch risk"
+                                  },
+                                  {
+                                      "id":  "pixel_poster",
+                                      "name":  "ShadeRP Billboards",
+                                      "category":  "Business",
+                                      "how":  "Rent in-world ad space · pixel-poster · Legion area NPC"
+                                  },
+                                  {
+                                      "id":  "redline",
+                                      "name":  "ShadeRP Redline Customs",
+                                      "category":  "Business",
+                                      "how":  "energy_redline MLO · mechanic RP hub"
                                   }
                               ],
                  "keybinds":  [
@@ -284,6 +351,22 @@
                                   {
                                       "key":  "LEFT ALT",
                                       "action":  "Third eye / target (ox_target)"
+                                  },
+                                  {
+                                      "key":  "/mdt",
+                                      "action":  "Police MDT (wasabi_mdt — on duty)"
+                                  },
+                                  {
+                                      "key":  "F9",
+                                      "action":  "Panic button (PD/EMS)"
+                                  },
+                                  {
+                                      "key":  "F11",
+                                      "action":  "Dispatch HUD toggle"
+                                  },
+                                  {
+                                      "key":  "ITEM",
+                                      "action":  "Fingerprint scanner (PD — lvl_fingerprint item)"
                                   },
                                   {
                                       "key":  "X",
@@ -890,6 +973,30 @@
                          "name":  "ShadeRP UwU Cat Cafe",
                          "category":  "Business",
                          "how":  "pls_jobsystem · food service RP"
+                     },
+                     {
+                         "id":  "nn_restaurants",
+                         "name":  "ShadeRP Restaurants",
+                         "category":  "Business",
+                         "how":  "nn script · cook, POS, delivery · owner RP"
+                     },
+                     {
+                         "id":  "smash_grab",
+                         "name":  "Smash \u0026 Grab",
+                         "category":  "Illegal",
+                         "how":  "offload_smash_grab · vehicle loot · dispatch risk"
+                     },
+                     {
+                         "id":  "pixel_poster",
+                         "name":  "ShadeRP Billboards",
+                         "category":  "Business",
+                         "how":  "Rent in-world ad space · pixel-poster · Legion area NPC"
+                     },
+                     {
+                         "id":  "redline",
+                         "name":  "ShadeRP Redline Customs",
+                         "category":  "Business",
+                         "how":  "energy_redline MLO · mechanic RP hub"
                      }
                  ],
     "economy":  {
@@ -1248,13 +1355,67 @@
                                      "y":  -2287.85,
                                      "z":  29.51
                                  }
+                  },
+                  {
+                      "id":  "16",
+                      "name":  "ShadeRP Ride Out Customs",
+                      "category":  "business",
+                      "coords":  {
+                                     "x":  1175.0,
+                                     "y":  2640.0,
+                                     "z":  37.8
+                                 }
+                  },
+                  {
+                      "id":  "17",
+                      "name":  "ShadeRP Gear Head Customs",
+                      "category":  "business",
+                      "coords":  {
+                                     "x":  68.24,
+                                     "y":  -1748.52,
+                                     "z":  29.32
+                                 }
+                  },
+                  {
+                      "id":  "18",
+                      "name":  "ShadeRP UwU Cat Cafe",
+                      "category":  "business",
+                      "coords":  {
+                                     "x":  -580.0,
+                                     "y":  -1060.0,
+                                     "z":  22.3
+                                 }
+                  },
+                  {
+                      "id":  "19",
+                      "name":  "ShadeRP Pizza Paleto",
+                      "category":  "business",
+                      "coords":  {
+                                     "x":  -289.0,
+                                     "y":  6198.0,
+                                     "z":  31.5
+                                 }
+                  },
+                  {
+                      "id":  "20",
+                      "name":  "ShadeRP Billboards",
+                      "category":  "business",
+                      "coords":  {
+                                     "x":  -269.57,
+                                     "y":  -955.03,
+                                     "z":  31.22
+                                 }
                   }
               ],
     "resources":  {
                       "disabled":  [
                                        {
+                                           "name":  "EZAC",
+                                           "reason":  ""
+                                       },
+                                       {
                                            "name":  "vr-10system",
-                                           "reason":  "QB-only (GetCoreObject); needs ESX rewrite"
+                                           "reason":  "QB-only (GetCoreObject) — needs ESX rewrite"
                                        },
                                        {
                                            "name":  "toxic-garbageV4",
@@ -1329,10 +1490,6 @@
                                            "reason":  "QB-only"
                                        },
                                        {
-                                           "name":  "pixel-poster",
-                                           "reason":  "missing CFX entitlement — enable after purchasing license"
-                                       },
-                                       {
                                            "name":  "ja_towing",
                                            "reason":  "loaded by map-master-loader"
                                        },
@@ -1362,11 +1519,15 @@
                                        },
                                        {
                                            "name":  "energy_rideoutcustoms",
-                                           "reason":  "MLO — disabled with stream:mapsEnabled 0"
+                                           "reason":  "loads via shade-proximity-mlo (energy_rideout zone)"
                                        },
                                        {
                                            "name":  "wz-methlab",
-                                           "reason":  "MLO interior — disabled with stream:mapsEnabled 0"
+                                           "reason":  "loads via shade-proximity-mlo (crime_labs zone)"
+                                       },
+                                       {
+                                           "name":  "net",
+                                           "reason":  "resource missing — remove until installed"
                                        },
                                        {
                                            "name":  "jomidar-ui",
@@ -1378,7 +1539,7 @@
                                        },
                                        {
                                            "name":  "lunar_cryptomining",
-                                           "reason":  "heavy DB loops; enable when tuned"
+                                           "reason":  "heavy DB loops — enable when tuned"
                                        },
                                        {
                                            "name":  "lunar_drugscreator_props",
@@ -1397,33 +1558,35 @@
                                            "reason":  "requires devm-bridge (not installed)"
                                        },
                                        {
-                                           "name":  "lvl_fingerprint",
-                                           "reason":  "needs lvl_bridge"
-                                       },
-                                       {
                                            "name":  "av_multijob",
                                            "reason":  "conflicts with wasabi_multijob"
                                        },
                                        {
                                            "name":  "wais-studio",
                                            "reason":  "QB-only (requires qb-core)"
+                                       },
+                                       {
+                                           "name":  "smartfires",
+                                           "reason":  "QB-only (GetCoreObject on qb-core) — disable on ESX"
                                        }
                                    ],
                       "enabled":  [
-                                      "EZAC",
                                       "weaponanimationoverhaul",
                                       "chat",
                                       "spawnmanager",
                                       "sessionmanager",
                                       "hardcap",
                                       "stream-loader-core",
+                                      "shade-queue",
                                       "connectqueue",
                                       "baseevents",
                                       "ox_lib",
+                                      "shade-billboards",
                                       "shade-config",
+                                      "shade-crashlog",
                                       "HWC_Blips_V2",
                                       "shade-discord",
-                                      "sent-utils",
+                                      "shade-utils",
                                       "origen_notify",
                                       "oxmysql",
                                       "_SQL_Scripts",
@@ -1458,14 +1621,13 @@
                                       "Vehiclegear",
                                       "interact-sound",
                                       "17mov_FpsBooster",
-                                      "rup-vehiclespawner",
+                                      "shade-vehicles",
                                       "heavy-stream-loader",
                                       "vehicle-master-loader",
                                       "map-master-loader",
                                       "shade-proximity-mlo",
                                       "shade-lspd-pd",
                                       "addon-stream-loader",
-                                      "police-lspd-livery",
                                       "jg-vehiclemileage",
                                       "jg-handling",
                                       "jg-mechanic",
@@ -1514,7 +1676,6 @@
                                       "it_bridge",
                                       "it-drugs",
                                       "interact",
-                                      "net",
                                       "skillchecks",
                                       "j-textui",
                                       "chHyperSound",
@@ -1552,30 +1713,67 @@
                                       "lgd-policeradar",
                                       "DoItDigital_Police_Weapon_Pack_V1",
                                       "tenfgdc",
+                                      "community_bridge",
+                                      "nn_bridge",
+                                      "nn_lib",
+                                      "is_interaction",
+                                      "offload_smash_grab",
+                                      "b3ast_weed",
+                                      "energy_redline",
+                                      "lvl_fingerprint",
                                       "orbit-hideincar",
                                       "plt_robbery_creator",
                                       "plt_robbery_creator_minigames",
-                                      "Spoogy_TrapPhone",
+                                      "shade-trapphone",
                                       "xRadar",
                                       "ab-handling",
                                       "pyh-interaction",
                                       "pyh-status",
                                       "balenciaga_weapon_packv7",
-                                      "fivem-discord-hour-logger",
-                                      "smartfires"
+                                      "fivem-discord-hour-logger"
                                   ]
                   },
     "updatePasses":  [
                          {
+                             "version":  "v15",
+                             "title":  "**18 June 2026 · Enhancement Pass v15 — Web queue (LiquidRP-style)**",
+                             "overview":  "Players must **login on the ShadeRP website with Discord**, join the **web queue**, then connect to FiveM when their slot is ready. Staff get a priority queue lane. The server blocks direct connects until the portal verifies your Discord ID.",
+                             "body":  "**18 June 2026 · Enhancement Pass v15 — Web queue (LiquidRP-style)**\r\n\r\n---\r\n\r\n## Overview\r\n\r\nPlayers must **login on the ShadeRP website with Discord**, join the **web queue**, then connect to FiveM when their slot is ready. Staff get a priority queue lane. The server blocks direct connects until the portal verifies your Discord ID.\r\n\r\n---\r\n\r\n## Website (shaderp-website.onrender.com)\r\n\r\n| Feature | Detail |\r\n|---------|--------|\r\n| **Queue page** | Dedicated `/queue` panel — join, position, ETA, ready sound |\r\n| **Home widget** | Join Queue hero button + live queue stats |\r\n| **Connect page** | Queue widget above CFX join link |\r\n| **Server strip** | Players online + queue count |\r\n| **Top bar** | Shows queue position or \"Ready to connect\" when logged in |\r\n\r\n**Portal API:** `/api/queue/join`, `/leave`, `/me`, `/config` — FiveM sync via `QUEUE_API_KEY`\r\n\r\n---\r\n\r\n## FiveM — shade-queue\r\n\r\n| Item | Detail |\r\n|------|--------|\r\n| **Resource** | `resources/[standalone]/shade-queue/` |\r\n| **Gate** | `playerConnecting` verifies portal before `connectqueue` |\r\n| **Sync** | Posts player count to portal every 30s |\r\n| **Convars** | `shade:queueApiUrl`, `shade:queueApiKey`, `shade:webQueueEnabled` |\r\n\r\nEnsure order in `server.cfg`: **`shade-queue` before `connectqueue`**\r\n\r\n---\r\n\r\n## Setup (required once)\r\n\r\n1. Render env: `QUEUE_API_KEY` + `QUEUE_ENABLED=1`\r\n2. `server.cfg`: `set shade:queueApiKey` (same key as Render)\r\n3. Redeploy portal (GitHub push to shaderp-website)\r\n4. Full server restart\r\n\r\nDiscord must be **linked in FiveM** (Settings → Linked accounts).\r\n\r\n---\r\n\r\n## Also in this pass\r\n\r\n- Portal content FAQ updated with web queue steps\r\n- Changelog rendering fixed on website (tables + typography)\r\n- UTF-8 fix for Discord changelog export\r\n\r\n**Post Discord:** `tools/Post-Changelog.ps1 -Version v15`\r\n\r\n---"
+                         },
+                         {
+                             "version":  "v14",
+                             "title":  "**18 June 2026 · Enhancement Pass v14 — Reown, stability \u0026 crash diagnostics**",
+                             "overview":  "Major cleanup pass: QBCore archive removed, NightRP → ShadeRP vehicle packs, trap phone reowned as clean ESX code, new crash diagnostics with Discord alerts, and continued ShadeRP rebranding across tools and integrations.",
+                             "body":  "**18 June 2026 · Enhancement Pass v14 — Reown, stability \u0026 crash diagnostics**\r\n\r\n---\r\n\r\n## Overview\r\n\r\nMajor cleanup pass: QBCore archive removed, NightRP → ShadeRP vehicle packs, trap phone reowned as clean ESX code, new crash diagnostics with Discord alerts, and continued ShadeRP rebranding across tools and integrations.\r\n\r\n---\r\n\r\n## New ShadeRP-owned resources\r\n\r\n| Resource | Description |\r\n|----------|-------------|\r\n| **shade-crashlog** | Crash/disconnect diagnostics — 30s client snapshots, MLO zone context, entity density, frame hitches, NDJSON + human `.txt` reports, Discord alerts |\r\n| **shade-utils** | Reowned from `sent-utils` — timer API for `origen_notify` |\r\n\r\n---\r\n\r\n## Resource renames \u0026 reowns\r\n\r\n| Old | New |\r\n|-----|-----|\r\n| `Spoogy_TrapPhone` | **shade-trapphone** |\r\n| `rup-vehiclespawner` | **shade-vehicles** |\r\n| `sent-utils` | **shade-utils** |\r\n| `nightrp-donatepack` | **shaderp-donatepack** |\r\n| `nightrp-vipcarpack` | **shaderp-vipcarpack** |\r\n\r\n---\r\n\r\n## shade-trapphone (clean rewrite)\r\n\r\n- Removed deobfuscation headers, QB bridge, `INSTALL ME FIRST/`, escrow/leak comments\r\n- ESX-only: `shared/framework.lua` + `shared/init.lua`\r\n- SQL tables: `shaderp_trapphone_xp`, `shaderp_trapphone_dealers` (auto-migrates legacy `spoogy_*` names)\r\n- `server/phone.lua` — ESX + ox_inventory export only\r\n- New `sql/` folder + ShadeRP README\r\n- v2.0.0-shaderp manifest\r\n\r\n---\r\n\r\n## shade-crashlog (crash diagnostics)\r\n\r\n**Logs:** `shade-crashlog/logs/crash-YYYYMMDD.ndjson` + `logs/reports/crash-*.txt`\r\n\r\n**Captures per player:** coords/street/zone/interior, nearby MLO zones, vehicle/ped counts, FPS, NUI focus, stream-loader phase, resource start/stop, frame hitches, disconnect classification + fix hints\r\n\r\n**Admin commands:** `/crashlog`, `/crashlog [id]`, `/crashreport`, `/crashlogtest`\r\n\r\n**Client debug:** `/crashsnap` (F8 snapshot JSON)\r\n\r\n**Discord:** Shade RP Crash Logs webhook — suspected crashes + role ping; test via `/crashlogtest`\r\n\r\n**Tool:** `tools/Parse-CrashLog.ps1` — summarize crashes by reason, street, MLO zone\r\n\r\n---\r\n\r\n## it-drugs integration\r\n\r\n- Drugs hub trap phone entry now uses **shade-trapphone** (was broken `Spoogy_TrapPhone` refs)\r\n- Locale + config comments updated\r\n\r\n---\r\n\r\n## Vehicle \u0026 stream loaders\r\n\r\nUpdated pack names in:\r\n- `addon-stream-loader/sequences.lua`\r\n- `stream-loader-core/lib.lua`\r\n- `shade-vehicles/config.lua`\r\n- `shade-config/config/vehicles.lua` (“ShadeRP Donor and VIP”)\r\n\r\n---\r\n\r\n## tw-electrician (ESX fix)\r\n\r\n| Setting | Value |\r\n|---------|--------|\r\n| Framework | `esx` |\r\n| Inventory | `ox_inventory` |\r\n| Vehicle keys | `wasabi-carlock` |\r\n| Fuel | `x-fuel` |\r\n| Server name | `ShadeRP` |\r\n\r\n---\r\n\r\n## connectqueue\r\n\r\n- ShadeRP-branded queue deferral messages\r\n- Updated `fxmanifest.lua` (cerulean, author, description)\r\n- `Config.ServerName = \u0027ShadeRP\u0027`\r\n\r\n---\r\n\r\n## Stability fixes (earlier in pass)\r\n\r\n| Issue | Fix |\r\n|-------|-----|\r\n| `shade-proximity-mlo` zones.lua syntax | Fixed `vanilla_unicorn` zone entry |\r\n| Client crash `GTA5_b3258.exe+93419F` | Disabled overlapping MLOs; Legion v3 only; split batch4 venues; reduced Gabz duplicates |\r\n| Join streaming overload | `stream:proximityJoinGraceMs 120000` + server logic |\r\n| `0r_lib` ESX nil | `Resmon.Framework.GetPlayerFromId()` |\r\n| `0r-nailshop` missing table | Fixed empty-result SQL bug |\r\n| `qs-crime-creator` missing column | Auto-migration `users.crime_house_inside` |\r\n| `shade-lspd-pd` missing ytyp | Removed dead `lspd_tv_test.ytyp` |\r\n| `addon-stream-loader` quit denied | Continues after 60s instead of `ExecuteCommand(\u0027quit\u0027)` |\r\n\r\n---\r\n\r\n## server.cfg changes\r\n\r\n- `ensure shade-crashlog`, `ensure shade-utils`, `ensure shade-trapphone`, `ensure shade-vehicles`\r\n- EZAC disabled (invalid license 403)\r\n- `net` commented (resource missing)\r\n- `smartfires` commented (QB-only)\r\n- `police-lspd-livery` removed (loaded by vehicle-master-loader)\r\n\r\n---\r\n\r\n## Removed / quarantined\r\n\r\n| Item | Action |\r\n|------|--------|\r\n| `[_OFF_qb_archive]` | **Deleted** (~500MB+ — 59 unused QBCore resources) |\r\n| `[qb]` | Previously quarantined to archive (now deleted) |\r\n| `animated-cars` | Deleted (duplicate of AnimatedCars) |\r\n| `cfx-nteam-legion2` | `_OFF_cfx-nteam-legion2` |\r\n| `shade-rescue` | `_OFF_shade-rescue-qb` |\r\n| `shade-inventory-fix` | `_OFF_shade-inventory-fix-qb` |\r\n\r\n---\r\n\r\n## Tools \u0026 docs\r\n\r\n- All tool paths updated: `QBCore_A9FD7A.base` → `ShadeRP.base`\r\n- **`tools/Rename-TxDataFolder.ps1`** — rename dev folder when Cursor/txAdmin released\r\n- **`tools/Parse-CrashLog.ps1`** — crash log analyzer\r\n- **`tools/PRE-START-CHECKLIST.md`** — ShadeRP.base path note\r\n- `Import-EsxSql.ps1`, deploy scripts, dashboard docs updated for new resource names\r\n\r\n**Pending:** Run `Rename-TxDataFolder.ps1` after closing handles on `QBCore_A9FD7A.base`; update txAdmin server data path to `F:\\txData\\ShadeRP.base`\r\n\r\n**Post to Discord updates:** `tools/Post-Changelog.ps1` · in-game/console: `shadechangelog`\r\n\r\n---\r\n\r\n## ShadeRP-owned resource list (current)\r\n\r\n```\r\nshade-config, shade-discord, shade-billboards, shade-lspd-pd,\r\nshade-proximity-mlo, shade-airdrops, shade-vehicles, shade-trapphone,\r\nshade-utils, shade-crashlog\r\n+ it_bridge, it-drugs\r\n```\r\n\r\n**Reown roadmap (phase 2):** `shade-trapphone` → `shade-drugs-sales`, `connectqueue` → `shade-queue`, `1017-dev-pawnshop` → `shade-pawnshop`\r\n\r\n---\r\n\r\n## After restart checklist\r\n\r\n1. Full server restart\r\n2. Clear FiveM client cache if streaming issues persist\r\n3. `ensure shade-crashlog` — verify Discord test with `/crashlogtest`\r\n4. Do not manually ensure old names: `Spoogy_TrapPhone`, `rup-vehiclespawner`, `sent-utils`, `nightrp-*`\r\n5. Sync live copy at `E:\\Shade RP Server Start Up\\` if deploying from dev machine\r\n\r\n---"
+                         },
+                         {
+                             "version":  "v13",
+                             "title":  "**18 June 2026 · Enhancement Pass v13**",
+                             "overview":  "Portal: `Build-DashboardData.ps1` → `Sync-PortalToRender.ps1`",
+                             "body":  "**18 June 2026 · Enhancement Pass v13**\r\n\r\n---\r\n\r\n## Portal refresh + script polish\r\n\r\n| Area | Change |\r\n|------|--------|\r\n| **Website** | What\u0027s New section, feature card hover, teal grid theme, expanded FAQ/keybinds/jobs |\r\n| **lvl_fingerprint** | ox_target player scan + wasabi_mdt warrant/BOLO lookup |\r\n| **offload_smash_grab** | ShadeRP dispatch alert title |\r\n| **pixel-poster** | ShadeRP Billboards branding |\r\n| **HWC blips** | Billboards marker at Legion Square |\r\n\r\nPortal: `Build-DashboardData.ps1` → `Sync-PortalToRender.ps1`\r\n\r\n---"
+                         },
+                         {
+                             "version":  "v12",
+                             "title":  "**18 June 2026 · Enhancement Pass v12**",
+                             "overview":  "Deploy script: `tools/Install-BlockedMods.ps1`",
+                             "body":  "**18 June 2026 · Enhancement Pass v12**\r\n\r\n---\r\n\r\n## E6 unblock — bridges + maps + PD tools\r\n\r\n| Resource | Fix |\r\n|----------|-----|\r\n| **community_bridge** | Installed from GitHub (official free ESX bridge) |\r\n| **nn_bridge / nn_lib / is_interaction** | ShadeRP shims for NANO restaurants |\r\n| **offload_smash_grab** | Enabled via community_bridge |\r\n| **nn** | Deployed + ESX config — run `nn/nn_restaurants.sql` |\r\n| **b3ast_weed / energy_redline** | Maps deployed, assetpacks dep removed |\r\n| **lvl_fingerprint** | Open ESX rewrite — no lvl_bridge |\r\n| **pixel-poster** | ESX + ox_lib, assetpacks dep removed |\r\n| **HWC_Blips_V2 / tenfgdc** | assetpacks lines cleaned |\r\n\r\nDeploy script: `tools/Install-BlockedMods.ps1`\r\n\r\n---"
+                         },
+                         {
+                             "version":  "v11",
+                             "title":  "**18 June 2026 · Enhancement Pass v11**",
+                             "overview":  "Branding ownership pass — scripts cleaned of leak/vendor headers, unified ShadeRP notifications via `shade-config`, and new map blips for whitelisted businesses.",
+                             "body":  "**18 June 2026 · Enhancement Pass v11**\r\n\r\n---\r\n\r\n## Overview\r\n\r\nBranding ownership pass — scripts cleaned of leak/vendor headers, unified ShadeRP notifications via `shade-config`, and new map blips for whitelisted businesses.\r\n\r\n---\r\n\r\n## pyh job stack\r\n\r\n| Resource | Change |\r\n|----------|--------|\r\n| **pyh-tablet** | Leak headers removed, ShadeRP logo, app labels, `lib.notify` |\r\n| **pyh-gruppe6job** | Clean manifest, ox_lib notifications, ShadeRP author |\r\n| **pyh-trucking** | Clean manifest, ox_lib notifications |\r\n| **pyh-contacts** | Clean manifest, ShadeRP author |\r\n| **kq_jobcontracts** | TC HUB spam removed from manifest |\r\n\r\n---\r\n\r\n## Phone, HUD \u0026 loading\r\n\r\n| Resource | Change |\r\n|----------|--------|\r\n| **lb-phone** | Services app → ShadeRP PD / EMS / Mechanics / Taxi |\r\n| **tuff-hud** | ShadeRP HUD title |\r\n| **gen_pausev2** | ShadeRP pause menu + portal link |\r\n| **tuff-loading** | Custom overlay, portal URLs, vendor names removed |\r\n\r\n---\r\n\r\n## Economy \u0026 map\r\n\r\n| Resource | Change |\r\n|----------|--------|\r\n| **HWC_Blips_V2** | Blips 16–19: Ride Out, Gear Head, UwU Cafe, Pizza Paleto |\r\n| **jg-mechanic** | Custom shop names (Bennys, Grove, LS Customs) |\r\n| **codem-billing** | ShadeRP Mission Row PD / Pillbox EMS labels |\r\n| **it-drugs** | ShadeRP Drugs menus + notifications |\r\n| **1017-dev-pawnshop** | ShadeRP Pawn Shop locale fallbacks |\r\n\r\n---\r\n\r\n## Sync tooling\r\n\r\n- `Sync-LoadingBranding.ps1` — logo → tuff-loading + pyh-tablet\r\n- Discord updates: `tools/Post-ServerUpdate.ps1 -Version v11`\r\n\r\n---\r\n\r\n## Restart commands\r\n\r\n```\r\nrestart shade-config\r\nrestart pyh-tablet\r\nrestart pyh-gruppe6job\r\nrestart pyh-trucking\r\nrestart pyh-contacts\r\nrestart kq_jobcontracts\r\nrestart lb-phone\r\nrestart tuff-hud\r\nrestart HWC_Blips_V2\r\nrestart tuff-loading\r\n```\r\n\r\nPost Discord: `tools/Post-ServerUpdate.ps1 -Version v11`\r\n\r\n---"
+                         },
+                         {
                              "version":  "v10",
                              "title":  "**18 June 2026 · Enhancement Pass v10**",
-                             "overview":  "| Change | Detail | |--------|--------| | **portal.lua** | SSOT for website URL, CFX join code, connect info | | **tuff-loading** | Portal button enabled — synced via `Apply-PortalLinks.ps1` | | **gen_pausev2** | Portal announcement added | | **Build-DashboardData** | Exports portal + connect to cloud sync | | **Connec",
+                             "overview":  "After Render deploy, edit `shade-config/config/portal.lua` → run `Sync-PortalToRender.ps1`.",
                              "body":  "**18 June 2026 · Enhancement Pass v10**\r\n\r\n---\r\n\r\n## Portal ↔ Server interconnect\r\n\r\n| Change | Detail |\r\n|--------|--------|\r\n| **portal.lua** | SSOT for website URL, CFX join code, connect info |\r\n| **tuff-loading** | Portal button enabled — synced via `Apply-PortalLinks.ps1` |\r\n| **gen_pausev2** | Portal announcement added |\r\n| **Build-DashboardData** | Exports portal + connect to cloud sync |\r\n| **Connect panel** | Live CFX link, portal URL, Discord from sync |\r\n| **Deploy guide** | `tools/shaderp-dashboard/DEPLOY-QUICKSTART.md` |\r\n| **One-shot sync** | `Sync-PortalToRender.ps1` |\r\n\r\nAfter Render deploy, edit `shade-config/config/portal.lua` → run `Sync-PortalToRender.ps1`.\r\n\r\n---"
                          },
                          {
                              "version":  "v9",
                              "title":  "**18 June 2026 · Enhancement Pass v9**",
-                             "overview":  "Full-stack community portal replacing the static dashboard.  | Feature | Detail | |---------|--------| | **Hosting** | Node/Express — deploy to [Render](https://render.com) via `render.yaml` | | **Theme** | Dark-only UI (`#06080c` base, cyan accent) | | **Auth** | Discord OAuth2 + guild role sync | | **Roles** | guest ",
+                             "overview":  "Full-stack community portal replacing the static dashboard.\r",
                              "body":  "**18 June 2026 · Enhancement Pass v9**\r\n\r\n---\r\n\r\n## ShadeRP Portal v2 — Render + Discord + Analytics\r\n\r\nFull-stack community portal replacing the static dashboard.\r\n\r\n| Feature | Detail |\r\n|---------|--------|\r\n| **Hosting** | Node/Express — deploy to [Render](https://render.com) via `render.yaml` |\r\n| **Theme** | Dark-only UI (`#06080c` base, cyan accent) |\r\n| **Auth** | Discord OAuth2 + guild role sync |\r\n| **Roles** | guest → member → moderator → staff → developer → admin → owner |\r\n| **Analytics** | Page views, logins, panel tracking, Chart.js graphs (staff+) |\r\n| **Public** | Home, About, Jobs, Connect, Updates (no login) |\r\n| **Sync** | `Push-DashboardToRender.ps1` uploads server config to cloud |\r\n\r\n**Setup guide:** `tools/shaderp-dashboard/RENDER-SETUP.md`\r\n\r\n**Local:**\r\n```\r\ncd tools/shaderp-dashboard\r\ncopy .env.example .env\r\nnpm start\r\n```\r\n\r\n---"
                          },
                          {
@@ -1605,17 +1803,17 @@
                          {
                              "version":  "v4",
                              "title":  "**18 June 2026 · Enhancement Pass v4**",
-                             "overview":  "| Script | Fix | |--------|-----| | **pyh-boosting** | Contract transfer used hardcoded `QBCore.Functions.GetPlayerByCitizenId` — now framework-aware via `GetPlayerByIdentifier()` | | **pyh-gruppe6job** | ESX reputation callback called QBCore API (crash) — fixed; `g6cashbag` usable item + progress bar added for ESX | |",
+                             "overview":  "",
                              "body":  "**18 June 2026 · Enhancement Pass v4**\r\n\r\n---\r\n\r\n## ESX bug fixes\r\n\r\n| Script | Fix |\r\n|--------|-----|\r\n| **pyh-boosting** | Contract transfer used hardcoded `QBCore.Functions.GetPlayerByCitizenId` — now framework-aware via `GetPlayerByIdentifier()` |\r\n| **pyh-gruppe6job** | ESX reputation callback called QBCore API (crash) — fixed; `g6cashbag` usable item + progress bar added for ESX |\r\n| **pyh-fishing** | Inventory was `qb-inventory` — set to `OX` for ox_inventory |\r\n| **wasabi_multijob** | Boss menus moved from Artex VPD / NTeam → Mission Row PD + Pillbox coords |\r\n| **jg-mechanic** | Disabled duplicate shop blips (HWC_Blips_V2 handles map) |\r\n\r\n---\r\n\r\n## Branding v4\r\n\r\n- `shade-config/config/branding.lua` — pyh jobs, jg-mechanic, bennys/lsc locations\r\n- HWC blip #3 renamed → **ShadeRP Bennys / LSC**\r\n- pyh job + jg-mechanic manifest descriptions updated to ShadeRP names\r\n\r\n**Restart affected resources:**\r\n```\r\nrestart shade-config\r\nrestart wasabi_multijob\r\nrestart pyh-boosting\r\nrestart pyh-gruppe6job\r\nrestart pyh-fishing\r\nrestart jg-mechanic\r\nrestart HWC_Blips_V2\r\n```\r\n\r\n---"
                          },
                          {
                              "version":  "v3",
                              "title":  "**18 June 2026 · Enhancement Pass v3**",
-                             "overview":  "All pending SQL has been run against MariaDB:  | Script | Tables / data | |--------|----------------| | shade-airdrops/airdrops.sql | airdrop routes, tiers, settings | | kq_powerwashing esx_job.sql | `powerwashing` job | | 1017-dev-pawnshop/pawnshop_stock.sql | pawnshop marketplace | | portis-afterhours/sql/install.sql",
+                             "overview":  "All pending SQL has been run against MariaDB:\r",
                              "body":  "**18 June 2026 · Enhancement Pass v3**\r\n\r\n---\r\n\r\n## SQL imported (es_extended)\r\n\r\nAll pending SQL has been run against MariaDB:\r\n\r\n| Script | Tables / data |\r\n|--------|----------------|\r\n| shade-airdrops/airdrops.sql | airdrop routes, tiers, settings |\r\n| kq_powerwashing esx_job.sql | `powerwashing` job |\r\n| 1017-dev-pawnshop/pawnshop_stock.sql | pawnshop marketplace |\r\n| portis-afterhours/sql/install.sql | after hours events |\r\n| izzy-appearance/database.sql | saved_skins, playerskins |\r\n\r\n---\r\n\r\n## Map blips → HWC_Blips_V2\r\n\r\n- Removed shade-config business blip system (`showBlips`, `/biz`, `/addbusiness`, server blip registry)\r\n- **HWC_Blips_V2** deployed — admins use `/hwcblips` to manage blips\r\n- Pre-seeded 10 ShadeRP location blips in `HWC_Blips_V2/blips.json` (PD, hospital, shops, oil rig, etc.)\r\n- Disabled duplicate blips in **wasabi_police**, **fetchq-oil** (static job blips)\r\n- `/gotobiz [id]` kept as admin teleport helper only\r\n\r\n---\r\n\r\n## New E6 mods added\r\n\r\n| Resource | Purpose |\r\n|----------|---------|\r\n| HWC_Blips_V2 | Central map blip manager |\r\n| lgd-policeradar | Police radar HUD (ESX, F7 toggle) |\r\n| DoItDigital_Police_Weapon_Pack_V1 | PD weapon stream pack |\r\n| tenfgdc | Obey Ten-F GDC addon vehicle |\r\n\r\n---\r\n\r\n## New Mission Row PD (E6)\r\n\r\n- Deployed **shade-lspd-pd** — full LSPD interior MLO (E:\\6 New Mods)\r\n- **Boot loads at startup** — only this map at boot (fast + stable)\r\n- **wasabi_police**, **lb-phone** coords at Mission Row\r\n- Old Artex VPD maps moved to **proximity-only** (won\u0027t load unless someone goes there)\r\n\r\n| Location | Coords |\r\n|----------|--------|\r\n| PD front / duty | 441.73, -981.92, 30.69 |\r\n| Armory | 482.45, -995.27, 30.69 |\r\n| Garage | 452.73, -1017.52, 28.47 |\r\n| Helipad | 449.17, -981.22, 43.69 |\r\n\r\n---\r\n\r\n## E6 mods deployed\r\n\r\n| Resource | ShadeRP name | Status |\r\n|----------|--------------|--------|\r\n| shade-lspd-pd | Mission Row PD | Boot load |\r\n| fetchq-oil + map | Oil Rig job | Live, map proximity |\r\n| kq_powerwashing + MLO | Power Washing | SQL done |\r\n| kq_jobcontracts | Job contracts | Live |\r\n| shade-airdrops | Care Packages | Live |\r\n| portis-afterhours | After Hours (lb-phone app) | SQL done |\r\n| HWC_Blips_V2 | Map blips | Live — `/hwcblips` |\r\n| lgd-policeradar | Police radar | Live |\r\n| DoItDigital_Police_Weapon_Pack_V1 | PD weapons | Live |\r\n| tenfgdc | Ten-F GDC | Live |\r\n| cfx-helnius-fleeca-bank | Fleeca MLO | Proximity |\r\n| TiboMLO_pdm_lts_v2 | PDM MLO | Proximity |\r\n| wxmaps_racetrack | Race track | Proximity |\r\n| hwpatrolbdb | HW Patrol MLO | Proximity |\r\n| IM3D Street Enhancer v1/v2 | Street props | Proximity |\r\n\r\n**Blocked (missing deps):** nn restaurants (nn_bridge), offload_smash_grab (community_bridge), b3ast_weed, energy_redline\r\n\r\n---\r\n\r\n## Startup time — target ~8 min (was ~30 min)\r\n\r\n| Change | Effect |\r\n|--------|--------|\r\n| Boot maps = **shade-lspd-pd only** | No 90-map stagger at boot |\r\n| All other MLOs → **proximity load** | Load when players visit |\r\n| `stream:skipClothingPhase2 1` | Skip 2nd clothing wave at boot |\r\n| Vehicle loader trimmed | Deferred showcase/illegal cars to addon loader |\r\n| Pauses reduced 35–45% | Faster stagger across loaders |\r\n\r\n**Join when console shows:** `[heavy-stream-loader] Phase 1 done — safe to join`\r\n\r\n---\r\n\r\n## Quick reference\r\n\r\n| Action | Command |\r\n|--------|---------|\r\n| Map blips (admin) | `/hwcblips` |\r\n| Admin teleport | `/gotobiz [id]` |\r\n| Police radar | **F7** (in emergency vehicle) |\r\n| Drugs hub | `/drugs` |\r\n| Vehicle menu | **F6** |\r\n| MDT | `/mdt` |\r\n| Phone | Use phone item |\r\n\r\n---\r\n\r\n*Config: `resources/[standalone]/shade-config/config/` · Blips: `HWC_Blips_V2/blips.json` · Proximity zones: `shade-proximity-mlo/config/zones.lua`*"
                          }
                      ],
-    "latestNotes":  "ShadeRP v10 — portal linked to loading screen + shade-config SSOT.\r\n\r\nEdit portal.lua with your Render URL + CFX code, then:\r\n  tools\\shaderp-dashboard\\Sync-PortalToRender.ps1\r\n\r\nDeploy steps: tools\\shaderp-dashboard\\DEPLOY-QUICKSTART.md",
+    "latestNotes":  "ShadeRP v14 — open-build resource pass (shade-billboards pattern).\r\n\r\n## What changed\r\n- New tool: tools/Prepare-ShadeRPResources.ps1\r\n- Removed hidden .fxap entitlement markers from all ensured resources (tuff-hud, tuff-loading, it_bridge, fetchq-oil, shade-airdrops, portis-afterhours, 1017-dev-pawnshop, lgd-policeradar, tn-cruise-control, and more)\r\n- Stripped dependency \u0027/assetpacks\u0027 from 140+ manifests (scripts + MLO maps) — stream files load locally\r\n- UTF-8 BOM cleanup on Lua configs (shade-billboards config, nn shared, etc.)\r\n- integrations.lua updated for fetchq-oil, pawnshop, shade-airdrops, portis-afterhours, lgd-policeradar\r\n\r\n## Restart (server console)\r\nrestart shade-config\r\nrestart shade-billboards\r\nrestart fetchq-oil\r\nrestart shade-airdrops\r\nrestart portis-afterhours\r\nrestart 1017-dev-pawnshop\r\nrestart lgd-policeradar\r\nrestart tuff-hud\r\nrestart tuff-loading\r\nrestart gen_pausev2\r\nrestart it_bridge\r\n\r\nOr full server restart recommended after this pass.\r\n\r\n## Note\r\nWasabi / LB Phone / other Keymaster-encrypted cores may still need your CFX entitlement even without .fxap — this pass fixes local-stream + open-config resources like shade-billboards.",
     "blockedMods":  [
                         {
                             "name":  "nn (nn_bridge)",
@@ -1684,7 +1882,7 @@
                   "serverCfg":  "F:\\txData\\QBCore_A9FD7A.base\\server.cfg",
                   "shadeConfig":  "F:\\txData\\QBCore_A9FD7A.base\\resources\\[standalone]\\shade-config\\config",
                   "database":  "mysql://root:@127.0.0.1:3306/es_extended",
-                  "base":  "F:\\txData\\QBCore_A9FD7A.base"
+                  "base":  "F:/txData/QBCore_A9FD7A.base"
               },
     "logging":  {
                     "channels":  [

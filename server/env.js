@@ -11,7 +11,7 @@ const SHADERP = {
     '{"1358187333848924260":"owner","1478053644673749076":"owner","1403881048416321698":"admin","1482853698462941195":"admin","1474033054279405829":"admin","1474032455567675525":"admin","1474148037541761160":"developer","1474135398312706089":"developer","1479921052413853970":"developer","1474030129884823715":"staff","1474592310317547733":"staff","1474031386703953920":"moderator","1403880641074036736":"moderator","1438657854432350350":"moderator","1474031854905725050":"moderator","1358199486941364224":"member","1479976364336480460":"member"}',
 };
 
-function portalBaseUrl() {
+export function portalBaseUrl() {
   if (process.env.DISCORD_CALLBACK_URL) {
     return process.env.DISCORD_CALLBACK_URL.replace(/\/auth\/discord\/callback\/?$/, '');
   }
@@ -34,6 +34,8 @@ export function getPortalEnv() {
     PORTAL_NAME: process.env.PORTAL_NAME || SHADERP.PORTAL_NAME,
     PORTAL_TAGLINE: process.env.PORTAL_TAGLINE || SHADERP.PORTAL_TAGLINE,
     SYNC_API_KEY: process.env.SYNC_API_KEY,
+    QUEUE_API_KEY: process.env.QUEUE_API_KEY,
+    QUEUE_ENABLED: process.env.QUEUE_ENABLED !== '0',
   };
 }
 

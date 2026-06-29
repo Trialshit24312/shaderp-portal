@@ -882,3 +882,29 @@ kbd {
   50% { opacity: 0.65; }
 }
 
+.logs-toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.65rem;
+  margin: 1rem 0;
+  align-items: center;
+}
+.logs-split { align-items: start; }
+.logs-list-card { min-height: 320px; }
+.logs-table { font-size: 0.85rem; }
+.logs-table .log-row { cursor: pointer; }
+.logs-table .log-row:hover td { background: var(--accent-dim); }
+.logs-table .log-summary { max-width: 280px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.logs-pager {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin-top: 0.75rem;
+  padding-top: 0.75rem;
+  border-top: 1px solid var(--border);
+}
+.pill.sev-high { background: rgba(232, 93, 93, 0.2); color: #e85d5d; }
+.pill.sev-medium { background: rgba(240, 160, 48, 0.15); color: #f0a030; }
+.pill.sev-info { background: var(--accent-dim); color: var(--accent); }
+.logs-detail-card pre { max-height: 220px; overflow: auto; }
+

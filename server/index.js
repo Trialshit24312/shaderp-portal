@@ -17,6 +17,7 @@ import { trackPageView, trackEvent, getAnalyticsSummary } from './analytics.js';
 import { getPortalEnv, isAuthConfigured, isOAuthReady, portalBaseUrl } from './env.js';
 import { loadDashboardData, normalizeUpdatePasses, extractPassHighlights } from './dashboard.js';
 import { createQueueManager, queueApiKeyValid } from './queue.js';
+import { createLogManager, logsApiKeyValid } from './logs.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const ROOT = path.join(__dirname, '..');
@@ -26,6 +27,11 @@ const DATA_FILE = path.join(ROOT, 'data', 'dashboard.json');
 const portalEnv = getPortalEnv();
 const roleMap = parseRoleMap(portalEnv.PORTAL_ROLE_MAP || '{}');
 const webQueue = createQueueManager({ enabled: portalEnv.QUEUE_ENABLED });
+const serverLogs = createLogManager({
+  enabled: portalEnv.LOGS_ENABLED,
+  maxEntries: portalEnv.LOGS_MAX_ENTRIES,
+  retentionDays: portalEnv.LOGS_RETENTION_DAYS,
+});
 
 const app = express();
 const PORT = process.env.PORT || 8787;
@@ -306,6 +312,39 @@ app.post('/api/queue/server/release', (req, res) => {
   res.json({ ok: true });
 });
 
+// —— Server logs (shade-crashlog → portal, owners only) ——
+app.post('/api/logs/server/ingest', (req, res) => {
+  if (!logsApiKeyValid(req, portalEnv)) {
+    return res.status(401).json({ error: 'Invalid logs key' });
+  }
+  const body = req.body;
+  const entries = body?.entries || (body?.type ? [body] : null);
+  if (!entries?.length) return res.status(400).json({ error: 'entries required' });
+  const result = serverLogs.ingest(entries);
+  if (result.error) return res.status(503).json(result);
+  res.json(result);
+});
+
+app.get('/api/logs/stats', requireRole('owner'), (_req, res) => {
+  res.json(serverLogs.stats());
+});
+
+app.get('/api/logs', requireRole('owner'), (req, res) => {
+  res.json(serverLogs.list({
+    type: req.query.type || 'all',
+    severity: req.query.severity || 'all',
+    q: req.query.q || '',
+    limit: parseInt(req.query.limit, 10) || 50,
+    offset: parseInt(req.query.offset, 10) || 0,
+  }));
+});
+
+app.get('/api/logs/:id', requireRole('owner'), (req, res) => {
+  const entry = serverLogs.get(req.params.id);
+  if (!entry) return res.status(404).json({ error: 'Not found' });
+  res.json(entry);
+});
+
 app.use(express.static(PUBLIC));
 app.get('*', (req, res) => {
   trackPageView({ path: req.path, userId: getUser(req)?.id, role: getUser(req)?.appRole });
@@ -316,4 +355,5 @@ app.listen(PORT, '0.0.0.0', () => {
   console.log(`ShadeRP Portal listening on port ${PORT}`);
   console.log(`OAuth: ${isOAuthReady(portalEnv) ? 'ready' : 'needs DISCORD_CLIENT_SECRET on Render'}`);
   console.log(`Web queue: ${webQueue.isEnabled() ? 'enabled' : 'disabled'}${portalEnv.QUEUE_API_KEY ? '' : ' (set QUEUE_API_KEY on Render)'}`);
+  console.log(`Server logs: ${serverLogs.isEnabled() ? 'enabled' : 'disabled'} (owner panel)`);
 });

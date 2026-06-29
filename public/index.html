@@ -286,6 +286,42 @@
       </div>
       <div class="card" style="margin-top:1rem"><h3>Server paths (sync source)</h3><div id="settings-paths" class="table-wrap"></div></div>
     </section>
+
+    <section id="panel-logs" class="panel" data-min-role="owner">
+      <h2>Server logs</h2>
+      <p class="hint">Live crash, disconnect, lag, and error events from <code>shade-crashlog</code> — owners only.</p>
+      <div id="logs-panel-body">
+        <div class="stat-grid" id="logs-stats"></div>
+        <div class="logs-toolbar">
+          <select id="logs-filter" class="admin-search" aria-label="Filter logs">
+            <option value="all">All events</option>
+            <option value="crashes">Crashes</option>
+            <option value="disconnects">Disconnects</option>
+            <option value="lag">Lag / hitches</option>
+            <option value="errors">Errors</option>
+            <option value="player_join">Joins</option>
+          </select>
+          <input type="search" id="logs-search" class="admin-search" placeholder="Search player, reason, type…" autocomplete="off" />
+          <button type="button" class="btn ghost btn-sm" id="logs-refresh">Refresh</button>
+        </div>
+        <div class="split-panels logs-split">
+          <div class="card logs-list-card">
+            <div id="logs-table-wrap" class="table-wrap"></div>
+            <div id="logs-pager" class="logs-pager"></div>
+          </div>
+          <div class="card logs-detail-card" id="logs-detail" hidden>
+            <div class="card-head-row">
+              <h3 id="logs-detail-title">Event</h3>
+              <button type="button" class="btn ghost btn-sm" id="logs-detail-close">Close</button>
+            </div>
+            <pre id="logs-detail-body" class="notes-block compact"></pre>
+            <h4 class="section-sub">Raw payload</h4>
+            <pre id="logs-detail-json" class="notes-block"></pre>
+            <button type="button" class="btn ghost btn-sm" id="logs-copy-json">Copy JSON</button>
+          </div>
+        </div>
+      </div>
+    </section>
   </main>
 
   <footer class="site-footer" id="site-footer"></footer>

@@ -21,6 +21,8 @@ Complete these so the website is fully filled out and functional.
 | `SYNC_API_KEY` | Long random string (copy for step 2) |
 | `QUEUE_API_KEY` | Same key as `shade:queueApiKey` in server.cfg (web queue) |
 | `QUEUE_ENABLED` | `1` |
+| `LOGS_API_KEY` | Same as `shade:logsApiKey` (optional — falls back to QUEUE_API_KEY) |
+| `LOGS_ENABLED` | `1` |
 | `SESSION_SECRET` | Auto-generate on Render |
 | `DISCORD_INVITE_URL` | `https://discord.gg/sbnu98HYAZ` |
 

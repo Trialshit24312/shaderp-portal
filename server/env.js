@@ -36,6 +36,10 @@ export function getPortalEnv() {
     SYNC_API_KEY: process.env.SYNC_API_KEY,
     QUEUE_API_KEY: process.env.QUEUE_API_KEY,
     QUEUE_ENABLED: process.env.QUEUE_ENABLED !== '0',
+    LOGS_API_KEY: process.env.LOGS_API_KEY || process.env.QUEUE_API_KEY,
+    LOGS_ENABLED: process.env.LOGS_ENABLED !== '0',
+    LOGS_MAX_ENTRIES: Math.min(2000, parseInt(process.env.LOGS_MAX_ENTRIES, 10) || 600),
+    LOGS_RETENTION_DAYS: Math.min(90, parseInt(process.env.LOGS_RETENTION_DAYS, 10) || 30),
   };
 }
 

@@ -33,6 +33,7 @@ const NAV = [
   { id: 'commands', label: 'Commands', min: 'admin' },
   { id: 'blocked', label: 'Blocked', min: 'admin' },
   { id: 'settings', label: 'Settings', min: 'admin' },
+  { id: 'logs', label: 'Server Logs', min: 'owner' },
 ];
 
 const ROLE_LEVEL = { guest: 0, member: 1, moderator: 2, staff: 3, developer: 4, admin: 5, owner: 6 };
@@ -152,6 +153,7 @@ function showPanel(id) {
   track('panel_view', { panel: id });
   if (id === 'analytics' && hasRole('staff')) loadAnalytics();
   if (id === 'team') renderTeam();
+  if (id === 'logs' && hasRole('owner')) loadLogs();
   if (id === 'queue' || id === 'connect' || id === 'home') renderQueueWidgets();
   el('sidebar')?.classList.remove('open');
 }
@@ -1030,6 +1032,151 @@ function renderSettings() {
   ).join('')}</tbody></table>`;
 }
 
+}
+
+let logsState = { filter: 'all', q: '', offset: 0, selected: null };
+
+function severityClass(s) {
+  if (s === 'high') return 'sev-high';
+  if (s === 'medium') return 'sev-medium';
+  return 'sev-info';
+}
+
+function formatLogDetail(entry) {
+  if (!entry) return '';
+  const data = entry.data || {};
+  const lines = [];
+  lines.push(`Type: ${entry.type}`);
+  lines.push(`Time: ${entry.iso}`);
+  lines.push(`Severity: ${entry.severity}`);
+  if (entry.classification) lines.push(`Classification: ${entry.classification}`);
+  if (entry.playerName) lines.push(`Player: ${entry.playerName}`);
+  if (entry.playerDiscord) lines.push(`Discord: ${entry.playerDiscord}`);
+  if (data.reason) lines.push(`Reason: ${data.reason}`);
+  if (data.crashSignature) lines.push(`Crash signature: ${data.crashSignature}`);
+  if (data.message) lines.push(`Message: ${data.message}`);
+  if (data.stallMs) lines.push(`Server stall: ${data.stallMs}ms`);
+  if (data.hints?.length) {
+    lines.push('Hints:');
+    data.hints.forEach((h) => lines.push(`  - ${h}`));
+  }
+  if (data.snapshot?.street) lines.push(`Street: ${data.snapshot.street}`);
+  if (data.snapshot?.coords) {
+    const c = data.snapshot.coords;
+    lines.push(`Coords: ${c.x?.toFixed?.(1)}, ${c.y?.toFixed?.(1)}, ${c.z?.toFixed?.(1)}`);
+  }
+  if (data.player?.identifiers?.length) {
+    lines.push('Identifiers:');
+    data.player.identifiers.forEach((id) => lines.push(`  ${id}`));
+  }
+  return lines.join('\n');
+}
+
+async function loadLogs(resetOffset = true) {
+  if (!hasRole('owner')) return;
+  if (resetOffset) logsState.offset = 0;
+
+  const params = new URLSearchParams({
+    type: logsState.filter,
+    q: logsState.q,
+    offset: String(logsState.offset),
+    limit: '40',
+  });
+
+  try {
+    const [statsRes, listRes] = await Promise.all([
+      fetch('/api/logs/stats'),
+      fetch(`/api/logs?${params}`),
+    ]);
+    if (statsRes.status === 403 || listRes.status === 403) {
+      el('logs-panel-body').innerHTML = '<p class="hint">Owner access only.</p>';
+      return;
+    }
+    const stats = await statsRes.json();
+    const list = await listRes.json();
+
+    el('logs-stats').innerHTML = [
+      stat('Stored', stats.total),
+      stat('Last 24h', stats.last24h),
+      stat('Crashes 24h', stats.crashes24h ?? 0),
+      stat('Last 7d', stats.last7d),
+    ].join('');
+
+    const rows = list.entries || [];
+    el('logs-table-wrap').innerHTML = rows.length
+      ? `<table class="logs-table"><thead><tr>
+          <th>Time</th><th>Type</th><th>Severity</th><th>Player</th><th>Summary</th>
+        </tr></thead><tbody>${rows.map((r) => `
+          <tr class="log-row" data-log-id="${esc(r.id)}">
+            <td class="mono hint">${esc((r.iso || '').replace('T', ' ').slice(0, 19))}</td>
+            <td><span class="pill">${esc(r.type)}</span></td>
+            <td><span class="pill ${severityClass(r.severity)}">${esc(r.severity)}</span></td>
+            <td>${esc(r.playerName || '—')}</td>
+            <td class="log-summary">${esc(r.summary || '')}</td>
+          </tr>`).join('')}</tbody></table>`
+      : '<p class="hint">No log entries yet — events appear when shade-crashlog syncs from the server.</p>';
+
+    el('logs-table-wrap').querySelectorAll('.log-row').forEach((row) => {
+      row.addEventListener('click', () => openLogDetail(row.dataset.logId));
+    });
+
+    const total = list.total || 0;
+    const page = Math.floor(logsState.offset / 40) + 1;
+    const pages = Math.max(1, Math.ceil(total / 40));
+    el('logs-pager').innerHTML = total > 40
+      ? `<button type="button" class="btn ghost btn-sm" id="logs-prev" ${logsState.offset <= 0 ? 'disabled' : ''}>Previous</button>
+         <span class="hint">Page ${page} / ${pages} (${total} total)</span>
+         <button type="button" class="btn ghost btn-sm" id="logs-next" ${logsState.offset + 40 >= total ? 'disabled' : ''}>Next</button>`
+      : `<span class="hint">${total} entries</span>`;
+
+    el('logs-prev')?.addEventListener('click', () => {
+      logsState.offset = Math.max(0, logsState.offset - 40);
+      loadLogs(false);
+    });
+    el('logs-next')?.addEventListener('click', () => {
+      logsState.offset += 40;
+      loadLogs(false);
+    });
+
+    if (logsState.selected) openLogDetail(logsState.selected, false);
+  } catch (err) {
+    console.error(err);
+    el('logs-panel-body').innerHTML = '<p class="hint">Could not load logs.</p>';
+  }
+}
+
+async function openLogDetail(id, store = true) {
+  if (store) logsState.selected = id;
+  const res = await fetch(`/api/logs/${encodeURIComponent(id)}`);
+  if (!res.ok) return;
+  const entry = await res.json();
+  el('logs-detail').hidden = false;
+  el('logs-detail-title').textContent = `${entry.type} — ${entry.playerName || 'server'}`;
+  el('logs-detail-body').textContent = formatLogDetail(entry);
+  el('logs-detail-json').textContent = JSON.stringify(entry.data, null, 2);
+}
+
+function setupLogsPanel() {
+  el('logs-filter')?.addEventListener('change', (e) => {
+    logsState.filter = e.target.value;
+    loadLogs(true);
+  });
+  el('logs-search')?.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter') {
+      logsState.q = e.target.value.trim();
+      loadLogs(true);
+    }
+  });
+  el('logs-refresh')?.addEventListener('click', () => loadLogs(false));
+  el('logs-detail-close')?.addEventListener('click', () => {
+    el('logs-detail').hidden = true;
+    logsState.selected = null;
+  });
+  el('logs-copy-json')?.addEventListener('click', () => {
+    copyText(el('logs-detail-json').textContent);
+  });
+}
+
 async function loadAnalytics() {
   try {
     const res = await fetch('/api/analytics/summary?days=14');
@@ -1146,6 +1293,8 @@ async function init() {
   } else if (location.hash === '#queue' || location.hash === '#connect') {
     showPanel(location.hash.slice(1));
   }
+
+  setupLogsPanel();
 
   track('page_view', { path: location.pathname });
 }

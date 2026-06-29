@@ -1,6 +1,7 @@
 node_modules/
 .env
 data/analytics.json
+data/server-logs.json
 data/sessions.json
 *.log
 .DS_Store

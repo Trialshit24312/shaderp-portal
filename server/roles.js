@@ -27,6 +27,7 @@ export const PANEL_ACCESS = {
   staff: 3,
   blocked: 5,
   settings: 5,
+  logs: 6,
 };
 
 export function parseRoleMap(envStr) {

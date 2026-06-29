@@ -1032,8 +1032,6 @@ function renderSettings() {
   ).join('')}</tbody></table>`;
 }
 
-}
-
 let logsState = { filter: 'all', q: '', offset: 0, selected: null };
 
 function severityClass(s) {

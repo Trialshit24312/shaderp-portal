@@ -337,12 +337,13 @@ function renderLocations() {
 
 function renderConnect() {
   if (!DATA) return;
-  const cfx = DATA.portal?.cfxJoinUrl || 'cfx.re/join/YOUR-CODE';
-  const cfxFull = cfx.startsWith('http') ? cfx : `https://${cfx}`;
+  const conn = getConnectInfo();
+  const cfx = conn.cfx;
+  const cfxFull = conn.cfxFull;
   const cfxEl = el('connect-cfx');
   if (cfxEl) {
-    cfxEl.textContent = cfx;
-    cfxEl.dataset.copy = cfx;
+    cfxEl.textContent = conn.hasCfx ? cfx : conn.directCmd;
+    cfxEl.dataset.copy = conn.hasCfx ? cfx : conn.directCmd;
   }
   const portalUrl = DATA.portal?.websiteUrl || DATA.branding?.portalUrl || location.origin;
   const portalLink = el('connect-portal-link');
@@ -357,16 +358,40 @@ function renderConnect() {
   const hostname = DATA.connect?.hostname;
   const meta = el('connect-meta');
   if (meta) {
-    const pending = cfx.includes('YOUR-CODE');
     meta.innerHTML = `
       <p class="hint">${esc(hostname || 'ShadeRP')} · ${DATA.connect?.maxClients ?? 48} slots · ${esc(DATA.connect?.framework || 'ESX Legacy')}</p>
-      ${pending ? '<p class="warn-banner">⚠ CFX join code not set — edit shade-config/config/portal.lua then run Sync-PortalToRender.ps1</p>' : ''}
+      ${conn.hasCfx
+    ? `<p class="hint">Public join: <span class="mono">${esc(cfx)}</span></p>`
+    : `<p class="warn-banner">No cfx.re join code yet (server not on a public VPS). Use direct connect below — F8 → <code>${esc(conn.directCmd)}</code> or click Open FiveM.</p>`}
       <div class="hero-actions" style="margin-top:0.75rem">
-        <a href="${esc(cfxFull)}" class="btn primary" target="_blank" rel="noopener">Open in browser</a>
-        <button type="button" class="btn ghost copy-block" data-copy="${esc(cfx)}">Copy connect link</button>
+        ${conn.hasCfx
+    ? `<a href="${esc(cfxFull)}" class="btn primary" target="_blank" rel="noopener">Open in browser</a>`
+    : `<a href="${esc(conn.fivemUrl)}" class="btn primary">Open FiveM (direct)</a>`}
+        <button type="button" class="btn ghost copy-block" data-copy="${esc(conn.hasCfx ? cfx : conn.directCmd)}">Copy ${conn.hasCfx ? 'cfx link' : 'connect command'}</button>
       </div>`;
-    meta.querySelector('.copy-block')?.addEventListener('click', () => copyText(cfx));
+    meta.querySelector('.copy-block')?.addEventListener('click', () => copyText(conn.hasCfx ? cfx : conn.directCmd));
   }
+}
+
+function getConnectInfo() {
+  const portal = DATA?.portal || {};
+  const connect = DATA?.connect || {};
+  const cfx = portal.cfxJoinUrl || 'cfx.re/join/YOUR-CODE';
+  const hasCfx = cfx && !cfx.includes('YOUR-CODE');
+  const host = portal.directConnect || connect.directConnect || `127.0.0.1:${connect.port || 30120}`;
+  const directCmd = host.includes(':') ? `connect ${host}` : `connect ${host}:${connect.port || 30120}`;
+  const fivemUrl = `fivem://connect/${directCmd.replace(/^connect\s+/, '')}`;
+  return {
+    hasCfx,
+    cfx,
+    cfxFull: cfx.startsWith('http') ? cfx : `https://${cfx}`,
+    directCmd,
+    fivemUrl,
+    host: directCmd.replace(/^connect\s+/, ''),
+    serverListed: portal.serverListed !== false && hasCfx,
+    offlineMode: QUEUE?.config?.offlineMode === true,
+    serverOnline: QUEUE?.config?.serverOnline === true,
+  };
 }
 
 function getQueueViewModel() {
@@ -374,10 +399,9 @@ function getQueueViewModel() {
   const me = QUEUE?.me || { inQueue: false };
   const stats = me.stats || cfg;
   const loggedIn = !!ME?.user;
-  const cfx = DATA?.portal?.cfxJoinUrl || 'cfx.re/join/YOUR-CODE';
-  const cfxFull = cfx.startsWith('http') ? cfx : `https://${cfx}`;
+  const conn = getConnectInfo();
   const returnTo = encodeURIComponent(location.pathname.includes('connect') ? '/connect' : '/queue');
-  return { cfg, me, stats, loggedIn, cfx, cfxFull, returnTo };
+  return { cfg, me, stats, loggedIn, conn, returnTo };
 }
 
 function queueStatsHtml(stats) {
@@ -387,6 +411,18 @@ function queueStatsHtml(stats) {
       <div class="queue-stat"><strong>${stats.ready ?? 0}</strong><span>Ready</span></div>
       <div class="queue-stat"><strong>${stats.slotsAvailable ?? '—'}</strong><span>Slots free</span></div>
     </div>`;
+}
+
+function queueConnectButtonsHtml(v) {
+  if (!v.me.inQueue || !v.me.ready) return '';
+  const c = v.conn;
+  if (c.hasCfx) {
+    return `<a href="${esc(c.cfxFull)}" class="btn primary" target="_blank" rel="noopener">Connect via cfx.re</a>`;
+  }
+  return `
+    <a href="${esc(c.fivemUrl)}" class="btn primary">Open FiveM (direct)</a>
+    <button type="button" class="btn ghost copy-block" data-copy="${esc(c.directCmd)}">Copy F8: ${esc(c.directCmd)}</button>
+    <p class="hint">No public cfx.re code yet — use direct connect while the server runs on your PC (same network or tunnel).</p>`;
 }
 
 function queueActionsHtml(v, { showPriority = true } = {}) {
@@ -408,11 +444,15 @@ function queueActionsHtml(v, { showPriority = true } = {}) {
       <p class="hint queue-eta-line">${esc(eta)}</p>
       ${v.me.ready ? '<p class="hint queue-ready-line">You can now connect to the server.</p>' : ''}
       <div class="hero-actions">
-        ${v.me.ready ? `<a href="${esc(v.cfxFull)}" class="btn primary" target="_blank" rel="noopener">Connect to FiveM</a>` : ''}
+        ${v.me.ready ? queueConnectButtonsHtml(v) : ''}
         <button type="button" class="btn ghost" data-queue-action="leave">Leave Queue</button>
       </div>`;
   }
+  const offlineNote = v.stats.offlineMode
+    ? '<p class="hint warn-banner">Server not linked to portal yet — you can still connect directly when ready (local / dev).</p>'
+    : '';
   return `
+    ${offlineNote}
     ${queueStatsHtml(v.stats)}
     <div class="hero-actions">
       <button type="button" class="btn primary" data-queue-action="join">Join Queue</button>

@@ -13,6 +13,7 @@ const QUEUE_FILE = path.join(DATA_DIR, 'web-queue.json');
 const HEARTBEAT_TTL_MS = 90_000;
 const READY_TTL_MS = 180_000;
 const RESERVE_SLOTS = 2;
+const SERVER_LINK_TTL_MS = 90_000;
 
 const PRIORITY_BY_ROLE = {
   owner: 200,
@@ -91,10 +92,16 @@ function availableConnectSlots(state) {
   return Math.max(0, max - used - RESERVE_SLOTS);
 }
 
+function isServerLinked(state) {
+  const ts = state.server?.updatedAt || 0;
+  return ts > 0 && (now() - ts) < SERVER_LINK_TTL_MS;
+}
+
 function recomputeReady(state) {
   pruneExpired(state);
   const sorted = sortEntries(state.entries.filter((e) => e.status === 'waiting' || e.status === 'ready'));
-  const slots = availableConnectSlots(state);
+  const linked = isServerLinked(state);
+  const slots = linked ? availableConnectSlots(state) : sorted.length;
   let readyCount = 0;
 
   for (const entry of sorted) {
@@ -152,6 +159,9 @@ export function createQueueManager(options = {}) {
       playersOnline: state.server.playersOnline,
       maxSlots: state.server.maxSlots,
       slotsAvailable: availableConnectSlots(state),
+      serverOnline: isServerLinked(state),
+      serverLastSync: state.server.updatedAt || null,
+      offlineMode: !isServerLinked(state),
     };
   }
 
@@ -254,6 +264,13 @@ export function createQueueManager(options = {}) {
       if (!entry) {
         return { allowed: false, reason: 'not_in_web_queue' };
       }
+      const linked = isServerLinked(state);
+      if (!linked && (entry.status === 'waiting' || entry.status === 'ready')) {
+        entry.status = 'connecting';
+        entry.connectingAt = now();
+        persist();
+        return { allowed: true, reason: 'offline_server', entry: { globalName: entry.globalName, lane: entry.lane } };
+      }
       if (entry.status === 'ready') {
         entry.status = 'connecting';
         entry.connectingAt = now();
@@ -291,6 +308,9 @@ export function createQueueManager(options = {}) {
 }
 
 export function queueApiKeyValid(req, env) {
-  const key = req.headers['x-queue-key'] || req.headers['x-api-key'] || req.query.key;
-  return env.QUEUE_API_KEY && key === env.QUEUE_API_KEY;
+  const key = req.headers['x-queue-key'] || req.headers['x-logs-key'] || req.headers['x-api-key'] || req.query.key;
+  const expected = env.QUEUE_API_KEY || env.LOGS_API_KEY || env.SYNC_API_KEY;
+  if (!expected || !key) return false;
+  if (String(key).includes('CHANGE_ME')) return false;
+  return key === expected;
 }

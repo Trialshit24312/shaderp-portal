@@ -187,6 +187,8 @@ if ($portalText -match "websiteUrl\s*=\s*'([^']+)'") { $portal.websiteUrl = $Mat
 if ($portalText -match "cfxJoinCode\s*=\s*'([^']+)'") { $portal.cfxJoinCode = $Matches[1] }
 if ($portalText -match "cfxJoinUrl\s*=\s*'([^']+)'") { $portal.cfxJoinUrl = $Matches[1] }
 if ($portalText -match "discordInvite\s*=\s*'([^']+)'") { $portal.discordInvite = $Matches[1] }
+if ($portalText -match "directConnect\s*=\s*'([^']+)'") { $portal.directConnect = $Matches[1] }
+if ($portalText -match 'serverListed\s*=\s*(true|false)') { $portal.serverListed = ($Matches[1] -eq 'true') }
 
 $serverCfgText = Read-Text $serverCfg
 $connect = @{

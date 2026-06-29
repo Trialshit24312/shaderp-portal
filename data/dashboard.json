@@ -1,5 +1,5 @@
 {
-    "generatedAt":  "2026-06-29 00:04:54",
+    "generatedAt":  "2026-06-29 00:30:26",
     "branding":  {
                      "resources":  {
                                        "kq_powerwashing":  "ShadeRP Power Washing",
@@ -73,10 +73,12 @@
                      "tagline":  "ESX Legacy Roleplay"
                  },
     "portal":  {
+                   "serverListed":  false,
+                   "directConnect":  "127.0.0.1:20256",
                    "discordInvite":  "https://discord.gg/sbnu98HYAZ",
-                   "websiteUrl":  "https://shaderp-website.onrender.com",
+                   "cfxJoinCode":  "YOUR-CODE",
                    "cfxJoinUrl":  "cfx.re/join/YOUR-CODE",
-                   "cfxJoinCode":  "YOUR-CODE"
+                   "websiteUrl":  "https://shaderp-website.onrender.com"
                },
     "connect":  {
                     "port":  20256,

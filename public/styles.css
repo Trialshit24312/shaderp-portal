@@ -1010,6 +1010,9 @@ kbd {
   justify-content: center;
   padding: 1rem;
 }
+.ac-modal[hidden] {
+  display: none !important;
+}
 .ac-modal-backdrop {
   position: absolute;
   inset: 0;

@@ -85,6 +85,7 @@ function hasRole(min) {
 async function loadMe() {
   const res = await fetch('/api/me');
   ME = await res.json();
+  if (!ME?.user || !hasRole('staff')) closeAcBanModal();
   renderUserBar();
   renderNav();
 }
@@ -1260,19 +1261,33 @@ function acSetServerStatus(status) {
 }
 
 function openAcBanModal(playerId, playerName, defaultReason = '') {
+  if (!ME?.user || !hasRole('staff')) {
+    toast('Staff login required to ban players');
+    return;
+  }
   acState.banPending = { playerId: Number(playerId), playerName };
   el('ac-ban-target').textContent = `${playerName} (server ID #${playerId})`;
   el('ac-ban-reason').value = defaultReason;
   el('ac-ban-modal').hidden = false;
+  el('ac-ban-modal').setAttribute('aria-hidden', 'false');
   el('ac-ban-reason').focus();
 }
 
 function closeAcBanModal() {
   acState.banPending = null;
-  el('ac-ban-modal').hidden = true;
+  const modal = el('ac-ban-modal');
+  if (modal) {
+    modal.hidden = true;
+    modal.setAttribute('aria-hidden', 'true');
+  }
 }
 
 async function confirmAcBan() {
+  if (!ME?.user || !hasRole('staff')) {
+    closeAcBanModal();
+    toast('Staff login required');
+    return;
+  }
   const pending = acState.banPending;
   if (!pending) return;
   const reason = el('ac-ban-reason').value.trim() || 'Banned via ShadeRP portal';
@@ -1281,6 +1296,10 @@ async function confirmAcBan() {
 }
 
 async function acAdminAction(path, playerId, playerName, extra = {}, useConfirm = true) {
+  if (!ME?.user || !hasRole('staff')) {
+    toast('Staff login required');
+    return;
+  }
   if (useConfirm && !confirm(`${path === 'kick' ? 'Kick' : path === 'ban' ? 'Ban' : 'Snapshot'} ${playerName} (#${playerId})?`)) return;
   try {
     const res = await fetch(`/api/ac/admin/${path}`, {
@@ -1759,6 +1778,7 @@ function stopAcAutoRefresh() {
 }
 
 function setupAcPanel() {
+  closeAcBanModal();
   el('ac-refresh')?.addEventListener('click', () => loadAcPanel());
   el('ac-stop-watch')?.addEventListener('click', () => stopAcWatch());
   el('ac-auto-refresh')?.addEventListener('change', () => {

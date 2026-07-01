@@ -10,7 +10,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="/styles.css?v=2.1.0" />
+  <link rel="stylesheet" href="/styles.css?v=2.1.1" />
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js" defer></script>
 </head>
 <body>
@@ -354,21 +354,20 @@
           <div id="ac-alt-wrap"></div>
         </div>
       </div>
-    </section>
-
-    <div id="ac-ban-modal" class="ac-modal" hidden>
-      <div class="ac-modal-backdrop" data-ac-close-ban></div>
-      <div class="ac-modal-box card">
-        <h3>Ban player</h3>
-        <p id="ac-ban-target" class="hint"></p>
-        <label class="ac-field-label" for="ac-ban-reason">Ban reason</label>
-        <textarea id="ac-ban-reason" rows="3" placeholder="Cheating — menu detected, aimbot, etc."></textarea>
-        <div class="ac-modal-actions">
-          <button type="button" class="btn ghost" id="ac-ban-cancel">Cancel</button>
-          <button type="button" class="btn danger" id="ac-ban-confirm">Ban player</button>
+      <div id="ac-ban-modal" class="ac-modal" hidden aria-hidden="true">
+        <div class="ac-modal-backdrop" data-ac-close-ban></div>
+        <div class="ac-modal-box card">
+          <h3>Ban player</h3>
+          <p id="ac-ban-target" class="hint"></p>
+          <label class="ac-field-label" for="ac-ban-reason">Ban reason</label>
+          <textarea id="ac-ban-reason" rows="3" placeholder="Cheating — menu detected, aimbot, etc."></textarea>
+          <div class="ac-modal-actions">
+            <button type="button" class="btn ghost" id="ac-ban-cancel">Cancel</button>
+            <button type="button" class="btn danger" id="ac-ban-confirm">Ban player</button>
+          </div>
         </div>
       </div>
-    </div>
+    </section>
 
     <section id="panel-logs" class="panel" data-min-role="owner">
       <h2>Server logs</h2>
@@ -410,6 +409,6 @@
   <footer class="site-footer" id="site-footer"></footer>
 
   <div id="toast" class="toast" hidden>Copied</div>
-  <script src="/app.js?v=2.1.0" type="module"></script>
+  <script src="/app.js?v=2.1.1" type="module"></script>
 </body>
 </html>

@@ -26,6 +26,7 @@ const NAV = [
   { id: 'map', label: 'Map', min: 'member' },
   { section: 'Staff' },
   { id: 'analytics', label: 'Analytics', min: 'staff' },
+  { id: 'anticheat', label: 'Anti-Cheat', min: 'staff', highlight: true },
   { id: 'staff', label: 'Staff Hub', min: 'staff' },
   { section: 'Admin' },
   { id: 'resources', label: 'Resources', min: 'admin' },
@@ -152,6 +153,12 @@ function showPanel(id) {
   document.querySelectorAll('.panel').forEach((p) => p.classList.toggle('active', p.id === `panel-${id}`));
   track('panel_view', { panel: id });
   if (id === 'analytics' && hasRole('staff')) loadAnalytics();
+  if (id === 'anticheat' && hasRole('staff')) {
+    loadAcPanel();
+    startAcAutoRefresh();
+  } else {
+    stopAcAutoRefresh();
+  }
   if (id === 'team') renderTeam();
   if (id === 'logs' && hasRole('owner')) loadLogs();
   if (id === 'queue' || id === 'connect' || id === 'home') renderQueueWidgets();
@@ -1215,6 +1222,579 @@ function setupLogsPanel() {
   });
 }
 
+let acState = {
+  sessionId: null,
+  pollTimer: null,
+  snapshotId: null,
+  refreshTimer: null,
+  lastDetectionAt: 0,
+  banPending: null,
+  playerFilter: '',
+};
+
+function acTrustClass(score) {
+  const n = Number(score);
+  if (Number.isNaN(n)) return 'ac-trust-mid';
+  if (n >= 70) return 'ac-trust-good';
+  if (n >= 40) return 'ac-trust-mid';
+  return 'ac-trust-low';
+}
+
+function acSetServerStatus(status) {
+  const elStatus = el('ac-server-status');
+  if (!elStatus) return;
+  if (!status?.connected && !status?.stale) {
+    elStatus.className = 'ac-status ac-status-offline';
+    elStatus.textContent = 'Server offline — check shaderp-ac + API key';
+    return;
+  }
+  if (status.stale) {
+    elStatus.className = 'ac-status ac-status-stale';
+    elStatus.textContent = `Sync stale (${Math.round((status.lastSyncAgeMs || 0) / 1000)}s ago)`;
+    return;
+  }
+  const host = status.stats?.hostname || 'FXServer';
+  const ver = status.stats?.acVersion ? ` · ${status.stats.acVersion}` : '';
+  elStatus.className = 'ac-status ac-status-online';
+  elStatus.textContent = `${host} online${ver}`;
+}
+
+function openAcBanModal(playerId, playerName, defaultReason = '') {
+  acState.banPending = { playerId: Number(playerId), playerName };
+  el('ac-ban-target').textContent = `${playerName} (server ID #${playerId})`;
+  el('ac-ban-reason').value = defaultReason;
+  el('ac-ban-modal').hidden = false;
+  el('ac-ban-reason').focus();
+}
+
+function closeAcBanModal() {
+  acState.banPending = null;
+  el('ac-ban-modal').hidden = true;
+}
+
+async function confirmAcBan() {
+  const pending = acState.banPending;
+  if (!pending) return;
+  const reason = el('ac-ban-reason').value.trim() || 'Banned via ShadeRP portal';
+  closeAcBanModal();
+  await acAdminAction('ban', pending.playerId, pending.playerName, { reason }, false);
+}
+
+async function acAdminAction(path, playerId, playerName, extra = {}, useConfirm = true) {
+  if (useConfirm && !confirm(`${path === 'kick' ? 'Kick' : path === 'ban' ? 'Ban' : 'Snapshot'} ${playerName} (#${playerId})?`)) return;
+  try {
+    const res = await fetch(`/api/ac/admin/${path}`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ playerId: Number(playerId), ...extra }),
+    });
+    if (!res.ok) {
+      const errText = await res.text();
+      throw new Error(errText || 'Request failed');
+    }
+    const data = await res.json();
+    if (path === 'ban') toast(`Ban queued for ${playerName} — FXServer applies within ~1s`);
+    else if (path === 'kick') toast(`Kick queued for ${playerName}`);
+    else toast('Snapshot requested');
+    if (path === 'snapshot' && data.requestId) {
+      acState.snapshotId = data.requestId;
+      pollAcSnapshot(data.requestId, playerName);
+    }
+    if (path !== 'snapshot') setTimeout(() => loadAcPanel(true), 1200);
+  } catch (err) {
+    toast(path === 'ban' ? 'Ban failed — is player still online?' : 'Action failed');
+    console.error(err);
+  }
+}
+
+function acShowFrame(src, title) {
+  const img = el('ac-frame');
+  const loading = el('ac-frame-loading');
+  if (!img) return;
+  img.src = src?.startsWith('data:') ? src : `data:image/jpeg;base64,${src}`;
+  img.hidden = false;
+  if (loading) loading.hidden = true;
+  if (title) el('ac-watch-title').textContent = title;
+}
+
+async function pollAcSnapshot(requestId, playerName) {
+  try {
+    const res = await fetch(`/api/ac/admin/frame/${encodeURIComponent(requestId)}`);
+    if (res.ok) {
+      const frame = await res.json();
+      acShowFrame(frame.image, `Snapshot — ${playerName}`);
+      acState.snapshotId = null;
+      return;
+    }
+  } catch (_) {}
+  if (acState.snapshotId === requestId) {
+    setTimeout(() => pollAcSnapshot(requestId, playerName), 800);
+  }
+}
+
+function acBindPlayerActions() {
+  el('ac-players-wrap')?.querySelectorAll('.ac-watch-btn').forEach((btn) => {
+    btn.addEventListener('click', () => startAcWatch(btn.dataset.pid, btn.dataset.pname));
+  });
+  el('ac-players-wrap')?.querySelectorAll('.ac-snap-btn').forEach((btn) => {
+    btn.addEventListener('click', () => acAdminAction('snapshot', btn.dataset.pid, btn.dataset.pname));
+  });
+  el('ac-players-wrap')?.querySelectorAll('.ac-kick-btn').forEach((btn) => {
+    btn.addEventListener('click', () => {
+      const reason = prompt('Kick reason (optional):') || 'Kicked by staff';
+      acAdminAction('kick', btn.dataset.pid, btn.dataset.pname, { reason });
+    });
+  });
+  el('ac-players-wrap')?.querySelectorAll('.ac-ban-btn').forEach((btn) => {
+    btn.addEventListener('click', () => openAcBanModal(btn.dataset.pid, btn.dataset.pname));
+  });
+}
+
+function acBindDetectionActions() {
+  el('ac-detections-wrap')?.querySelectorAll('.ac-det-watch').forEach((btn) => {
+    btn.addEventListener('click', () => startAcWatch(btn.dataset.pid, btn.dataset.pname));
+  });
+  el('ac-detections-wrap')?.querySelectorAll('.ac-det-snap').forEach((btn) => {
+    btn.addEventListener('click', () => acAdminAction('snapshot', btn.dataset.pid, btn.dataset.pname));
+  });
+  el('ac-detections-wrap')?.querySelectorAll('.ac-det-ban').forEach((btn) => {
+    btn.addEventListener('click', () => {
+      openAcBanModal(btn.dataset.pid, btn.dataset.pname, btn.dataset.reason || 'Cheating — AC detection');
+    });
+  });
+  el('ac-detections-wrap')?.querySelectorAll('.ac-screenshot-link').forEach((link) => {
+    link.addEventListener('click', (e) => {
+      const url = link.getAttribute('href') || '';
+      if (url.startsWith('http')) return;
+      e.preventDefault();
+      acShowFrame(url, `Evidence — ${link.dataset.pname || 'player'}`);
+    });
+  });
+}
+
+function acBindUnbanActions() {
+  el('ac-bans-wrap')?.querySelectorAll('.ac-unban-btn').forEach((btn) => {
+    btn.addEventListener('click', async () => {
+      if (!confirm(`Unban ${btn.dataset.banid}?`)) return;
+      try {
+        const res = await fetch('/api/ac/admin/unban', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ banId: btn.dataset.banid }),
+        });
+        if (!res.ok) throw new Error(await res.text());
+        toast('Unban complete');
+        loadAcPanel(true);
+      } catch (err) {
+        toast('Unban failed');
+        console.error(err);
+      }
+    });
+  });
+}
+
+function acRenderPlayers(players) {
+  const q = acState.playerFilter.trim().toLowerCase();
+  const filtered = q
+    ? players.filter((p) => `${p.name} ${p.id}`.toLowerCase().includes(q))
+    : players;
+
+  const rows = filtered.map((p) => {
+    const trust = p.trust ?? 100;
+    const rowClass = trust < 40 ? ' class="ac-row-danger"' : '';
+    return `<tr${rowClass}>
+      <td>${esc(p.name)}</td>
+      <td>#${p.id}</td>
+      <td><span class="ac-trust ${acTrustClass(trust)}">${trust}</span></td>
+      <td>${p.strikes ?? 0}</td>
+      <td><code class="ac-fp">${esc(p.fingerprint || '—')}</code></td>
+      <td>${p.ping ?? 0}ms</td>
+      <td class="ac-actions">
+        <button type="button" class="btn ghost btn-sm ac-watch-btn" data-pid="${p.id}" data-pname="${esc(p.name)}">Watch</button>
+        <button type="button" class="btn ghost btn-sm ac-snap-btn" data-pid="${p.id}" data-pname="${esc(p.name)}">Snap</button>
+        <button type="button" class="btn ghost btn-sm ac-kick-btn" data-pid="${p.id}" data-pname="${esc(p.name)}">Kick</button>
+        <button type="button" class="btn danger btn-sm ac-ban-btn" data-pid="${p.id}" data-pname="${esc(p.name)}">Ban</button>
+      </td>
+    </tr>`;
+  }).join('');
+
+  el('ac-players-wrap').innerHTML = rows
+    ? `<table><thead><tr><th>Name</th><th>ID</th><th>Trust</th><th>Strikes</th><th>FP</th><th>Ping</th><th>Actions</th></tr></thead><tbody>${rows}</tbody></table>`
+    : `<p class="hint">${players.length ? 'No players match your search.' : 'No players synced — restart shaderp-ac and verify shade:acApiKey matches AC_API_KEY on Render.'}</p>`;
+  acBindPlayerActions();
+}
+
+function acRenderDetections(dets) {
+  if (!dets.length) {
+    el('ac-detections-wrap').innerHTML = '<p class="hint">No detections yet — shaderp-ac pushes alerts here when cheats are flagged.</p>';
+    return;
+  }
+
+  const rows = dets.map((d) => {
+    const pid = d.playerId ?? d.details?.playerId ?? '';
+    const pname = d.playerName || '?';
+    const detail = d.details?.detail || d.details?.details?.detail || d.details?.menu || d.details?.executor || '';
+    const screenshot = d.details?.screenshot || d.details?.details?.screenshot;
+    const canAct = pid !== '' && pid != null;
+    return `<tr class="ac-det-row">
+      <td>${d.at ? new Date(d.at).toLocaleString() : '—'}</td>
+      <td><strong>${esc(pname)}</strong>${pid ? ` <small>#${pid}</small>` : ''}</td>
+      <td><span class="ac-det-type">${esc(d.detection || 'unknown')}</span></td>
+      <td>${d.trust != null ? `<span class="ac-trust ${acTrustClass(d.trust)}">${d.trust}</span>` : '—'}</td>
+      <td><span class="ac-det-detail" title="${esc(String(detail))}">${esc(String(detail || '—'))}</span>
+        ${screenshot ? `<a href="${esc(screenshot)}" class="ac-screenshot-link" data-pname="${esc(pname)}" target="_blank" rel="noopener">📷 evidence</a>` : ''}</td>
+      <td class="ac-actions">${canAct ? `
+        <button type="button" class="btn ghost btn-sm ac-det-watch" data-pid="${pid}" data-pname="${esc(pname)}">Watch</button>
+        <button type="button" class="btn ghost btn-sm ac-det-snap" data-pid="${pid}" data-pname="${esc(pname)}">Snap</button>
+        <button type="button" class="btn danger btn-sm ac-det-ban" data-pid="${pid}" data-pname="${esc(pname)}" data-reason="${esc(`Cheating — ${d.detection || 'AC detection'}`)}">Ban</button>` : '<span class="hint">offline</span>'}</td>
+    </tr>`;
+  }).join('');
+
+  el('ac-detections-wrap').innerHTML = `<table><thead><tr><th>Time</th><th>Player</th><th>Detection</th><th>Trust</th><th>Detail</th><th>Actions</th></tr></thead><tbody>${rows}</tbody></table>`;
+  acBindDetectionActions();
+}
+
+function acNotifyNewDetections(dets) {
+  const newest = dets[0]?.at || 0;
+  if (!newest) return;
+  if (acState.lastDetectionAt && newest > acState.lastDetectionAt) {
+    const d = dets[0];
+    toast(`🚨 ${d.playerName || 'Player'} — ${d.detection || 'detection'}`);
+  }
+  acState.lastDetectionAt = Math.max(acState.lastDetectionAt, newest);
+}
+
+let acToggleDraft = {};
+
+async function loadAcPortalVersion() {
+  try {
+    const res = await fetch('/api/portal/version');
+    if (!res.ok) return;
+    const data = await res.json();
+    const badge = el('ac-portal-version');
+    if (badge) badge.textContent = `(Portal v${data.version || '?'})`;
+  } catch (_) {}
+}
+
+async function loadAcToggles() {
+  try {
+    const res = await fetch('/api/ac/admin/protection-toggles');
+    if (!res.ok) return;
+    const data = await res.json();
+    acToggleDraft = { ...(data.toggles || {}) };
+    acRenderToggles(data);
+  } catch (_) {}
+}
+
+function acRenderToggles(data) {
+  const wrap = el('ac-toggles-wrap');
+  if (!wrap) return;
+  const toggles = data.toggles || {};
+  const catalog = [
+    { group: 'Player', items: ['Anti Noclip', 'Anti Godmode', 'Anti Invisible', 'Anti Teleport', 'Anti Speed Hack', 'Anti Super Jump', 'Anti No Ragdoll', 'Anti Infinite Stamina', 'Anti Bigger Hitbox'] },
+    { group: 'Combat', items: ['Anti Give Weapon', 'Anti Weapon Pickup', 'Anti Damage Modifier', 'Anti No Recoil', 'Anti No Reload', 'Anti Explosion Bullet', 'Anti Magic Bullet', 'Anti Aim Assist', 'Anti Aimbot', 'Anti Silent Aim', 'Anti Rapid Fire', 'Anti Weapon Inventory', 'Anti AI', 'Anti Armor', 'Anti Combat Roll', 'Anti Attach'] },
+    { group: 'Visual', items: ['Anti Night Vision', 'Anti Thermal Vision', 'Anti Player Blips'] },
+    { group: 'Advanced', items: ['Anti Freecam', 'Anti Spectate', 'Anti AFK Injection', 'Anti State Bag Overflow', 'Anti Extended NUI Devtools', 'Anti Resource Stop', 'Anti Resource Starter', 'Anti Particles', 'Anti Super Punch', 'Anti Invalid Ped'] },
+    { group: 'Extended', items: ['Anti Lua Injection', 'Anti Plate Changer', 'Anti Tiny Ped', 'Anti Handling Modifier', 'Anti Vehicle Weapons', 'Anti Network Events', 'Anti Chat Spam', 'Anti Explosive Damage', 'Anti Clear Tasks', 'Anti Event Blacklist', 'Anti Money Monitor'] },
+  ];
+  wrap.innerHTML = catalog.map((cat) => `
+    <div class="ac-toggle-group">
+      <h4>${esc(cat.group)}</h4>
+      ${cat.items.map((name) => {
+        const on = toggles[name] !== false;
+        return `<label class="ac-toggle-item"><input type="checkbox" data-toggle="${esc(name)}" ${on ? 'checked' : ''} ${hasRole('admin') ? '' : 'disabled'} /><span>${esc(name)}</span></label>`;
+      }).join('')}
+    </div>
+  `).join('');
+  const meta = el('ac-toggles-meta');
+  if (meta && data.meta?.updatedAt) {
+    meta.textContent = `Last saved ${new Date(data.meta.updatedAt).toLocaleString()} by ${esc(data.meta.updatedBy || 'staff')}`;
+  }
+  const saveBtn = el('ac-toggles-save');
+  if (saveBtn) saveBtn.disabled = !hasRole('admin');
+  wrap.querySelectorAll('input[data-toggle]').forEach((input) => {
+    input.addEventListener('change', () => {
+      acToggleDraft[input.dataset.toggle] = input.checked;
+      if (saveBtn) saveBtn.disabled = false;
+    });
+  });
+}
+
+async function saveAcToggles() {
+  if (!hasRole('admin')) return;
+  try {
+    const res = await fetch('/api/ac/admin/protection-toggles', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ toggles: acToggleDraft }),
+    });
+    if (!res.ok) throw new Error(await res.text());
+    toast('Detection toggles saved — FXServer syncs within ~60s');
+    loadAcToggles();
+    el('ac-toggles-save').disabled = true;
+  } catch (err) {
+    toast('Failed to save toggles');
+    console.error(err);
+  }
+}
+
+async function loadAcSignatures() {
+  try {
+    const res = await fetch('/api/ac/admin/signatures');
+    if (!res.ok) return;
+    const data = await res.json();
+    acRenderSignatures(data.signatures || {});
+  } catch (_) {}
+}
+
+function acRenderSignatures(sig) {
+  const wrap = el('ac-signatures-wrap');
+  if (!wrap) return;
+  const rows = [];
+  for (const cat of ['executors', 'patterns', 'ocr']) {
+    for (const entry of sig[cat] || []) {
+      const val = entry.value || entry;
+      rows.push(`<tr>
+        <td>${esc(cat)}</td>
+        <td><code>${esc(String(val))}</code></td>
+        <td><small>${entry.at ? new Date(entry.at).toLocaleString() : ''}</small></td>
+        <td><button type="button" class="btn ghost btn-sm ac-sig-del" data-cat="${esc(cat === 'executors' ? 'executor' : cat === 'patterns' ? 'pattern' : 'ocr')}" data-val="${esc(String(val))}">Remove</button></td>
+      </tr>`);
+    }
+  }
+  wrap.innerHTML = rows.length
+    ? `<table><thead><tr><th>Type</th><th>Value</th><th>Added</th><th></th></tr></thead><tbody>${rows.join('')}</tbody></table>`
+    : '<p class="hint">No custom signatures yet — add executor names, partial patterns, or OCR words above.</p>';
+  wrap.querySelectorAll('.ac-sig-del').forEach((btn) => {
+    btn.addEventListener('click', async () => {
+      if (!confirm(`Remove signature "${btn.dataset.val}"?`)) return;
+      await fetch('/api/ac/admin/signatures', {
+        method: 'DELETE',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ category: btn.dataset.cat, value: btn.dataset.val }),
+      });
+      toast('Signature removed');
+      loadAcSignatures();
+    });
+  });
+}
+
+async function loadAcPanel(silent = false) {
+  if (!hasRole('staff')) return;
+  try {
+    const [statusRes, playersRes, detectionsRes, bansRes, denialsRes, hintsRes, altRes] = await Promise.all([
+      fetch('/api/ac/admin/status'),
+      fetch('/api/ac/admin/players'),
+      fetch('/api/ac/admin/detections?limit=20'),
+      fetch('/api/ac/admin/bans?limit=15'),
+      fetch('/api/ac/admin/join-denials?limit=8'),
+      fetch('/api/ac/admin/rate-hints'),
+      fetch('/api/ac/admin/alt-clusters?limit=10'),
+    ]);
+
+    if (!playersRes.ok) {
+      if (!silent) {
+        el('ac-players-wrap').innerHTML = '<p class="hint warn-banner">Anti-cheat API unavailable — set AC_ENABLED=1 and AC_API_KEY on Render, then ensure shaderp-ac is running with matching shade:acApiKey.</p>';
+      }
+      return;
+    }
+
+    const statusData = statusRes.ok ? await statusRes.json() : {};
+    const playersData = await playersRes.json();
+    const detectionsData = detectionsRes.ok ? await detectionsRes.json() : { detections: [] };
+    const bansData = bansRes.ok ? await bansRes.json() : { bans: [] };
+    const denialsData = denialsRes.ok ? await denialsRes.json() : { denials: [] };
+    const hintsData = hintsRes.ok ? await hintsRes.json() : { events: [] };
+    const altData = altRes.ok ? await altRes.json() : { clusters: [] };
+
+    acSetServerStatus(statusData);
+    const stats = playersData.stats || statusData.stats || {};
+    el('ac-stats').innerHTML = [
+      stat('Online', stats.online ?? playersData.players?.length ?? 0),
+      stat('Max slots', stats.maxSlots ?? '—'),
+      stat('Active watches', statusData.activeSessions ?? 0),
+      stat('Last sync', playersData.lastSync ? new Date(playersData.lastSync).toLocaleTimeString() : '—'),
+    ].join('');
+
+    acRenderPlayers(playersData.players || []);
+    const dets = detectionsData.detections || [];
+    acNotifyNewDetections(dets);
+    acRenderDetections(dets);
+
+    el('ac-bans-wrap').innerHTML = (bansData.bans || []).length
+      ? `<ul class="ac-ban-list">${bansData.bans.map((b) =>
+          `<li><strong>${esc(b.playerName || '?')}</strong> — ${esc(b.reason || 'banned')} <small>${b.at ? new Date(b.at).toLocaleString() : ''}</small>
+            <button type="button" class="btn ghost btn-sm ac-unban-btn" data-banid="${esc(String(b.banId || b.id || ''))}">Unban</button></li>`
+        ).join('')}</ul>`
+      : '<p class="hint">No bans synced yet.</p>';
+    acBindUnbanActions();
+
+    el('ac-join-wrap').innerHTML = (denialsData.denials || []).filter((d) => !d.allowed).length
+      ? `<ul class="ac-ban-list">${denialsData.denials.filter((d) => !d.allowed).map((d) =>
+          `<li><strong>${esc(d.playerName || '?')}</strong> — ${esc(d.reason || 'blocked')} <small>${esc(d.code || '')}</small></li>`
+        ).join('')}</ul>`
+      : '<p class="hint">No recent join blocks.</p>';
+
+    const hintEvents = hintsData.events || [];
+    el('ac-rate-hints-wrap').innerHTML = hintEvents.length
+      ? `<h4 class="section-sub">Event whitelist suggestions</h4><ul class="ac-ban-list">${hintEvents.map((h) =>
+          `<li><code>${esc(h.event)}</code> — ${h.count} hits
+            <button type="button" class="btn ghost btn-sm ac-whitelist-event" data-event="${esc(h.event)}">Whitelist</button></li>`
+        ).join('')}</ul>`
+      : '';
+
+    el('ac-rate-hints-wrap').querySelectorAll('.ac-whitelist-event').forEach((btn) => {
+      btn.addEventListener('click', async () => {
+        if (!confirm(`Whitelist event "${btn.dataset.event}" on the live server?`)) return;
+        try {
+          const res = await fetch('/api/ac/admin/whitelist-event', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ eventName: btn.dataset.event }),
+          });
+          if (!res.ok) throw new Error(await res.text());
+          toast(`Whitelisted ${btn.dataset.event}`);
+          btn.disabled = true;
+          btn.textContent = 'Applied';
+        } catch (err) {
+          toast('Whitelist failed');
+          console.error(err);
+        }
+      });
+    });
+
+    const clusters = altData.clusters || [];
+    el('ac-alt-wrap').innerHTML = clusters.length
+      ? clusters.map((c) =>
+          `<div class="ac-alt-cluster" style="margin-bottom:0.75rem;padding:0.5rem;border:1px solid var(--border);border-radius:8px">
+            <strong class="ac-trust ${c.risk === 'high' ? 'ac-trust-low' : 'ac-trust-mid'}">${esc(c.linkType)}</strong>
+            <code>${esc(String(c.key).slice(0, 48))}</code>
+            <ul class="ac-ban-list">${(c.members || []).map((m) =>
+              `<li>${esc(m.playerName || '?')} ${m.banned ? '<span class="ac-trust ac-trust-low">BANNED</span>' : ''} ${m.license ? `<small>${esc(m.license)}</small>` : ''}</li>`
+            ).join('')}</ul>
+          </div>`
+        ).join('')
+      : '<p class="hint">No alt clusters detected yet — fingerprints build as players connect.</p>';
+
+    loadAcSignatures();
+    loadAcToggles();
+    loadAcPortalVersion();
+  } catch (err) {
+    console.error(err);
+    if (!silent) el('ac-players-wrap').innerHTML = '<p class="hint">Failed to load anti-cheat data.</p>';
+  }
+}
+
+async function startAcWatch(playerId, playerName) {
+  try {
+    if (acState.sessionId) await stopAcWatch();
+    const loading = el('ac-frame-loading');
+    const img = el('ac-frame');
+    if (loading) loading.hidden = false;
+    if (img) img.hidden = true;
+
+    const res = await fetch('/api/ac/admin/watch', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ playerId: Number(playerId), playerName }),
+    });
+    if (!res.ok) throw new Error(await res.text());
+    const data = await res.json();
+    acState.sessionId = data.sessionId;
+    el('ac-watch-title').textContent = `Watching ${playerName} (#${playerId})`;
+    el('ac-watch-hint').textContent = 'Live stream active — frames arrive every ~1s once FXServer picks up the command.';
+    el('ac-stop-watch').disabled = false;
+    toast(`Watch started for ${playerName}`);
+    pollAcFrame();
+  } catch (err) {
+    toast('Watch failed — is player online?');
+    console.error(err);
+  }
+}
+
+async function stopAcWatch() {
+  if (acState.pollTimer) clearTimeout(acState.pollTimer);
+  acState.pollTimer = null;
+  if (acState.sessionId) {
+    try {
+      await fetch('/api/ac/admin/stop-watch', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ sessionId: acState.sessionId }),
+      });
+    } catch (_) {}
+  }
+  acState.sessionId = null;
+  el('ac-frame').hidden = true;
+  el('ac-frame-loading').hidden = true;
+  el('ac-watch-title').textContent = 'Select a player to watch';
+  el('ac-watch-hint').textContent = 'Click Watch on a player or on a detection below. Live frames update every ~1s.';
+  el('ac-stop-watch').disabled = true;
+}
+
+async function pollAcFrame() {
+  if (!acState.sessionId) return;
+  try {
+    const res = await fetch(`/api/ac/admin/frame/${encodeURIComponent(acState.sessionId)}`);
+    if (res.ok) {
+      const frame = await res.json();
+      acShowFrame(frame.image, el('ac-watch-title').textContent);
+    }
+  } catch (_) {}
+  acState.pollTimer = setTimeout(pollAcFrame, 700);
+}
+
+function startAcAutoRefresh() {
+  stopAcAutoRefresh();
+  if (!el('ac-auto-refresh')?.checked) return;
+  acState.refreshTimer = setInterval(() => {
+    const panel = document.querySelector('#panel-anticheat.active');
+    if (panel && hasRole('staff')) loadAcPanel(true);
+  }, 10000);
+}
+
+function stopAcAutoRefresh() {
+  if (acState.refreshTimer) clearInterval(acState.refreshTimer);
+  acState.refreshTimer = null;
+}
+
+function setupAcPanel() {
+  el('ac-refresh')?.addEventListener('click', () => loadAcPanel());
+  el('ac-stop-watch')?.addEventListener('click', () => stopAcWatch());
+  el('ac-auto-refresh')?.addEventListener('change', () => {
+    if (document.querySelector('#panel-anticheat.active')) startAcAutoRefresh();
+    else stopAcAutoRefresh();
+  });
+  el('ac-player-search')?.addEventListener('input', (e) => {
+    acState.playerFilter = e.target.value;
+    fetch('/api/ac/admin/players')
+      .then((r) => r.ok ? r.json() : null)
+      .then((data) => { if (data) acRenderPlayers(data.players || []); })
+      .catch(() => {});
+  });
+  el('ac-ban-cancel')?.addEventListener('click', closeAcBanModal);
+  el('ac-ban-confirm')?.addEventListener('click', confirmAcBan);
+  el('ac-ban-modal')?.querySelector('[data-ac-close-ban]')?.addEventListener('click', closeAcBanModal);
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape' && !el('ac-ban-modal')?.hidden) closeAcBanModal();
+  });
+  el('ac-toggles-save')?.addEventListener('click', saveAcToggles);
+  el('ac-sig-add')?.addEventListener('click', async () => {
+    const category = el('ac-sig-category')?.value;
+    const value = el('ac-sig-value')?.value?.trim();
+    if (!value) return toast('Enter a signature value');
+    const res = await fetch('/api/ac/admin/signatures', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ category, value }),
+    });
+    if (!res.ok) { toast('Could not add signature'); return; }
+    el('ac-sig-value').value = '';
+    toast('Signature added — syncs to server within ~60s');
+    loadAcSignatures();
+  });
+}
+
 async function loadAnalytics() {
   try {
     const res = await fetch('/api/analytics/summary?days=14');
@@ -1333,6 +1913,7 @@ async function init() {
   }
 
   setupLogsPanel();
+  setupAcPanel();
 
   track('page_view', { path: location.pathname });
 }

@@ -22,6 +22,8 @@ services:
         value: https://discord.gg/sbnu98HYAZ
       - key: PORTAL_OWNER_IDS
         value: "1170463252698902561,940681605670916148"
+      - key: AC_ENABLED
+        value: "1"
       - key: DISCORD_CLIENT_SECRET
         sync: false
       - key: DISCORD_BOT_TOKEN

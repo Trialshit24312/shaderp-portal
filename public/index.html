@@ -10,7 +10,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="/styles.css" />
+  <link rel="stylesheet" href="/styles.css?v=2.1.0" />
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js" defer></script>
 </head>
 <body>
@@ -287,6 +287,89 @@
       <div class="card" style="margin-top:1rem"><h3>Server paths (sync source)</h3><div id="settings-paths" class="table-wrap"></div></div>
     </section>
 
+    <section id="panel-anticheat" class="panel" data-min-role="staff">
+      <h2>Anti-Cheat — Live Watch &amp; Ban <span id="ac-portal-version" class="hint" style="font-weight:400"></span></h2>
+      <p class="hint">Watch players live and ban cheaters from the website. Requires <code>shaderp-ac</code> on FXServer with matching <code>AC_API_KEY</code> / <code>shade:acApiKey</code>.</p>
+      <div id="ac-panel-body">
+        <div class="ac-toolbar">
+          <span id="ac-server-status" class="ac-status ac-status-offline">Server offline</span>
+          <input type="search" id="ac-player-search" class="admin-search" placeholder="Search players…" autocomplete="off" />
+          <label class="ac-auto-label"><input type="checkbox" id="ac-auto-refresh" checked /> Auto-refresh</label>
+          <button type="button" class="btn ghost btn-sm" id="ac-refresh">Refresh now</button>
+          <button type="button" class="btn ghost btn-sm" id="ac-stop-watch" disabled>Stop watching</button>
+        </div>
+        <div class="stat-grid" id="ac-stats"></div>
+        <div class="split-panels logs-split ac-main-split">
+          <div class="card logs-list-card">
+            <h3>Online players</h3>
+            <div id="ac-players-wrap" class="table-wrap"></div>
+          </div>
+          <div class="card logs-detail-card ac-watch-card">
+            <h3 id="ac-watch-title">Select a player to watch</h3>
+            <p id="ac-watch-hint" class="hint">Click <strong>Watch</strong> on a player or on a detection below. Live frames update every ~1s.</p>
+            <div id="ac-frame-wrap" class="ac-frame-wrap">
+              <div id="ac-frame-loading" class="ac-frame-loading" hidden>Waiting for live frame…</div>
+              <img id="ac-frame" alt="Live frame" hidden />
+            </div>
+          </div>
+        </div>
+        <div class="card" style="margin-top:1rem">
+          <h3>Recent detections <span class="hint" style="font-weight:400">— ban or watch directly from alerts</span></h3>
+          <div id="ac-detections-wrap" class="table-wrap"></div>
+        </div>
+        <div class="split-panels" style="margin-top:1rem">
+          <div class="card">
+            <h3>Recent bans</h3>
+            <div id="ac-bans-wrap"></div>
+          </div>
+          <div class="card">
+            <h3>Join blocks &amp; hints</h3>
+            <div id="ac-join-wrap"></div>
+            <div id="ac-rate-hints-wrap" style="margin-top:0.75rem"></div>
+          </div>
+        </div>
+        <div class="card" style="margin-top:1rem">
+          <h3>Detection toggles <span class="hint" style="font-weight:400">— EZAC-style; syncs to live server every 60s (admin only to save)</span></h3>
+          <div id="ac-toggles-wrap" class="ac-toggles-grid"></div>
+          <div class="ac-toolbar" style="margin-top:0.75rem">
+            <button type="button" class="btn ghost btn-sm" id="ac-toggles-save" disabled>Save toggles</button>
+            <span id="ac-toggles-meta" class="hint"></span>
+          </div>
+        </div>
+        <div class="card" style="margin-top:1rem">
+          <h3>Cheat signatures <span class="hint" style="font-weight:400">— add from website, syncs to live server every 60s</span></h3>
+          <div class="ac-toolbar" style="margin-bottom:0.5rem">
+            <select id="ac-sig-category" class="admin-search">
+              <option value="executor">Executor name</option>
+              <option value="pattern">Partial pattern</option>
+              <option value="ocr">OCR word</option>
+            </select>
+            <input type="text" id="ac-sig-value" class="admin-search" placeholder="e.g. SusanoMenu" autocomplete="off" />
+            <button type="button" class="btn ghost btn-sm" id="ac-sig-add">Add signature</button>
+          </div>
+          <div id="ac-signatures-wrap" class="table-wrap"></div>
+        </div>
+        <div class="card" style="margin-top:1rem">
+          <h3>Alt / fingerprint clusters</h3>
+          <div id="ac-alt-wrap"></div>
+        </div>
+      </div>
+    </section>
+
+    <div id="ac-ban-modal" class="ac-modal" hidden>
+      <div class="ac-modal-backdrop" data-ac-close-ban></div>
+      <div class="ac-modal-box card">
+        <h3>Ban player</h3>
+        <p id="ac-ban-target" class="hint"></p>
+        <label class="ac-field-label" for="ac-ban-reason">Ban reason</label>
+        <textarea id="ac-ban-reason" rows="3" placeholder="Cheating — menu detected, aimbot, etc."></textarea>
+        <div class="ac-modal-actions">
+          <button type="button" class="btn ghost" id="ac-ban-cancel">Cancel</button>
+          <button type="button" class="btn danger" id="ac-ban-confirm">Ban player</button>
+        </div>
+      </div>
+    </div>
+
     <section id="panel-logs" class="panel" data-min-role="owner">
       <h2>Server logs</h2>
       <p class="hint">Live crash, disconnect, lag, and error events from <code>shade-crashlog</code> — owners only.</p>
@@ -327,6 +410,6 @@
   <footer class="site-footer" id="site-footer"></footer>
 
   <div id="toast" class="toast" hidden>Copied</div>
-  <script src="/app.js" type="module"></script>
+  <script src="/app.js?v=2.1.0" type="module"></script>
 </body>
 </html>

@@ -18,6 +18,8 @@ import { getPortalEnv, isAuthConfigured, isOAuthReady, portalBaseUrl } from './e
 import { loadDashboardData, normalizeUpdatePasses, extractPassHighlights } from './dashboard.js';
 import { createQueueManager, queueApiKeyValid } from './queue.js';
 import { createLogManager, logsApiKeyValid } from './logs.js';
+import { createAcManager, registerAcRoutes } from './ac.js';
+import { startAcDiscordBot } from './discord-ac-bot.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const ROOT = path.join(__dirname, '..');
@@ -32,6 +34,7 @@ const serverLogs = createLogManager({
   maxEntries: portalEnv.LOGS_MAX_ENTRIES,
   retentionDays: portalEnv.LOGS_RETENTION_DAYS,
 });
+const acManager = createAcManager({ enabled: portalEnv.AC_ENABLED });
 
 const app = express();
 const PORT = process.env.PORT || 8787;
@@ -39,7 +42,7 @@ const isProd = process.env.NODE_ENV === 'production';
 
 app.set('trust proxy', 1);
 app.use(cookieParser());
-app.use(express.json({ limit: '2mb' }));
+app.use(express.json({ limit: '8mb' }));
 app.use(
   session({
     secret: portalEnv.SESSION_SECRET || 'dev-only-change-me',
@@ -345,7 +348,33 @@ app.get('/api/logs/:id', requireRole('owner'), (req, res) => {
   res.json(entry);
 });
 
-app.use(express.static(PUBLIC));
+registerAcRoutes(app, { acManager, portalEnv, requireRole });
+
+app.get('/api/portal/version', (_req, res) => {
+  res.setHeader('Cache-Control', 'no-cache, must-revalidate');
+  res.json({
+    version: '2.1.0',
+    acEnabled: acManager.isEnabled(),
+    features: ['anticheat', 'detection-toggles', 'signatures', 'live-watch'],
+  });
+});
+
+app.use((req, res, next) => {
+  if (/\.(js|css|html)$/.test(req.path)) {
+    res.setHeader('Cache-Control', 'no-cache, must-revalidate');
+  }
+  next();
+});
+
+app.use(express.static(PUBLIC, {
+  etag: true,
+  lastModified: true,
+  setHeaders(res, filePath) {
+    if (/\.(js|css|html)$/.test(filePath)) {
+      res.setHeader('Cache-Control', 'no-cache, must-revalidate');
+    }
+  },
+}));
 app.get('*', (req, res) => {
   trackPageView({ path: req.path, userId: getUser(req)?.id, role: getUser(req)?.appRole });
   res.sendFile(path.join(PUBLIC, 'index.html'));
@@ -356,4 +385,8 @@ app.listen(PORT, '0.0.0.0', () => {
   console.log(`OAuth: ${isOAuthReady(portalEnv) ? 'ready' : 'needs DISCORD_CLIENT_SECRET on Render'}`);
   console.log(`Web queue: ${webQueue.isEnabled() ? 'enabled' : 'disabled'}${portalEnv.QUEUE_API_KEY ? '' : ' (set QUEUE_API_KEY on Render)'}`);
   console.log(`Server logs: ${serverLogs.isEnabled() ? 'enabled' : 'disabled'} (owner panel)`);
+  console.log(`Anti-cheat API: ${acManager.isEnabled() ? 'enabled' : 'disabled'}${portalEnv.AC_API_KEY ? '' : ' (set AC_API_KEY on Render)'}`);
+  startAcDiscordBot({ acManager, portalEnv, roleMap }).catch((err) => {
+    console.error('AC Discord bot failed to start:', err.message);
+  });
 });

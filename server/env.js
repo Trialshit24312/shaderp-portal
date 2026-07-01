@@ -40,6 +40,14 @@ export function getPortalEnv() {
     LOGS_ENABLED: process.env.LOGS_ENABLED !== '0',
     LOGS_MAX_ENTRIES: Math.min(2000, parseInt(process.env.LOGS_MAX_ENTRIES, 10) || 600),
     LOGS_RETENTION_DAYS: Math.min(90, parseInt(process.env.LOGS_RETENTION_DAYS, 10) || 30),
+    AC_API_KEY: process.env.AC_API_KEY || process.env.QUEUE_API_KEY,
+    AC_ENABLED: process.env.AC_ENABLED !== '0',
+    AC_DISCORD_BOT_TOKEN: process.env.AC_DISCORD_BOT_TOKEN || process.env.DISCORD_BOT_TOKEN,
+    AC_DISCORD_GUILD_ID: process.env.AC_DISCORD_GUILD_ID || process.env.DISCORD_GUILD_ID || SHADERP.DISCORD_GUILD_ID,
+    AC_CHEAT_DISCORD_GUILDS: process.env.AC_CHEAT_DISCORD_GUILDS || '',
+    AC_CHEAT_GUILD_CHECK: process.env.AC_CHEAT_GUILD_CHECK,
+    AC_REQUIRE_DISCORD_MEMBER: process.env.AC_REQUIRE_DISCORD_MEMBER,
+    AC_DISCORD_SLASH_COMMANDS: process.env.AC_DISCORD_SLASH_COMMANDS,
   };
 }
 

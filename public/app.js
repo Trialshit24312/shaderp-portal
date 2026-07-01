@@ -82,6 +82,10 @@ function hasRole(min) {
   return (ROLE_LEVEL[r] ?? 0) >= (ROLE_LEVEL[min] ?? 99);
 }
 
+function canUnban() {
+  return ME?.canUnban === true || ME?.user?.canUnban === true;
+}
+
 async function loadMe() {
   const res = await fetch('/api/me');
   ME = await res.json();
@@ -1392,6 +1396,7 @@ function acBindDetectionActions() {
 }
 
 function acBindUnbanActions() {
+  if (!canUnban()) return;
   el('ac-bans-wrap')?.querySelectorAll('.ac-unban-btn').forEach((btn) => {
     btn.addEventListener('click', async () => {
       if (!confirm(`Unban ${btn.dataset.banid}?`)) return;
@@ -1401,11 +1406,14 @@ function acBindUnbanActions() {
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ banId: btn.dataset.banid }),
         });
-        if (!res.ok) throw new Error(await res.text());
+        if (!res.ok) {
+          const err = await res.json().catch(() => ({}));
+          throw new Error(err.error || 'Unban failed');
+        }
         toast('Unban complete');
         loadAcPanel(true);
       } catch (err) {
-        toast('Unban failed');
+        toast(err.message?.includes('owner') ? 'Only the server owner can unban' : 'Unban failed');
         console.error(err);
       }
     });
@@ -1643,7 +1651,7 @@ async function loadAcPanel(silent = false) {
     el('ac-bans-wrap').innerHTML = (bansData.bans || []).length
       ? `<ul class="ac-ban-list">${bansData.bans.map((b) =>
           `<li><strong>${esc(b.playerName || '?')}</strong> — ${esc(b.reason || 'banned')} <small>${b.at ? new Date(b.at).toLocaleString() : ''}</small>
-            <button type="button" class="btn ghost btn-sm ac-unban-btn" data-banid="${esc(String(b.banId || b.id || ''))}">Unban</button></li>`
+            ${canUnban() ? `<button type="button" class="btn ghost btn-sm ac-unban-btn" data-banid="${esc(String(b.banId || b.id || ''))}">Unban</button>` : ''}</li>`
         ).join('')}</ul>`
       : '<p class="hint">No bans synced yet.</p>';
     acBindUnbanActions();

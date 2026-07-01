@@ -5,6 +5,7 @@
 import fs from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
+import { canUnbanDiscordUser } from './unban.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const DATA_DIR = path.join(__dirname, '..', 'data');
@@ -278,7 +279,7 @@ export const PROTECTION_CATALOG = [
   { group: 'Combat', items: ['Anti Give Weapon', 'Anti Weapon Pickup', 'Anti Damage Modifier', 'Anti No Recoil', 'Anti No Reload', 'Anti Explosion Bullet', 'Anti Magic Bullet', 'Anti Aim Assist', 'Anti Aimbot', 'Anti Silent Aim', 'Anti Rapid Fire', 'Anti Weapon Inventory', 'Anti AI', 'Anti Armor', 'Anti Combat Roll', 'Anti Attach'] },
   { group: 'Visual', items: ['Anti Night Vision', 'Anti Thermal Vision', 'Anti Player Blips'] },
   { group: 'Advanced', items: ['Anti Freecam', 'Anti Spectate', 'Anti AFK Injection', 'Anti State Bag Overflow', 'Anti Extended NUI Devtools', 'Anti Resource Stop', 'Anti Resource Starter', 'Anti Particles', 'Anti Super Punch', 'Anti Invalid Ped'] },
-  { group: 'Extended', items: ['Anti Lua Injection', 'Anti Plate Changer', 'Anti Tiny Ped', 'Anti Handling Modifier', 'Anti Vehicle Weapons', 'Anti Network Events', 'Anti Chat Spam', 'Anti Explosive Damage', 'Anti Clear Tasks', 'Anti Event Blacklist', 'Anti Money Monitor'] },
+  { group: 'Extended', items: ['Anti Lua Injection', 'Anti Plate Changer', 'Anti Tiny Ped', 'Anti Handling Modifier', 'Anti Vehicle Weapons', 'Anti Network Events', 'Anti Chat Spam', 'Anti Explosive Damage', 'Anti Clear Tasks', 'Anti Event Blacklist', 'Anti Money Monitor', 'Anti Weapon Range', 'Anti Infinite Ammo', 'Anti Vehicle Boost'] },
 ];
 
 function acApiKeyValid(req, portalEnv) {
@@ -951,6 +952,10 @@ export function registerAcRoutes(app, { acManager, portalEnv, requireRole }) {
   });
 
   app.post('/api/ac/admin/unban', requireRole('staff'), (req, res) => {
+    const user = req.session?.user;
+    if (!canUnbanDiscordUser(user?.id, portalEnv)) {
+      return res.status(403).json({ error: 'Only the server owner can unban players' });
+    }
     const { banId, identifier } = req.body || {};
     if (!banId && !identifier) return res.status(400).json({ error: 'banId or identifier required' });
     const ok = acManager.unbanBan({ banId, identifier });

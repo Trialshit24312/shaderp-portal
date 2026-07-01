@@ -11,6 +11,7 @@ import {
 } from 'discord.js';
 import { fetchGuildMemberBot } from './discord.js';
 import { resolveAppRole, ROLE_LEVEL } from './roles.js';
+import { canUnbanDiscordUser } from './unban.js';
 
 function staffRoleOk(member, roleMap, ownerIds, userId) {
   if (!member) return false;
@@ -119,6 +120,10 @@ export async function startAcDiscordBot({ acManager, portalEnv, roleMap }) {
       }
 
       if (sub === 'unban') {
+        if (!canUnbanDiscordUser(interaction.user.id, portalEnv)) {
+          await interaction.reply({ content: '⛔ Only the server owner can unban players.', ephemeral: true });
+          return;
+        }
         const banId = interaction.options.getString('ban_id');
         const ok = acManager.unbanBan({ banId });
         await interaction.reply({

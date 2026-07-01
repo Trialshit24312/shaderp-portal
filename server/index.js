@@ -20,6 +20,7 @@ import { createQueueManager, queueApiKeyValid } from './queue.js';
 import { createLogManager, logsApiKeyValid } from './logs.js';
 import { createAcManager, registerAcRoutes } from './ac.js';
 import { startAcDiscordBot } from './discord-ac-bot.js';
+import { canUnbanDiscordUser } from './unban.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const ROOT = path.join(__dirname, '..');
@@ -104,8 +105,10 @@ app.post('/auth/logout', (req, res) => {
 
 app.get('/api/me', (req, res) => {
   const user = getUser(req);
+  const canUnban = user ? canUnbanDiscordUser(user.id, portalEnv) : false;
   res.json({
-    user,
+    user: user ? { ...user, canUnban } : null,
+    canUnban,
     panels: user ? panelsForRole(user.appRole) : panelsForRole('guest'),
     roleLevel: user ? ROLE_LEVEL[user.appRole] : 0,
     discordInvite: portalEnv.DISCORD_INVITE_URL,

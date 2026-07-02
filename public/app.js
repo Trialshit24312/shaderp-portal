@@ -215,9 +215,14 @@ function renderHome() {
   }
 
   const latest = el('home-latest');
+  const latestVer = el('home-latest-ver');
+  const latestTitle = el('home-latest-title');
   if (latest) {
     const pass = getUpdatePasses()[0];
-    latest.textContent = pass?.overview?.slice(0, 220) || DATA.latestNotes?.slice(0, 220) || 'No updates synced yet.';
+    const meta = pass ? parseUpdateMeta(pass) : null;
+    if (latestVer) latestVer.textContent = meta?.version || '—';
+    if (latestTitle) latestTitle.textContent = meta?.subtitle || meta?.titleClean || 'No updates synced yet.';
+    latest.textContent = meta?.overview?.slice(0, 280) || DATA.latestNotes?.slice(0, 280) || 'Run Build-DashboardData.ps1 on your server PC to pull the latest changelog.';
   }
 }
 
@@ -749,12 +754,15 @@ function renderOverview() {
     ? highlights.map((h) => `<li><strong>${esc(h.title)}</strong>${h.detail ? ` — ${esc(h.detail)}` : ''}</li>`).join('')
     : '<li class="hint">Sync dashboard for changelog highlights</li>';
 
-  el('overview-timeline').innerHTML = passes.slice(0, 5).map((p) => `
+  el('overview-timeline').innerHTML = passes.slice(0, 5).map((p) => {
+    const meta = parseUpdateMeta(p);
+    return `
     <div class="timeline-item">
-      <span class="pill">${esc(p.version)}</span>
-      <strong>${esc((p.title || '').replace(/\*\*/g, ''))}</strong>
-      <p class="hint">${esc((p.overview || '').slice(0, 140))}</p>
-    </div>`).join('') || '<p class="hint">No update passes in sync data.</p>';
+      <span class="pill">${esc(meta.version)}</span>
+      <strong>${esc(meta.subtitle || meta.titleClean)}</strong>
+      <p class="hint">${esc(meta.overview.slice(0, 140))}</p>
+    </div>`;
+  }).join('') || '<p class="hint">No update passes in sync data.</p>';
 }
 
 function extractHighlightsClient(pass) {
@@ -767,26 +775,101 @@ function extractHighlightsClient(pass) {
   return out;
 }
 
-function renderUpdates() {
-  el('updates-list').innerHTML = getUpdatePasses().map((p, i) => `
-    <details class="update-card" ${i === 0 ? 'open' : ''}>
-      <summary><span>${esc((p.title || '').replace(/\*\*/g, ''))}</span><span class="ver">${esc(p.version)}</span></summary>
-      <div class="update-body">${formatUpdateBody(p.body || p.overview || '')}</div>
-    </details>
-  `).join('') || '<p class="hint">Run Build-DashboardData.ps1 to pull UPDATE-LOG.md</p>';
+function renderUpdates(filter = '') {
+  const q = filter.trim().toLowerCase();
+  const passes = getUpdatePasses().filter((p) => {
+    if (!q) return true;
+    const meta = parseUpdateMeta(p);
+    const hay = `${meta.version} ${meta.subtitle} ${meta.titleClean} ${meta.overview} ${p.body || ''}`.toLowerCase();
+    return hay.includes(q);
+  });
+
+  el('updates-list').innerHTML = passes.length
+    ? passes.map((p, i) => {
+      const meta = parseUpdateMeta(p);
+      const bodyHtml = formatUpdateBody(prepareUpdateBodyForDisplay(p.body || p.overview || ''));
+      return `
+    <article class="update-card" data-version="${esc(meta.version)}">
+      <details class="update-details" ${i === 0 && !q ? 'open' : ''}>
+        <summary>
+          <div class="update-summary-main">
+            ${meta.date ? `<time class="update-date">${esc(meta.date)}</time>` : ''}
+            <strong class="update-title">${esc(meta.subtitle || meta.titleClean)}</strong>
+            ${meta.overview ? `<p class="update-preview">${esc(meta.overview)}</p>` : ''}
+          </div>
+          <div class="update-summary-badges">
+            <span class="ver">${esc(meta.version)}</span>
+            <span class="update-chevron" aria-hidden="true"></span>
+          </div>
+        </summary>
+        <div class="update-body changelog-content">${bodyHtml}</div>
+      </details>
+    </article>`;
+    }).join('')
+    : `<p class="hint">${q ? 'No updates match your search.' : 'Run Build-DashboardData.ps1 to pull UPDATE-LOG.md'}</p>`;
+}
+
+function setupUpdatesToolbar() {
+  const input = el('updates-filter');
+  const expandBtn = el('updates-expand-all');
+  if (input && !input.dataset.bound) {
+    input.dataset.bound = '1';
+    input.addEventListener('input', () => renderUpdates(input.value));
+  }
+  if (expandBtn && !expandBtn.dataset.bound) {
+    expandBtn.dataset.bound = '1';
+    let expanded = false;
+    expandBtn.addEventListener('click', () => {
+      expanded = !expanded;
+      document.querySelectorAll('#updates-list .update-details').forEach((d) => { d.open = expanded; });
+      expandBtn.textContent = expanded ? 'Collapse all' : 'Expand all';
+    });
+  }
+}
+
+function parseUpdateMeta(pass) {
+  const titleRaw = normalizeChangelogText((pass?.title || '').replace(/\*\*/g, ''));
+  const date = pass?.date || (titleRaw.match(/^(\d{1,2} \w+ \d{4})/)?.[1] || '');
+  let subtitle = pass?.subtitle || '';
+  if (!subtitle) {
+    const dash = titleRaw.match(/Enhancement Pass v\d+\s*[—–-]\s*(.+)$/);
+    if (dash) subtitle = dash[1].trim();
+    else subtitle = titleRaw.replace(/^\d{1,2} \w+ \d{4}\s*[·•]\s*/, '').trim();
+  }
+  subtitle = subtitle.replace(/^[—–-\u2014\u2013]\s*/, '').trim();
+  return {
+    version: pass?.version || '',
+    date,
+    subtitle,
+    titleClean: titleRaw,
+    overview: normalizeChangelogText(pass?.overview || ''),
+  };
+}
+
+function prepareUpdateBodyForDisplay(text) {
+  if (!text) return '';
+  text = normalizeChangelogText(text);
+  text = text.replace(/^\*\*[^*\n]+Enhancement Pass v\d+[^*\n]*\*\*\s*\n+/, '');
+  text = text.replace(/^---\s*\n+/, '');
+  text = text.replace(/^## Overview\s*\n+[\s\S]*?(?=\n---|\n## |\n\*\*|\z)/, '');
+  text = text.replace(/^\s*---\s*\n+/, '');
+  return text.trim();
 }
 
 function normalizeChangelogText(text) {
   if (!text) return '';
-  return text
-    .replace(/\r\n/g, '\n')
-    .replace(/Â·/g, '·')
-    .replace(/â€"/g, '—')
-    .replace(/â†'/g, '→')
-    .replace(/â€œ/g, '"')
-    .replace(/â€\u009d/g, '"')
-    .replace(/â€˜/g, "'")
-    .replace(/â€™/g, "'");
+  let s = text.replace(/\r\n/g, '\n');
+  s = s.replace(/^\uFEFF/, '').replace(/[\u200B-\u200D\uFEFF]/g, '');
+  const pairs = [
+    [/\u00c2\u00b7/g, '·'], [/Â·/g, '·'],
+    [/\u00e2\u0080\u0094/g, '—'], [/â€"/g, '—'], [/â€"/g, '—'], [/â€“/g, '–'],
+    [/\u00e2\u0086\u0092/g, '→'], [/â†'/g, '→'], [/â†'/g, '→'],
+    [/\u00e2\u0080\u009c/g, '"'], [/â€œ/g, '"'], [/â€\u009d/g, '"'], [/â€\u009c/g, '"'],
+    [/\u00e2\u0080\u0098/g, "'"], [/â€˜/g, "'"], [/â€™/g, "'"],
+    [/â€¦/g, '…'],
+  ];
+  for (const [re, rep] of pairs) s = s.replace(re, rep);
+  return s.trim();
 }
 
 function markdownTableToHtml(rows) {
@@ -840,14 +923,14 @@ function formatUpdateBody(text) {
 
     if (trimmed.startsWith('## ')) {
       flushList();
-      html += `<h4>${esc(trimmed.slice(3))}</h4>`;
+      html += `<h4 class="changelog-section">${esc(trimmed.slice(3))}</h4>`;
       i += 1;
       continue;
     }
 
     if (trimmed.startsWith('### ')) {
       flushList();
-      html += `<h5>${esc(trimmed.slice(4))}</h5>`;
+      html += `<h5 class="changelog-subsection">${esc(trimmed.slice(4))}</h5>`;
       i += 1;
       continue;
     }
@@ -1887,6 +1970,7 @@ function renderAll() {
   renderAbout();
   renderOverview();
   renderUpdates();
+  setupUpdatesToolbar();
   renderEconomy();
   renderMap();
   setupSearch();

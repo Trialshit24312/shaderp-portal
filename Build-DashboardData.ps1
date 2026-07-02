@@ -1,8 +1,33 @@
 # Regenerate dashboard.json from live ShadeRP server files
 param(
-    [string]$BasePath = 'F:\txData\ShadeRP.base',
+    [string]$BasePath = 'F:\txData\QBCore_A9FD7A.base',
     [string]$OutFile = ''
 )
+
+function Normalize-ChangelogText([string]$text) {
+    if ([string]::IsNullOrWhiteSpace($text)) { return '' }
+    $s = ($text -replace "`r`n", "`n").TrimStart([char]0xFEFF)
+
+    $emDash = [char]0x2014
+    $enDash = [char]0x2013
+    $midDot = [char]0x00B7
+    $ellipsis = [char]0x2026
+    $arrow = [char]0x2192
+
+    $badEmDash = [string]::Concat([char]0x00E2, [char]0x20AC, [char]0x201D)
+    $badEnDash = [string]::Concat([char]0x00E2, [char]0x20AC, [char]0x201C)
+    $badMidDot = [string]::Concat([char]0x00C2, [char]0x00B7)
+    $badEllipsis = [string]::Concat([char]0x00E2, [char]0x20AC, [char]0x00A6)
+    $badArrow = [string]::Concat([char]0x00E2, [char]0x2020, [char]0x2019)
+
+    $s = $s.Replace($badEmDash, $emDash)
+    $s = $s.Replace($badEnDash, $enDash)
+    $s = $s.Replace($badMidDot, $midDot)
+    $s = $s.Replace($badEllipsis, $ellipsis)
+    $s = $s.Replace($badArrow, $arrow)
+
+    return $s.Trim()
+}
 
 $ErrorActionPreference = 'Stop'
 $dashboardDir = Split-Path -Parent $MyInvocation.MyCommand.Path
@@ -54,8 +79,22 @@ function Parse-UpdatePasses([string]$md) {
         $start = $passMatches[$i].Index
         $end = if ($i + 1 -lt $passMatches.Count) { $passMatches[$i + 1].Index } else { $md.Length }
         $section = $md.Substring($start, $end - $start).Trim()
-        $title = $passMatches[$i].Groups[1].Value
+        $title = Normalize-ChangelogText $passMatches[$i].Groups[1].Value
         $ver = $passMatches[$i].Groups[2].Value
+        $date = ''
+        $subtitle = ''
+        if ($title -match '^(\d{1,2} \w+ \d{4})') { $date = $Matches[1] }
+        if ($title -match 'Enhancement Pass v\d+\s*[—–-]\s*(.+)$') {
+            $subtitle = $Matches[1].Trim()
+        } elseif ($title -match 'Enhancement Pass v\d+\s*(.+)$') {
+            $subtitle = ($Matches[1] -replace '^[—–-]\s*', '').Trim()
+        } else {
+            $subtitle = ($title -replace '^\d{1,2} \w+ \d{4}\s*[·•]\s*', '').Trim()
+        }
+        $subtitle = ($subtitle -replace '^[—–-]\s*', '').Trim()
+        while ($subtitle.Length -gt 0 -and ($subtitle[0] -eq [char]0x2014 -or $subtitle[0] -eq [char]0x2013 -or $subtitle[0] -eq '-')) {
+            $subtitle = $subtitle.Substring(1).TrimStart()
+        }
         $overview = ''
         if ($section -match '## Overview\s*\r?\n\r?\n([\s\S]+?)(?=\r?\n---|\r?\n## |\z)') {
             $overview = $Matches[1].Trim()
@@ -70,8 +109,12 @@ function Parse-UpdatePasses([string]$md) {
                 $overview = if ($plain.Length -gt 320) { $plain.Substring(0, 320).Trim() + '…' } else { $plain }
             }
         }
+        $section = Normalize-ChangelogText $section
+        $overview = Normalize-ChangelogText $overview
         [void]$passes.Add([ordered]@{
             version = "v$ver"
+            date = $date
+            subtitle = $subtitle
             title = "**$title**"
             overview = $overview
             body = $section

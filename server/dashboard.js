@@ -1,9 +1,11 @@
 import fs from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
+import { normalizeChangelogText, sanitizeUpdatePass } from './textNormalize.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 export const DATA_FILE = path.join(__dirname, '..', 'data', 'dashboard.json');
+export { normalizeChangelogText, sanitizeUpdatePass };
 
 /** PowerShell ConvertTo-Json sometimes emits a single object instead of an array. */
 export function normalizeUpdatePasses(raw) {
@@ -16,7 +18,8 @@ export function normalizeUpdatePasses(raw) {
 export function loadDashboardData() {
   if (!fs.existsSync(DATA_FILE)) return null;
   const data = JSON.parse(fs.readFileSync(DATA_FILE, 'utf8'));
-  data.updatePasses = normalizeUpdatePasses(data.updatePasses);
+  data.updatePasses = normalizeUpdatePasses(data.updatePasses).map(sanitizeUpdatePass);
+  if (data.latestNotes) data.latestNotes = normalizeChangelogText(data.latestNotes);
   return data;
 }
 

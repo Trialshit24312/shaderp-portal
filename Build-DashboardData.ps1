@@ -364,3 +364,18 @@ if (-not (Test-Path -LiteralPath $outDir)) { New-Item -ItemType Directory -Force
 $json = $data | ConvertTo-Json -Depth 8
 [System.IO.File]::WriteAllText($OutFile, $json, [System.Text.UTF8Encoding]::new($false))
 Write-Host "Dashboard data written: $OutFile"
+
+# Keep Discord + in-game changelog files in sync with latest UPDATE-LOG pass
+if ($data.updatePasses -and $data.updatePasses.Count -gt 0) {
+    $latestBody = $data.updatePasses[0].body
+    if ($latestBody) {
+        $utf8 = [System.Text.UTF8Encoding]::new($false)
+        $discordLatest = Join-Path $BasePath 'tools\DISCORD_CHANGELOG_LATEST.txt'
+        $shadeChangelog = Join-Path $resRoot 'shade-discord\changelog\latest.txt'
+        New-Item -ItemType Directory -Force -Path (Split-Path -LiteralPath $shadeChangelog) | Out-Null
+        [System.IO.File]::WriteAllText($discordLatest, $latestBody, $utf8)
+        [System.IO.File]::WriteAllText($shadeChangelog, $latestBody, $utf8)
+        Write-Host "Changelog synced: $discordLatest"
+        Write-Host "Changelog synced: $shadeChangelog"
+    }
+}

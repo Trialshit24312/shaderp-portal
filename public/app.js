@@ -776,6 +776,10 @@ function extractHighlightsClient(pass) {
 }
 
 function renderUpdates(filter = '') {
+  const syncEl = el('updates-sync-time');
+  if (syncEl) {
+    syncEl.textContent = DATA?.generatedAt ? `Last portal sync: ${DATA.generatedAt}.` : '';
+  }
   const q = filter.trim().toLowerCase();
   const passes = getUpdatePasses().filter((p) => {
     if (!q) return true;

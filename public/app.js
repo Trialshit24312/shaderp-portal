@@ -33,6 +33,7 @@ const NAV = [
   { id: 'updates', label: 'Updates', min: 'guest' },
   { section: 'Community' },
   { id: 'team', label: 'Team & Roles', min: 'member' },
+  { id: 'support', label: 'Support', min: 'member' },
   { id: 'overview', label: 'Overview', min: 'member' },
   { id: 'economy', label: 'Economy', min: 'member' },
   { id: 'map', label: 'Map', min: 'member' },
@@ -51,7 +52,7 @@ const NAV = [
   { id: 'logs', label: 'Server Logs', min: 'staff' },
 ];
 
-const ROLE_LEVEL = { guest: 0, member: 1, moderator: 2, staff: 3, developer: 4, admin: 5, owner: 6 };
+const ROLE_LEVEL = { guest: 0, member: 1, moderator: 2, staff: 3, manager: 4, developer: 5, admin: 6, owner: 7 };
 let TEAM = null;
 
 const el = (id) => document.getElementById(id);
@@ -216,6 +217,8 @@ function showPanel(id) {
   }
   if (id === 'commands' && hasRole('admin')) loadServerControl();
   if (id === 'tickets' && hasRole('staff')) loadTicketsPanel();
+  if (id === 'support' && hasRole('member')) renderSupport();
+  if (id === 'credits') renderCredits();
   if (id === 'logs' && hasRole('staff')) loadLogs();
   if (id === 'team') renderTeam();
   if (id === 'queue' || id === 'connect' || id === 'home') renderQueueWidgets();
@@ -444,18 +447,37 @@ function renderFaq() {
     : '<p class="hint">No FAQ synced yet.</p>';
 }
 
+function teamMemberCard(c, tier = 'staff') {
+  const roleColors = {
+    owner: 'var(--role-owner)', admin: 'var(--role-admin)', manager: 'var(--role-manager)',
+    developer: 'var(--role-developer)', staff: 'var(--role-staff)', moderator: 'var(--role-moderator)',
+  };
+  const accent = roleColors[tier] || 'var(--accent)';
+  return `<article class="team-member-card reveal" style="--role-accent:${accent}">
+    <span class="role-pill">${esc(c.role || tier)}</span>
+    <img class="team-avatar" src="${esc(discordAvatarUrl(c.discordId))}" alt="" loading="lazy" />
+    <h4>${esc(c.displayName || c.username || 'Team member')}</h4>
+    ${c.username ? `<p class="accent-text">@${esc(c.username)}</p>` : ''}
+    <p class="hint">${esc(c.note || '')}</p>
+    ${c.discordId ? `<a class="pill mono" href="https://discord.com/users/${esc(c.discordId)}" target="_blank" rel="noopener">Discord</a>` : ''}
+  </article>`;
+}
+
 function renderCredits() {
+  const root = el('credits-root');
+  if (!root) return;
   const credits = DATA?.credits || TEAM?.credits || [];
-  el('credits-grid').innerHTML = credits.length
-    ? credits.map((c) => `
-      <div class="feature-card credit-card team-card">
-        <img class="team-avatar" src="${esc(discordAvatarUrl(c.discordId))}" alt="" />
-        <h4>${esc(c.role)}</h4>
-        ${c.displayName ? `<p class="accent-text">${esc(c.displayName)}${c.username ? ` · @${esc(c.username)}` : ''}</p>` : ''}
-        <p>${esc(c.note)}</p>
-        <a class="pill mono" href="https://discord.com/users/${esc(c.discordId)}" target="_blank" rel="noopener">Discord profile</a>
-      </div>`).join('')
-    : '<p class="hint">Team credits in shade-config/config/credits.lua</p>';
+  root.innerHTML = `
+    ${renderPageHeader('Our Team', 'Leadership and credits — the people behind ShadeRP.', [{ id: 'home', label: 'Home' }, { id: 'credits', label: 'Team' }])}
+    <div class="team-hero reveal">
+      <h2>Built for serious roleplay</h2>
+      <p class="hint">Meet the team keeping ShadeRP running. Members can see live Discord roles on <button type="button" class="crumb-link" data-panel="team">Team & Roles</button>.</p>
+    </div>
+    <div class="team-leadership-grid">${credits.length
+    ? credits.map((c) => teamMemberCard(c, 'owner')).join('')
+    : '<p class="hint">Team credits in shade-config/config/credits.lua</p>'}</div>`;
+  bindBreadcrumbs(root);
+  initRevealAnimations(root);
 }
 
 function renderKeybinds() {
@@ -777,60 +799,116 @@ function renderJobs() {
 }
 
 async function renderTeam() {
+  const root = el('team-root');
+  if (!root) return;
   try {
     if (!TEAM) {
       const res = await fetch('/api/team');
       TEAM = await res.json();
     }
     const credits = TEAM.credits?.length ? TEAM.credits : (DATA?.credits || []);
-    el('team-leadership').innerHTML = credits.length
-      ? credits.map((c) => `
-        <div class="feature-card team-card">
-          <img class="team-avatar" src="${esc(discordAvatarUrl(c.discordId))}" alt="" />
-          <h4>${esc(c.role)}</h4>
-          <p class="accent-text">${esc(c.displayName || c.username || 'Team member')}</p>
-          <p>${esc(c.note)}</p>
-        </div>`).join('')
-      : '<p class="hint">No team credits synced — edit credits.lua and run Sync-PortalToRender.ps1</p>';
-
-    const tiers = ['owner', 'admin', 'developer', 'staff', 'moderator', 'member'];
-    el('team-tiers').innerHTML = tiers.map((tier) => {
-      const meta = TEAM.tierMeta?.[tier] || { label: tier, icon: '•', desc: '' };
-      const roles = TEAM.grouped?.[tier] || [];
-      if (!roles.length) return '';
-      return `
-        <div class="tier-card">
-          <div class="tier-head">
-            <span class="tier-icon">${meta.icon}</span>
-            <div>
-              <strong class="role-badge role-${esc(tier)}">${esc(meta.label)}</strong>
-              <p class="hint">${esc(meta.desc)}</p>
-            </div>
-          </div>
+    const tiers = ['owner', 'admin', 'manager', 'developer', 'staff', 'moderator', 'member'];
+    root.innerHTML = `
+      ${renderPageHeader('Team & Roles', 'Live Discord roster and your portal access level.', [{ id: 'home', label: 'Home' }, { id: 'team', label: 'Team' }])}
+      <div class="team-hero reveal">
+        <h2>ShadeRP staff roster</h2>
+        <p class="hint">Roles sync from Discord every login. Need help? Open a ticket on <button type="button" class="crumb-link" data-panel="support">Support</button>.</p>
+      </div>
+      <h3 class="section-sub reveal">Leadership</h3>
+      <div class="team-leadership-grid">${credits.length
+      ? credits.map((c) => teamMemberCard(c, 'owner')).join('')
+      : '<p class="hint">No leadership credits synced</p>'}</div>
+      <h3 class="section-sub reveal" style="margin-top:1.5rem">Portal tiers</h3>
+      <div class="stack">${tiers.map((tier) => {
+        const meta = TEAM.tierMeta?.[tier] || { label: tier, icon: '•', desc: '' };
+        const roles = TEAM.grouped?.[tier] || [];
+        if (!roles.length) return '';
+        return `<details class="tier-accordion reveal">
+          <summary><span class="tier-icon">${meta.icon}</span>
+            <span class="role-badge role-${esc(tier)}">${esc(meta.label)}</span>
+            <span class="hint">${roles.length} member(s)</span></summary>
           <div class="role-grid">${roles.map((r) => `
             <div class="role-card">
               <div class="app role-${esc(r.appRole)}">${esc(r.appRole)}</div>
               <div class="discord-name">${esc(r.discordName)}</div>
             </div>`).join('')}</div>
-        </div>`;
-    }).join('') || '<p class="hint">Configure PORTAL_ROLE_MAP on Render with your Discord role IDs.</p>';
-
-    const access = el('team-your-access');
-    if (ME?.user) {
-      access.hidden = false;
-      access.innerHTML = `
-        <h3>Your portal access</h3>
-        <p>You are logged in as <strong>${esc(ME.user.globalName)}</strong>
-          <span class="role-badge role-${esc(ME.user.appRole)}">${esc(ME.user.appRole)}</span></p>
-        <p class="hint">${ME.user.inGuild ? 'Member of ShadeRP Discord' : 'Not detected in guild — join Discord first'}</p>
-        <p class="hint">Panels unlocked: ${esc((ME.panels || []).join(', '))}</p>`;
-    } else {
-      access.hidden = true;
-    }
+        </details>`;
+      }).join('') || '<p class="hint">Configure PORTAL_ROLE_MAP on Render</p>'}</div>
+      ${ME?.user ? `<div class="card your-access-card reveal" style="margin-top:1rem">
+        <h3>Your access</h3>
+        <p><strong>${esc(ME.user.globalName)}</strong> <span class="role-badge role-${esc(ME.user.appRole)}">${esc(ME.user.appRole)}</span></p>
+        <p class="hint">${ME.user.inGuild ? 'Discord guild member' : 'Join Discord to unlock full access'}</p>
+      </div>` : ''}`;
+    bindBreadcrumbs(root);
+    initRevealAnimations(root);
   } catch {
-    el('team-leadership').innerHTML = '<p class="hint">Could not load team data.</p>';
-    el('team-tiers').innerHTML = '';
+    root.innerHTML = '<p class="hint">Could not load team data.</p>';
   }
+}
+
+async function renderSupport() {
+  const root = el('support-root');
+  if (!root) return;
+  if (!ME?.user) {
+    root.innerHTML = `${renderPageHeader('Support', 'Login with Discord to open a ticket.')}
+      <div class="card reveal"><p>Please <a href="/auth/discord">login with Discord</a> to contact staff.</p></div>`;
+    return;
+  }
+  let mine = [];
+  try {
+    const res = await fetch('/api/tickets/mine');
+    if (res.ok) mine = (await res.json()).tickets || [];
+  } catch (_) {}
+
+  root.innerHTML = `
+    ${renderPageHeader('Support', 'Open a ticket on the web — synced with Discord and AC profiles.', [{ id: 'home', label: 'Home' }, { id: 'support', label: 'Support' }])}
+    <div class="split-panels">
+      <div class="card reveal">
+        <h3>Open a ticket</h3>
+        <form class="support-form" id="support-form">
+          <select id="support-category" class="admin-search">
+            <option value="general">General</option>
+            <option value="ban_appeal">Ban appeal</option>
+            <option value="report">Report player</option>
+            <option value="bug">Bug</option>
+            <option value="other">Other</option>
+          </select>
+          <input type="text" id="support-subject" class="admin-search" placeholder="Subject" required maxlength="120" />
+          <textarea id="support-desc" class="admin-search" placeholder="Describe your issue…"></textarea>
+          <button type="submit" class="btn primary">Submit ticket</button>
+        </form>
+        <p class="hint" style="margin-top:0.75rem">Or use Discord #open-a-ticket after staff runs <code>/ticket setup</code>.</p>
+      </div>
+      <div class="card reveal">
+        <h3>Your tickets</h3>
+        ${mine.length ? `<ul class="ac-ban-list">${mine.map((t) => `
+          <li><code>${esc(t.id)}</code> · ${esc(t.category)} · <strong>${esc(t.status)}</strong>
+            <br><span class="hint">${esc(t.subject)}</span></li>`).join('')}</ul>`
+        : '<p class="hint">No tickets yet.</p>'}
+      </div>
+    </div>`;
+  bindBreadcrumbs(root);
+  initRevealAnimations(root);
+  el('support-form')?.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    try {
+      const res = await fetch('/api/tickets/open', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          category: el('support-category').value,
+          subject: el('support-subject').value,
+          description: el('support-desc').value,
+        }),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || 'Failed');
+      toast(`Ticket ${data.ticket.id} opened`);
+      renderSupport();
+    } catch (err) {
+      toast(err.message, true);
+    }
+  });
 }
 
 function renderOverview() {
@@ -1303,6 +1381,31 @@ function renderCommandLog(log) {
   }</tbody></table>`;
 }
 
+async function showTicketDetail(id) {
+  const panel = el('ticket-detail');
+  const body = el('ticket-detail-body');
+  if (!panel || !body) return;
+  try {
+    const res = await fetch(`/api/tickets/admin/${encodeURIComponent(id)}`);
+    if (!res.ok) throw new Error('Not found');
+    const t = await res.json();
+    const msgs = t.transcript?.messages || t.messages || [];
+    body.innerHTML = `
+      <p><strong>${esc(t.discordName)}</strong> · ${esc(t.category)} · ${esc(t.status)}</p>
+      <p class="hint">${esc(t.subject)}</p>
+      ${t.profile?.activeBan ? `<p class="warn-banner">Active ban: ${esc(t.profile.activeBan.reason)}</p>` : ''}
+      ${t.transcriptSavedAt ? `<p class="hint">Transcript saved ${new Date(t.transcriptSavedAt).toLocaleString()}</p>` : ''}
+      <div class="ticket-detail" style="margin-top:0.75rem">${msgs.length
+        ? msgs.map((m) => `<div class="ticket-msg"><strong>${esc(m.authorName)}</strong> <span class="hint">${m.at ? new Date(m.at).toLocaleString() : ''}</span><br>${esc(m.content)}</div>`).join('')
+        : '<p class="hint">No messages captured yet.</p>'}</div>`;
+    panel.hidden = false;
+    panel.dataset.ticketId = id;
+    el('ticket-delete').hidden = !hasRole('owner');
+  } catch (e) {
+    toast(e.message, true);
+  }
+}
+
 async function loadTicketsPanel() {
   if (!hasRole('staff')) return;
   const status = el('ticket-filter')?.value || 'all';
@@ -1319,10 +1422,10 @@ async function loadTicketsPanel() {
     ].join('');
     const tickets = data.tickets || [];
     if (!tickets.length) {
-      el('tickets-wrap').innerHTML = '<p class="hint">No tickets yet. Post a panel in Discord with <code>/ticket panel</code>.</p>';
+      el('tickets-wrap').innerHTML = '<p class="hint">No tickets yet. Run <code>/ticket setup</code> in Discord or use the Support panel.</p>';
       return;
     }
-    el('tickets-wrap').innerHTML = `<table><thead><tr><th>ID</th><th>User</th><th>Category</th><th>Subject</th><th>Ban</th><th>Status</th><th>Staff</th><th>Rating</th><th>Actions</th></tr></thead><tbody>${
+    el('tickets-wrap').innerHTML = `<table><thead><tr><th>ID</th><th>User</th><th>Category</th><th>Subject</th><th>Ban</th><th>Status</th><th>Staff</th><th>Actions</th></tr></thead><tbody>${
       tickets.map((t) => `<tr>
         <td><code>${esc(t.id)}</code></td>
         <td>${esc(t.discordName)}</td>
@@ -1331,14 +1434,15 @@ async function loadTicketsPanel() {
         <td>${t.profile?.activeBan ? `<span class="ac-trust-low">ACTIVE</span>` : '—'}</td>
         <td>${esc(t.status)}</td>
         <td>${esc(t.claimedByName || '—')}</td>
-        <td>${t.rating ? `${t.rating}★` : '—'}</td>
         <td class="ac-actions">
+          <button type="button" class="btn ghost btn-sm tk-view" data-id="${esc(t.id)}">View</button>
           ${t.status === 'open' ? `<button type="button" class="btn ghost btn-sm tk-claim" data-id="${esc(t.id)}">Claim</button>
           <button type="button" class="btn ghost btn-sm tk-close" data-id="${esc(t.id)}">Close</button>` : ''}
           ${t.profile?.activeBan && canUnban() ? `<button type="button" class="btn danger btn-sm tk-unban" data-id="${esc(t.id)}">Unban</button>` : ''}
         </td>
       </tr>`).join('')
     }</tbody></table>`;
+    el('tickets-wrap').querySelectorAll('.tk-view').forEach((b) => b.addEventListener('click', () => showTicketDetail(b.dataset.id)));
     el('tickets-wrap').querySelectorAll('.tk-claim').forEach((b) => b.addEventListener('click', async () => {
       await fetch(`/api/tickets/admin/${b.dataset.id}/claim`, { method: 'POST' });
       toast('Ticket claimed'); loadTicketsPanel();
@@ -1363,6 +1467,16 @@ async function loadTicketsPanel() {
 function bindTicketsPanel() {
   el('ticket-refresh')?.addEventListener('click', () => loadTicketsPanel());
   el('ticket-filter')?.addEventListener('change', () => loadTicketsPanel());
+  el('ticket-detail-close')?.addEventListener('click', () => { el('ticket-detail').hidden = true; });
+  el('ticket-delete')?.addEventListener('click', async () => {
+    const id = el('ticket-detail')?.dataset.ticketId;
+    if (!id || !confirm(`Permanently delete ${id}? Owner only.`)) return;
+    const r = await fetch(`/api/tickets/admin/${encodeURIComponent(id)}`, { method: 'DELETE' });
+    if (!r.ok) { toast('Delete failed', true); return; }
+    toast('Ticket deleted');
+    el('ticket-detail').hidden = true;
+    loadTicketsPanel();
+  });
 }
 
 async function loadServerControl(silent = false) {

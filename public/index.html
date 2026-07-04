@@ -10,7 +10,8 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="/styles.css?v=3.1.1" />
+  <link rel="stylesheet" href="/styles.css?v=4.0.0" />
+  <link rel="stylesheet" href="/v4-theme.css?v=4.0.0" />
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js" defer></script>
 </head>
 <body>
@@ -99,8 +100,7 @@
     </section>
 
     <section id="panel-credits" class="panel" data-min-role="guest">
-      <h2>Team & credits</h2>
-      <div id="credits-grid" class="card-grid three"></div>
+      <div id="credits-root"></div>
     </section>
 
     <section id="panel-keybinds" class="panel" data-min-role="guest">
@@ -177,13 +177,11 @@
     </section>
 
     <section id="panel-team" class="panel" data-min-role="member">
-      <h2>Team & Discord roles</h2>
-      <p class="hint">Leadership credits and portal access synced from your Discord roles.</p>
-      <h3 class="section-sub">Leadership</h3>
-      <div id="team-leadership" class="card-grid three"></div>
-      <h3 class="section-sub">Portal access tiers</h3>
-      <div id="team-tiers" class="stack"></div>
-      <div id="team-your-access" class="card your-access-card" hidden></div>
+      <div id="team-root"></div>
+    </section>
+
+    <section id="panel-support" class="panel" data-min-role="member">
+      <div id="support-root"></div>
     </section>
 
     <!-- MEMBER+ -->
@@ -462,18 +460,28 @@
     </section>
 
     <section id="panel-tickets" class="panel" data-min-role="staff">
-      <h2>Support tickets</h2>
-      <p class="hint">Discord tickets synced here — AC ban profile, evidence, claim/close/unban.</p>
-      <div class="stat-grid" id="ticket-stats"></div>
-      <div class="ac-toolbar" style="margin:0.75rem 0">
-        <select id="ticket-filter" class="admin-search">
-          <option value="all">All</option>
-          <option value="open">Open</option>
-          <option value="closed">Closed</option>
-        </select>
-        <button type="button" class="btn ghost btn-sm" id="ticket-refresh">Refresh</button>
+      <div id="tickets-root">
+        <div class="stat-grid" id="ticket-stats"></div>
+        <div class="ac-toolbar" style="margin:0.75rem 0">
+          <select id="ticket-filter" class="admin-search">
+            <option value="all">All</option>
+            <option value="open">Open</option>
+            <option value="closed">Closed</option>
+          </select>
+          <button type="button" class="btn ghost btn-sm" id="ticket-refresh">Refresh</button>
+        </div>
+        <div class="ticket-layout">
+          <div id="tickets-wrap" class="table-wrap card"></div>
+          <div id="ticket-detail" class="card ticket-detail" hidden>
+            <h3>Ticket detail</h3>
+            <div id="ticket-detail-body"></div>
+            <div class="ac-modal-actions" style="margin-top:0.75rem">
+              <button type="button" class="btn ghost btn-sm" id="ticket-detail-close">Close panel</button>
+              <button type="button" class="btn danger btn-sm" id="ticket-delete" hidden>Delete (owner)</button>
+            </div>
+          </div>
+        </div>
       </div>
-      <div id="tickets-wrap" class="table-wrap"></div>
     </section>
 
     <section id="panel-logs" class="panel" data-min-role="staff">
@@ -523,6 +531,6 @@
   </div>
 
   <div id="toast" class="toast" hidden>Copied</div>
-  <script src="/app.js?v=3.1.1" type="module"></script>
+  <script src="/app.js?v=4.0.0" type="module"></script>
 </body>
 </html>

@@ -24,7 +24,7 @@ await check('GET /api/portal/version', async () => {
   const res = await fetch(`${base}/api/portal/version`);
   if (!res.ok) throw new Error(`HTTP ${res.status}`);
   const data = await res.json();
-  if (!data.version?.startsWith('3.')) throw new Error(`unexpected version ${data.version}`);
+  if (!data.version?.startsWith('4.')) throw new Error(`unexpected version ${data.version}`);
   if (!data.features?.includes('multi-watch')) throw new Error('missing multi-watch feature flag');
 });
 
@@ -32,7 +32,8 @@ await check('GET / (index.html)', async () => {
   const res = await fetch(`${base}/`);
   if (!res.ok) throw new Error(`HTTP ${res.status}`);
   const html = await res.text();
-  if (!html.includes('app.js?v=3.1.1')) throw new Error('cache bust mismatch on app.js');
+  if (!html.includes('app.js?v=4.0.0')) throw new Error('cache bust mismatch on app.js');
+  if (!html.includes('v4-theme.css')) throw new Error('v4 theme missing');
   if (!html.includes('ac-watch-grid')) throw new Error('AC watch grid missing from HTML');
 });
 

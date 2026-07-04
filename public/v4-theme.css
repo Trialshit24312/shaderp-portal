@@ -1,0 +1,278 @@
+/**
+ * ShadeRP Portal v4 — Obsidian + violet accent, glass surfaces, motion.
+ */
+:root {
+  --bg: #030508;
+  --bg-elevated: #080b12;
+  --bg-card: rgba(14, 18, 28, 0.72);
+  --surface: rgba(16, 22, 36, 0.85);
+  --border: rgba(124, 92, 255, 0.14);
+  --text: #f0f4fc;
+  --text-muted: #8b9cb8;
+  --muted: #8b9cb8;
+  --accent: #7c5cff;
+  --accent-2: #00d4c8;
+  --accent-dim: rgba(124, 92, 255, 0.16);
+  --accent-glow: rgba(124, 92, 255, 0.45);
+  --glass-bg: rgba(10, 14, 24, 0.65);
+  --glass-border: rgba(255, 255, 255, 0.06);
+  --warn: #f0a030;
+  --danger: #ff5c7a;
+  --ok: #3dd68c;
+  --radius: 16px;
+  --radius-sm: 10px;
+  --shadow-lg: 0 32px 64px rgba(0, 0, 0, 0.55);
+  --role-owner: #ffd76a;
+  --role-admin: #ff6b6b;
+  --role-manager: #c084fc;
+  --role-developer: #60a5fa;
+  --role-staff: #7c5cff;
+  --role-moderator: #34d399;
+  --role-member: #94a3b8;
+}
+
+.bg-glow {
+  background:
+    radial-gradient(ellipse 55% 45% at 0% 0%, rgba(124, 92, 255, 0.12), transparent 55%),
+    radial-gradient(ellipse 45% 35% at 100% 100%, rgba(0, 212, 200, 0.08), transparent 50%);
+}
+
+.bg-grid {
+  background-image:
+    linear-gradient(rgba(124, 92, 255, 0.04) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(124, 92, 255, 0.04) 1px, transparent 1px);
+}
+
+.sidebar {
+  background: var(--glass-bg);
+  backdrop-filter: blur(20px);
+  border-right: 1px solid var(--glass-border);
+}
+
+.brand-logo {
+  box-shadow: 0 0 28px var(--accent-glow);
+}
+
+.nav-btn.active {
+  background: linear-gradient(90deg, var(--accent-dim), transparent);
+  color: var(--accent);
+  box-shadow: inset 3px 0 0 var(--accent);
+}
+
+.card, .feature-card, .tier-card, .hub-action, .stat {
+  background: var(--bg-card);
+  backdrop-filter: blur(12px);
+  border: 1px solid var(--glass-border);
+  transition: transform 0.25s var(--ease-out), box-shadow 0.25s var(--ease-out), border-color 0.25s;
+}
+
+.card:hover, .feature-card:hover, .hub-action:hover {
+  transform: translateY(-3px);
+  border-color: rgba(124, 92, 255, 0.28);
+  box-shadow: var(--shadow-lg);
+}
+
+.btn.primary {
+  background: linear-gradient(135deg, var(--accent), #5b3fd4);
+  border: none;
+  box-shadow: 0 8px 24px rgba(124, 92, 255, 0.35);
+}
+
+.hero {
+  background: linear-gradient(145deg, rgba(124, 92, 255, 0.08), rgba(0, 212, 200, 0.04));
+  border: 1px solid var(--glass-border);
+  border-radius: var(--radius);
+}
+
+.page-header .page-title {
+  font-size: clamp(1.75rem, 4vw, 2.25rem);
+  background: linear-gradient(135deg, var(--text), var(--accent-2));
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+/* Team v4 */
+.team-hero {
+  padding: 2rem;
+  margin-bottom: 1.5rem;
+  border-radius: var(--radius);
+  background: linear-gradient(135deg, rgba(124, 92, 255, 0.12), rgba(0, 212, 200, 0.06));
+  border: 1px solid var(--glass-border);
+}
+
+.team-hero h2 {
+  font-size: 1.75rem;
+  margin-bottom: 0.35rem;
+}
+
+.team-leadership-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+  gap: 1rem;
+}
+
+.team-member-card {
+  position: relative;
+  padding: 1.25rem;
+  border-radius: var(--radius);
+  background: var(--bg-card);
+  border: 1px solid var(--glass-border);
+  overflow: hidden;
+  transition: transform 0.3s var(--ease-out), border-color 0.3s;
+}
+
+.team-member-card::before {
+  content: '';
+  position: absolute;
+  inset: 0 auto 0 0;
+  width: 4px;
+  background: var(--role-accent, var(--accent));
+  border-radius: 4px 0 0 4px;
+}
+
+.team-member-card:hover {
+  transform: translateY(-4px) scale(1.01);
+  border-color: rgba(124, 92, 255, 0.35);
+}
+
+.team-member-card .team-avatar {
+  width: 72px;
+  height: 72px;
+  border-radius: 50%;
+  border: 2px solid var(--role-accent, var(--accent));
+  box-shadow: 0 0 20px rgba(124, 92, 255, 0.25);
+  margin-bottom: 0.75rem;
+}
+
+.team-member-card .role-pill {
+  display: inline-block;
+  font-size: 0.7rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  padding: 0.2rem 0.55rem;
+  border-radius: 999px;
+  background: rgba(124, 92, 255, 0.15);
+  color: var(--role-accent, var(--accent));
+  margin-bottom: 0.5rem;
+}
+
+.tier-accordion {
+  border: 1px solid var(--glass-border);
+  border-radius: var(--radius-sm);
+  margin-bottom: 0.65rem;
+  overflow: hidden;
+}
+
+.tier-accordion summary {
+  cursor: pointer;
+  padding: 0.85rem 1rem;
+  background: rgba(124, 92, 255, 0.06);
+  list-style: none;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.tier-accordion[open] summary {
+  border-bottom: 1px solid var(--glass-border);
+}
+
+.tier-accordion .role-grid {
+  padding: 1rem;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+  gap: 0.5rem;
+}
+
+.role-card {
+  padding: 0.65rem 0.75rem;
+  border-radius: var(--radius-sm);
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid var(--glass-border);
+  transition: background 0.2s;
+}
+
+.role-card:hover {
+  background: var(--accent-dim);
+}
+
+.role-badge.role-owner { color: var(--role-owner); }
+.role-badge.role-admin { color: var(--role-admin); }
+.role-badge.role-manager { color: var(--role-manager); }
+.role-badge.role-developer { color: var(--role-developer); }
+.role-badge.role-staff { color: var(--role-staff); }
+.role-badge.role-moderator { color: var(--role-moderator); }
+.role-badge.role-member { color: var(--role-member); }
+
+/* Tickets v4 */
+.ticket-layout {
+  display: grid;
+  grid-template-columns: 1fr 360px;
+  gap: 1rem;
+}
+
+@media (max-width: 960px) {
+  .ticket-layout { grid-template-columns: 1fr; }
+}
+
+.ticket-detail {
+  max-height: 420px;
+  overflow-y: auto;
+  font-size: 0.88rem;
+  line-height: 1.55;
+}
+
+.ticket-msg {
+  padding: 0.5rem 0;
+  border-bottom: 1px solid var(--glass-border);
+}
+
+.ticket-msg strong { color: var(--accent-2); }
+
+.support-form {
+  display: grid;
+  gap: 0.75rem;
+  max-width: 520px;
+}
+
+.support-form textarea {
+  min-height: 120px;
+  resize: vertical;
+}
+
+.audit-feed .audit-row {
+  padding: 0.65rem 0;
+  border-bottom: 1px solid var(--glass-border);
+  font-size: 0.88rem;
+}
+
+.audit-row .audit-action {
+  color: var(--accent);
+  font-weight: 600;
+}
+
+.status-bar {
+  background: var(--glass-bg);
+  backdrop-filter: blur(16px);
+  border-top: 1px solid var(--glass-border);
+}
+
+.reveal.is-visible {
+  animation: v4Reveal 0.65s var(--ease-out) both;
+  animation-delay: var(--reveal-delay, 0ms);
+}
+
+@keyframes v4Reveal {
+  from { opacity: 0; transform: translateY(18px) scale(0.98); }
+  to { opacity: 1; transform: none; }
+}
+
+.panel-enter {
+  animation: v4PanelIn 0.4s var(--ease-out);
+}
+
+@keyframes v4PanelIn {
+  from { opacity: 0; transform: translateY(12px); }
+  to { opacity: 1; transform: none; }
+}

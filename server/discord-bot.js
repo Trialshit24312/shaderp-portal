@@ -19,11 +19,24 @@ import { fetchGuildMemberBot } from './discord.js';
 import { resolveAppRole, ROLE_LEVEL } from './roles.js';
 import { canUnbanDiscordUser } from './unban.js';
 import { buildTicketProfileEmbed } from './tickets.js';
+import {
+  parseGuildIds,
+  buildStaffOverwrites,
+  runTicketSetup,
+  closeTicketWithTranscript,
+} from './discord-ticket-helpers.js';
 
 function staffRoleOk(member, roleMap, ownerIds, userId, minRole = 'staff') {
   if (!member) return false;
   const appRole = resolveAppRole(member.roles || [], { roleMap, ownerIds, userId });
   return (ROLE_LEVEL[appRole] ?? 0) >= (ROLE_LEVEL[minRole] ?? ROLE_LEVEL.staff);
+}
+
+function ownerRoleOk(member, roleMap, ownerIds, userId) {
+  if (ownerIds?.includes(userId)) return true;
+  if (!member) return false;
+  const appRole = resolveAppRole(member.roles || [], { roleMap, ownerIds, userId });
+  return appRole === 'owner';
 }
 
 function buildAllCommands() {
@@ -70,8 +83,13 @@ function buildAllCommands() {
     .addSubcommand((sub) =>
       sub.setName('claim').setDescription('Claim this ticket (staff)'))
     .addSubcommand((sub) =>
-      sub.setName('close').setDescription('Close ticket (staff)')
-        .addStringOption((o) => o.setName('reason').setDescription('Resolution note')));
+      sub.setName('close').setDescription('Close ticket (staff) — manager+ saves transcript')
+        .addStringOption((o) => o.setName('reason').setDescription('Resolution note')))
+    .addSubcommand((sub) =>
+      sub.setName('setup').setDescription('Auto-create ticket category, channels, and panel (admin)'))
+    .addSubcommand((sub) =>
+      sub.setName('delete').setDescription('Permanently delete ticket record (owner only)')
+        .addStringOption((o) => o.setName('ticket_id').setDescription('Ticket ID e.g. TKT-...').setRequired(true)));
 
   const security = new SlashCommandBuilder()
     .setName('security')
@@ -117,7 +135,7 @@ function panelRow() {
   );
 }
 
-async function createTicketChannel(guild, user, category, subject, description, ticketManager, portalEnv) {
+async function createTicketChannel(guild, user, category, subject, description, ticketManager, portalEnv, roleMap) {
   const existing = ticketManager.list({ status: 'open' }).find(
     (t) => t.discordId === user.id,
   );
@@ -131,8 +149,8 @@ async function createTicketChannel(guild, user, category, subject, description, 
     discordName: user.globalName || user.username,
   });
 
-  const categoryId = process.env.DISCORD_TICKET_CATEGORY_ID || portalEnv.DISCORD_TICKET_CATEGORY_ID;
-  const parentId = process.env.DISCORD_TICKET_CHANNEL_ID || portalEnv.DISCORD_TICKET_CHANNEL_ID;
+  const categoryId = process.env.DISCORD_TICKET_CATEGORY_ID || portalEnv.DISCORD_TICKET_CATEGORY_ID || ticketManager.getSetup()?.categoryId;
+  const parentId = process.env.DISCORD_TICKET_CHANNEL_ID || portalEnv.DISCORD_TICKET_CHANNEL_ID || ticketManager.getSetup()?.panelChannelId;
   let channel;
 
   try {
@@ -141,13 +159,7 @@ async function createTicketChannel(guild, user, category, subject, description, 
         name: `ticket-${user.username}`.slice(0, 90).replace(/[^a-z0-9-]/gi, '-'),
         type: ChannelType.GuildText,
         parent: categoryId,
-        permissionOverwrites: [
-          { id: guild.id, deny: [PermissionFlagsBits.ViewChannel] },
-          {
-            id: user.id,
-            allow: [PermissionFlagsBits.ViewChannel, PermissionFlagsBits.SendMessages, PermissionFlagsBits.ReadMessageHistory],
-          },
-        ],
+        permissionOverwrites: buildStaffOverwrites(guild, user.id, roleMap),
       });
       ticketManager.updateTicketChannel(ticket.id, channel.id, null);
     } else if (parentId) {
@@ -197,12 +209,32 @@ export async function startShadeDiscordBot({ acManager, ticketManager, portalEnv
 
   const ownerIds = (portalEnv.PORTAL_OWNER_IDS || '').split(',').map((s) => s.trim()).filter(Boolean);
 
+  const guildIds = parseGuildIds(portalEnv);
   const rest = new REST({ version: '10' }).setToken(token);
-  await rest.put(Routes.applicationGuildCommands(clientId, guildId), { body: buildAllCommands() });
-  console.log('Registered ShadeRP Discord commands (/ac, /ticket, /security)');
+  for (const gid of guildIds) {
+    await rest.put(Routes.applicationGuildCommands(clientId, gid), { body: buildAllCommands() });
+    console.log(`Registered ShadeRP commands on guild ${gid}`);
+  }
+  console.log('Commands: /ac · /ticket · /security');
 
   const client = new Client({
-    intents: [GatewayIntentBits.Guilds, GatewayIntentBits.GuildMessages],
+    intents: [
+      GatewayIntentBits.Guilds,
+      GatewayIntentBits.GuildMessages,
+      GatewayIntentBits.MessageContent,
+    ],
+  });
+
+  client.on('messageCreate', async (message) => {
+    if (message.author?.bot) return;
+    const ticket = ticketManager.getByChannel(message.channelId);
+    if (!ticket || ticket.status === 'closed') return;
+    ticketManager.appendMessage(ticket.id, {
+      authorId: message.author.id,
+      authorName: message.author.globalName || message.author.username,
+      content: message.content,
+      at: message.createdTimestamp,
+    });
   });
 
   client.on('interactionCreate', async (interaction) => {
@@ -223,6 +255,7 @@ export async function startShadeDiscordBot({ acManager, ticketManager, portalEnv
             '',
             ticketManager,
             portalEnv,
+            roleMap,
           );
           if (result.error) {
             await interaction.editReply({ content: `❌ ${result.error}` });
@@ -253,13 +286,26 @@ export async function startShadeDiscordBot({ acManager, ticketManager, portalEnv
 
         if (parts[2] === 'close') {
           const ticketId = parts[3];
-          const t = ticketManager.closeTicket(ticketId, interaction.user.id, interaction.user.username, 'Closed via Discord');
-          if (!t) {
+          const ticket = ticketManager.getTicket(ticketId);
+          if (!ticket) {
+            await interaction.reply({ content: 'Ticket not found.', ephemeral: true });
+            return;
+          }
+          const { closed, transcriptSaved } = await closeTicketWithTranscript({
+            ticket,
+            ticketManager,
+            interaction,
+            client,
+            portalEnv,
+            roleMap,
+            reason: 'Closed via Discord button',
+          });
+          if (!closed) {
             await interaction.reply({ content: 'Cannot close.', ephemeral: true });
             return;
           }
           await interaction.reply({
-            content: `✅ Ticket **${ticketId}** closed. Rate your experience:`,
+            content: `✅ Ticket **${ticketId}** closed${transcriptSaved ? ' · transcript saved' : ''}. Rate your experience:`,
             components: [ratingRow(ticketId)],
           });
           return;
@@ -331,6 +377,7 @@ export async function startShadeDiscordBot({ acManager, ticketManager, portalEnv
             interaction.options.getString('description') || '',
             ticketManager,
             portalEnv,
+            roleMap,
           );
           if (result.error) {
             await interaction.editReply({ content: `❌ ${result.error}` });
@@ -352,14 +399,52 @@ export async function startShadeDiscordBot({ acManager, ticketManager, portalEnv
             .setTitle('🎫 ShadeRP Support')
             .setDescription(
               'Open a ticket for ban appeals, reports, bugs, or general help.\n\n'
-              + 'Your Discord is linked to our **Anti-Cheat profile** — staff see ban history and evidence automatically.',
+              + 'Your Discord is linked to our **Anti-Cheat profile** — staff see ban history and evidence automatically.\n'
+              + 'Transcripts are saved on close (manager+) to Discord and the portal.',
             )
-            .setColor(0x5865f2)
-            .setFooter({ text: 'Average response time varies · Rate staff after close' });
+            .setColor(0x7c5cff)
+            .setFooter({ text: 'ShadeRP · Portal + Discord tickets stay in sync' });
 
           const msg = await interaction.channel.send({ embeds: [embed], components: [panelRow()] });
           ticketManager.setPanel(interaction.channelId, msg.id);
           await interaction.reply({ content: '✅ Ticket panel posted.', ephemeral: true });
+          return;
+        }
+
+        if (sub === 'setup') {
+          if (!staffRoleOk(member, roleMap, ownerIds, interaction.user.id, 'admin')) {
+            await interaction.reply({ content: '⛔ Admin role required for setup.', ephemeral: true });
+            return;
+          }
+          await interaction.deferReply({ ephemeral: true });
+          const result = await runTicketSetup(interaction.guild, ticketManager, roleMap);
+          const panelEmbed = new EmbedBuilder()
+            .setTitle('🎫 ShadeRP Support')
+            .setDescription('Click a button below to open a ticket. Staff respond in a private channel.')
+            .setColor(0x7c5cff);
+          const panelMsg = await result.panel.send({ embeds: [panelEmbed], components: [panelRow()] });
+          ticketManager.setPanel(result.panel.id, panelMsg.id);
+          await interaction.editReply({
+            content: `✅ Ticket system configured:\n`
+              + `• Category: <#${result.category.id}>\n`
+              + `• Panel: <#${result.panel.id}>\n`
+              + `• Transcripts: <#${result.transcripts.id}>\n`
+              + `• Escalations: <#${result.escalations.id}>`,
+          });
+          return;
+        }
+
+        if (sub === 'delete') {
+          if (!ownerRoleOk(member, roleMap, ownerIds, interaction.user.id)) {
+            await interaction.reply({ content: '⛔ Owner only — use close instead of delete.', ephemeral: true });
+            return;
+          }
+          const ticketId = interaction.options.getString('ticket_id');
+          const ok = ticketManager.deleteTicket(ticketId, interaction.user.id, interaction.user.username);
+          await interaction.reply({
+            content: ok ? `🗑 Deleted ticket **${ticketId}** from portal records.` : '❌ Ticket not found.',
+            ephemeral: true,
+          });
           return;
         }
 
@@ -375,8 +460,23 @@ export async function startShadeDiscordBot({ acManager, ticketManager, portalEnv
             await interaction.reply({ content: `✋ Claimed **${ticket.id}**` });
           } else {
             const reason = interaction.options.getString('reason') || 'Resolved';
-            ticketManager.closeTicket(ticket.id, interaction.user.id, actor, reason);
-            await interaction.reply({ content: `✅ Closed **${ticket.id}**`, components: [ratingRow(ticket.id)] });
+            const { closed, transcriptSaved } = await closeTicketWithTranscript({
+              ticket,
+              ticketManager,
+              interaction,
+              client,
+              portalEnv,
+              roleMap,
+              reason,
+            });
+            if (!closed) {
+              await interaction.reply({ content: 'Cannot close.', ephemeral: true });
+              return;
+            }
+            await interaction.reply({
+              content: `✅ Closed **${ticket.id}**${transcriptSaved ? ' · transcript saved' : ''}`,
+              components: [ratingRow(ticket.id)],
+            });
           }
         }
         return;

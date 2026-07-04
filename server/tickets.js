@@ -19,10 +19,11 @@ function now() {
 
 function defaultState() {
   return {
-    version: 1,
+    version: 2,
     tickets: [],
     panelMessageId: null,
     panelChannelId: null,
+    setup: {},
     stats: { opened: 0, closed: 0, rated: 0, avgRating: 0 },
   };
 }
@@ -56,7 +57,7 @@ function banMatchesDiscord(ban, discordId) {
   return disc === d;
 }
 
-export function createTicketManager({ acManager } = {}) {
+export function createTicketManager({ acManager, auditManager } = {}) {
   let state = loadState();
 
   function persist() {
@@ -138,6 +139,10 @@ export function createTicketManager({ acManager } = {}) {
         closeReason: null,
         rating: null,
         ratingComment: null,
+        messages: [],
+        transcript: null,
+        transcriptSavedAt: null,
+        transcriptSavedBy: null,
         profile,
         createdAt: now(),
         updatedAt: now(),
@@ -186,7 +191,7 @@ export function createTicketManager({ acManager } = {}) {
       return t;
     },
 
-    closeTicket(id, staffId, staffName, reason) {
+    closeTicket(id, staffId, staffName, reason, { saveTranscript = false, transcript = null } = {}) {
       const t = this.getTicket(id);
       if (!t || t.status === 'closed') return null;
       t.status = 'closed';
@@ -195,9 +200,91 @@ export function createTicketManager({ acManager } = {}) {
       t.closedAt = now();
       t.closeReason = String(reason || 'Resolved').slice(0, 500);
       t.updatedAt = now();
+      if (saveTranscript && transcript) {
+        t.transcript = transcript;
+        t.transcriptSavedAt = now();
+        t.transcriptSavedBy = staffId;
+        t.transcriptSavedByName = staffName;
+      }
       state.stats.closed += 1;
       persist();
+      auditManager?.log('ticket_close', {
+        actorId: staffId,
+        actorName: staffName,
+        targetId: id,
+        targetName: t.discordName,
+        reason: t.closeReason,
+        source: 'portal',
+        meta: { category: t.category, transcriptSaved: !!saveTranscript },
+      });
       return t;
+    },
+
+    appendMessage(ticketId, msg) {
+      const t = this.getTicket(ticketId);
+      if (!t || t.status === 'closed') return null;
+      t.messages = t.messages || [];
+      t.messages.push({
+        authorId: msg.authorId,
+        authorName: msg.authorName,
+        content: String(msg.content || '').slice(0, 4000),
+        at: msg.at || now(),
+      });
+      if (t.messages.length > 500) t.messages.shift();
+      t.updatedAt = now();
+      persist();
+      return t;
+    },
+
+    saveTranscript(id, staffId, staffName, transcript) {
+      const t = this.getTicket(id);
+      if (!t) return null;
+      t.transcript = transcript;
+      t.transcriptSavedAt = now();
+      t.transcriptSavedBy = staffId;
+      t.transcriptSavedByName = staffName;
+      t.updatedAt = now();
+      persist();
+      auditManager?.log('ticket_transcript', {
+        actorId: staffId,
+        actorName: staffName,
+        targetId: id,
+        targetName: t.discordName,
+        source: 'portal',
+        meta: { messageCount: transcript?.messages?.length || 0 },
+      });
+      return t;
+    },
+
+    deleteTicket(id, actorId, actorName) {
+      const idx = state.tickets.findIndex((t) => t.id === id);
+      if (idx === -1) return false;
+      const t = state.tickets[idx];
+      state.tickets.splice(idx, 1);
+      persist();
+      auditManager?.log('ticket_delete', {
+        actorId,
+        actorName,
+        targetId: id,
+        targetName: t.discordName,
+        source: 'portal',
+      });
+      return true;
+    },
+
+    setSetup(setup) {
+      state.setup = { ...state.setup, ...setup, updatedAt: now() };
+      persist();
+      return state.setup;
+    },
+
+    getSetup() {
+      return state.setup || {};
+    },
+
+    listMine(discordId, { limit = 20 } = {}) {
+      const d = normalizeDiscord(discordId);
+      return state.tickets.filter((t) => t.discordId === d).slice(0, limit);
     },
 
     rateTicket(id, stars, comment) {
@@ -251,8 +338,48 @@ export function createTicketManager({ acManager } = {}) {
   };
 }
 
-export function registerTicketRoutes(app, { ticketManager, acManager, portalEnv, requireRole }) {
+export function registerTicketRoutes(app, { ticketManager, acManager, portalEnv, requireRole, auditManager }) {
   if (!ticketManager) return;
+
+  app.post('/api/tickets/open', (req, res) => {
+    const user = req.session?.user;
+    if (!user?.id) return res.status(401).json({ error: 'Login required' });
+    const { category, subject, description } = req.body || {};
+    const existing = ticketManager.list({ status: 'open' }).find((t) => t.discordId === user.id);
+    if (existing) return res.status(409).json({ error: 'You already have an open ticket', ticketId: existing.id });
+    const ticket = ticketManager.createTicket({
+      category: category || 'general',
+      subject: subject || 'Support request',
+      description: description || '',
+      discordId: user.id,
+      discordName: user.globalName || user.username,
+      source: 'web',
+    });
+    auditManager?.log('ticket_open', {
+      actorId: user.id,
+      actorName: user.globalName || user.username,
+      targetId: ticket.id,
+      source: 'web',
+      meta: { category: ticket.category },
+    });
+    res.json({ ok: true, ticket });
+  });
+
+  app.get('/api/tickets/mine', (req, res) => {
+    const user = req.session?.user;
+    if (!user?.id) return res.status(401).json({ error: 'Login required' });
+    res.json({ tickets: ticketManager.listMine(user.id) });
+  });
+
+  app.get('/api/tickets/:id', (req, res) => {
+    const user = req.session?.user;
+    if (!user?.id) return res.status(401).json({ error: 'Login required' });
+    const t = ticketManager.getTicket(req.params.id);
+    if (!t) return res.status(404).json({ error: 'Not found' });
+    const isStaff = hasMinRole(user.appRole, 'staff');
+    if (!isStaff && t.discordId !== user.id) return res.status(403).json({ error: 'Forbidden' });
+    res.json(t);
+  });
 
   app.get('/api/tickets/admin/list', requireRole('staff'), (req, res) => {
     res.json({
@@ -287,15 +414,40 @@ export function registerTicketRoutes(app, { ticketManager, acManager, portalEnv,
 
   app.post('/api/tickets/admin/:id/close', requireRole('staff'), (req, res) => {
     const user = req.session?.user;
-    const { reason } = req.body || {};
+    const { reason, saveTranscript, transcript } = req.body || {};
+    const canSave = hasMinRole(user?.appRole, 'manager');
     const t = ticketManager.closeTicket(
       req.params.id,
       user?.id,
       user?.username || 'staff',
-      reason
+      reason,
+      {
+        saveTranscript: canSave && saveTranscript,
+        transcript: canSave && transcript ? transcript : null,
+      },
     );
     if (!t) return res.status(400).json({ error: 'Cannot close ticket' });
     res.json({ ok: true, ticket: t });
+  });
+
+  app.post('/api/tickets/admin/:id/transcript', requireRole('manager'), (req, res) => {
+    const user = req.session?.user;
+    const { transcript } = req.body || {};
+    if (!transcript) return res.status(400).json({ error: 'transcript required' });
+    const t = ticketManager.saveTranscript(req.params.id, user?.id, user?.username, transcript);
+    if (!t) return res.status(404).json({ error: 'Ticket not found' });
+    res.json({ ok: true, ticket: t });
+  });
+
+  app.delete('/api/tickets/admin/:id', requireRole('owner'), (req, res) => {
+    const user = req.session?.user;
+    const ok = ticketManager.deleteTicket(req.params.id, user?.id, user?.username);
+    if (!ok) return res.status(404).json({ error: 'Ticket not found' });
+    res.json({ ok: true });
+  });
+
+  app.get('/api/tickets/admin/setup', requireRole('admin'), (req, res) => {
+    res.json({ setup: ticketManager.getSetup(), panel: ticketManager.getPanel() });
   });
 
   app.post('/api/tickets/admin/:id/unban', requireRole('staff'), (req, res) => {
@@ -309,10 +461,16 @@ export function registerTicketRoutes(app, { ticketManager, acManager, portalEnv,
   });
 
   app.post('/api/tickets/admin/:id/rate', (req, res) => {
+    const user = req.session?.user;
     const { stars, comment } = req.body || {};
-    const t = ticketManager.rateTicket(req.params.id, stars, comment);
+    const t = ticketManager.getTicket(req.params.id);
     if (!t) return res.status(404).json({ error: 'Ticket not found' });
-    res.json({ ok: true, ticket: t });
+    if (user?.id && t.discordId !== user.id && !hasMinRole(user.appRole, 'staff')) {
+      return res.status(403).json({ error: 'Forbidden' });
+    }
+    const rated = ticketManager.rateTicket(req.params.id, stars, comment);
+    if (!rated) return res.status(404).json({ error: 'Ticket not found' });
+    res.json({ ok: true, ticket: rated });
   });
 }
 

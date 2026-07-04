@@ -20,6 +20,7 @@ import { createQueueManager, queueApiKeyValid } from './queue.js';
 import { createLogManager, logsApiKeyValid } from './logs.js';
 import { createAcManager, registerAcRoutes } from './ac.js';
 import { createTicketManager, registerTicketRoutes } from './tickets.js';
+import { createAuditManager, registerAuditRoutes } from './audit.js';
 import { startShadeDiscordBot } from './discord-bot.js';
 import { canUnbanDiscordUser } from './unban.js';
 import {
@@ -42,8 +43,9 @@ const serverLogs = createLogManager({
   maxEntries: portalEnv.LOGS_MAX_ENTRIES,
   retentionDays: portalEnv.LOGS_RETENTION_DAYS,
 });
-const acManager = createAcManager({ enabled: portalEnv.AC_ENABLED });
-const ticketManager = createTicketManager({ acManager });
+const auditManager = createAuditManager({ logManager: serverLogs });
+const acManager = createAcManager({ enabled: portalEnv.AC_ENABLED, auditManager });
+const ticketManager = createTicketManager({ acManager, auditManager });
 
 const app = express();
 const PORT = process.env.PORT || 8787;
@@ -381,14 +383,15 @@ app.get('/api/logs/:id', requireRole('staff'), (req, res) => {
 });
 
 registerAcRoutes(app, { acManager, portalEnv, requireRole });
-registerTicketRoutes(app, { ticketManager, acManager, portalEnv, requireRole });
+registerTicketRoutes(app, { ticketManager, acManager, portalEnv, requireRole, auditManager });
+registerAuditRoutes(app, { auditManager, requireRole });
 
 app.get('/api/portal/version', (_req, res) => {
   res.setHeader('Cache-Control', 'no-cache, must-revalidate');
   res.json({
-    version: '3.1.0',
+    version: '4.0.0',
     acEnabled: acManager.isEnabled(),
-    features: ['anticheat', 'multi-watch', 'evidence-replay', 'threat-dashboard', 'signature-presets', 'detection-toggles', 'signatures', 'live-watch', 'server-control', 'tickets', 'persistent-auth', 'command-center'],
+    features: ['anticheat', 'multi-watch', 'evidence-replay', 'tickets-web', 'ticket-setup', 'transcripts', 'audit-log', 'v4-theme', 'persistent-auth', 'command-center'],
   });
 });
 

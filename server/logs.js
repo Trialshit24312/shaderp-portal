@@ -53,10 +53,14 @@ function summarize(entry) {
   const data = entry.data || {};
   const parts = [];
   if (data.classification) parts.push(data.classification);
+  if (data.crashType) parts.push(data.crashType);
   if (data.reason) parts.push(String(data.reason).slice(0, 120));
   else if (data.message) parts.push(String(data.message).slice(0, 120));
-  else if (data.crashSignature) parts.push(String(data.crashSignature).slice(0, 120));
+  else if (data.crashSignature) parts.push(`sig:${String(data.crashSignature).slice(0, 80)}`);
   else if (data.stallMs) parts.push(`Server stall ${data.stallMs}ms`);
+  if (data.resource) parts.push(`res:${data.resource}`);
+  if (data.stackHint) parts.push(String(data.stackHint).slice(0, 80));
+  if (data.clientBuild) parts.push(`build:${data.clientBuild}`);
   return parts.join(' — ') || entry.type || 'event';
 }
 

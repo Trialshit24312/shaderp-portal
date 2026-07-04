@@ -313,7 +313,7 @@ function acApiKeyValid(req, portalEnv) {
   return !!expected && key === expected;
 }
 
-export function createAcManager({ enabled = true } = {}) {
+export function createAcManager({ enabled = true, auditManager } = {}) {
   let state = loadState();
 
   function persist() {
@@ -422,9 +422,46 @@ export function createAcManager({ enabled = true } = {}) {
     },
 
     pushBan(entry) {
-      state.bans.unshift({ ...entry, at: now() });
+      const ban = {
+        ...entry,
+        at: now(),
+        banId: entry.banId || entry.id || `ban_${now()}`,
+        admin: entry.admin || entry.requestedBy || 'system',
+        source: entry.source || 'fxserver',
+      };
+      state.bans.unshift(ban);
       if (state.bans.length > MAX_BANS) state.bans.length = MAX_BANS;
       rebuildFlagged(state);
+      auditManager?.log('ac_ban', {
+        actorName: ban.admin,
+        targetId: ban.banId,
+        targetName: ban.playerName || entry.playerName,
+        reason: ban.reason,
+        source: ban.source,
+        meta: { identifiers: ban.identifiers, playerId: ban.playerId },
+      });
+      const webhook = process.env.AC_BAN_WEBHOOK || process.env.AC_DISCORD_WEBHOOK;
+      if (webhook) {
+        fetch(webhook, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            content: process.env.AC_BAN_PING_EVERYONE === '1' ? '@everyone' : undefined,
+            username: 'ShadeRP Enforcement',
+            embeds: [{
+              title: '🔨 Player banned',
+              description: `**${ban.playerName || '?'}**${ban.playerId ? ` (#${ban.playerId})` : ''}`,
+              color: 0xe85d5d,
+              fields: [
+                { name: 'Reason', value: String(ban.reason || '—').slice(0, 500), inline: false },
+                { name: 'Staff', value: String(ban.admin || '—'), inline: true },
+                { name: 'Ban ID', value: `\`${ban.banId}\``, inline: true },
+              ],
+              timestamp: new Date().toISOString(),
+            }],
+          }),
+        }).catch(() => {});
+      }
       persist();
     },
 
@@ -700,6 +737,13 @@ export function createAcManager({ enabled = true } = {}) {
     },
 
     banPlayer(playerId, reason, requestedBy) {
+      auditManager?.log('portal_ban', {
+        actorName: requestedBy || 'staff',
+        targetName: `Player #${playerId}`,
+        reason,
+        source: 'portal',
+        meta: { playerId: Number(playerId) },
+      });
       state.commands.push({
         id: `cmd_${now()}`,
         type: 'ban_player',

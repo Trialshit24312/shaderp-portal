@@ -4,9 +4,10 @@ export const ROLE_LEVEL = {
   member: 1,
   moderator: 2,
   staff: 3,
-  developer: 4,
-  admin: 5,
-  owner: 6,
+  manager: 4,
+  developer: 5,
+  admin: 6,
+  owner: 7,
 };
 
 export const PANEL_ACCESS = {
@@ -28,8 +29,10 @@ export const PANEL_ACCESS = {
   staff: 3,
   anticheat: 3,
   tickets: 3,
-  blocked: 5,
-  settings: 5,
+  support: 1,
+  audit: 3,
+  blocked: 6,
+  settings: 6,
   logs: 3,
 };
 

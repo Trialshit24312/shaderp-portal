@@ -2,7 +2,7 @@
 param(
     [string]$PortalUrl = $env:PORTAL_URL,
     [string]$SyncKey = $env:SYNC_API_KEY,
-    [string]$BasePath = 'F:\txData\QBCore_A9FD7A.base',
+    [string]$BasePath = 'F:\txData\ShadeRP.base',
     [switch]$SkipPush
 )
 

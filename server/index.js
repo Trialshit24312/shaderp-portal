@@ -19,8 +19,15 @@ import { loadDashboardData, normalizeUpdatePasses, extractPassHighlights } from 
 import { createQueueManager, queueApiKeyValid } from './queue.js';
 import { createLogManager, logsApiKeyValid } from './logs.js';
 import { createAcManager, registerAcRoutes } from './ac.js';
-import { startAcDiscordBot } from './discord-ac-bot.js';
+import { createTicketManager, registerTicketRoutes } from './tickets.js';
+import { startShadeDiscordBot } from './discord-bot.js';
 import { canUnbanDiscordUser } from './unban.js';
+import {
+  resolveUser,
+  setAuthCookie,
+  clearAuthCookie,
+  refreshUserRoles,
+} from './auth.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const ROOT = path.join(__dirname, '..');
@@ -36,6 +43,7 @@ const serverLogs = createLogManager({
   retentionDays: portalEnv.LOGS_RETENTION_DAYS,
 });
 const acManager = createAcManager({ enabled: portalEnv.AC_ENABLED });
+const ticketManager = createTicketManager({ acManager });
 
 const app = express();
 const PORT = process.env.PORT || 8787;
@@ -53,8 +61,10 @@ app.use(
   })
 );
 
+const roleRefreshCache = new Map();
+
 function getUser(req) {
-  return req.session?.user || null;
+  return resolveUser(req, portalEnv);
 }
 
 function requireRole(minRole) {
@@ -91,6 +101,7 @@ app.get('/auth/discord/callback', async (req, res) => {
     const discordUser = await fetchDiscordUser(tokens.access_token);
     const user = await buildUserSession(discordUser, tokens.access_token, portalEnv, roleMap);
     req.session.user = user;
+    setAuthCookie(res, user, portalEnv);
     trackEvent('login', { userId: user.id, role: user.appRole });
     res.redirect(req.session.returnTo || '/');
   } catch (err) {
@@ -100,11 +111,27 @@ app.get('/auth/discord/callback', async (req, res) => {
 });
 
 app.post('/auth/logout', (req, res) => {
+  clearAuthCookie(res);
   req.session.destroy(() => res.json({ ok: true }));
 });
 
-app.get('/api/me', (req, res) => {
-  const user = getUser(req);
+app.get('/api/me', async (req, res) => {
+  let user = getUser(req);
+  if (user && portalEnv.DISCORD_BOT_TOKEN) {
+    const cached = roleRefreshCache.get(user.id);
+    if (!cached || Date.now() - cached.at > 5 * 60 * 1000) {
+      try {
+        user = await refreshUserRoles(user, portalEnv, roleMap);
+        roleRefreshCache.set(user.id, { user, at: Date.now() });
+        req.session.user = user;
+        if (req.cookies?.shaderp_auth) setAuthCookie(res, user, portalEnv);
+      } catch (err) {
+        console.warn('Role refresh failed:', err.message);
+      }
+    } else {
+      user = cached.user;
+    }
+  }
   const canUnban = user ? canUnbanDiscordUser(user.id, portalEnv) : false;
   res.json({
     user: user ? { ...user, canUnban } : null,
@@ -115,6 +142,8 @@ app.get('/api/me', (req, res) => {
     portal: { name: portalEnv.PORTAL_NAME, tagline: portalEnv.PORTAL_TAGLINE },
     authConfigured: isAuthConfigured(portalEnv),
     oauthReady: isOAuthReady(portalEnv),
+    persistentSession: Boolean(req.cookies?.shaderp_auth),
+    sessionDays: 90,
   });
 });
 
@@ -331,11 +360,11 @@ app.post('/api/logs/server/ingest', (req, res) => {
   res.json(result);
 });
 
-app.get('/api/logs/stats', requireRole('owner'), (_req, res) => {
+app.get('/api/logs/stats', requireRole('staff'), (_req, res) => {
   res.json(serverLogs.stats());
 });
 
-app.get('/api/logs', requireRole('owner'), (req, res) => {
+app.get('/api/logs', requireRole('staff'), (req, res) => {
   res.json(serverLogs.list({
     type: req.query.type || 'all',
     severity: req.query.severity || 'all',
@@ -345,20 +374,21 @@ app.get('/api/logs', requireRole('owner'), (req, res) => {
   }));
 });
 
-app.get('/api/logs/:id', requireRole('owner'), (req, res) => {
+app.get('/api/logs/:id', requireRole('staff'), (req, res) => {
   const entry = serverLogs.get(req.params.id);
   if (!entry) return res.status(404).json({ error: 'Not found' });
   res.json(entry);
 });
 
 registerAcRoutes(app, { acManager, portalEnv, requireRole });
+registerTicketRoutes(app, { ticketManager, acManager, portalEnv, requireRole });
 
 app.get('/api/portal/version', (_req, res) => {
   res.setHeader('Cache-Control', 'no-cache, must-revalidate');
   res.json({
-    version: '2.1.0',
+    version: '3.1.0',
     acEnabled: acManager.isEnabled(),
-    features: ['anticheat', 'detection-toggles', 'signatures', 'live-watch'],
+    features: ['anticheat', 'multi-watch', 'evidence-replay', 'threat-dashboard', 'signature-presets', 'detection-toggles', 'signatures', 'live-watch', 'server-control', 'tickets', 'persistent-auth', 'command-center'],
   });
 });
 
@@ -389,7 +419,7 @@ app.listen(PORT, '0.0.0.0', () => {
   console.log(`Web queue: ${webQueue.isEnabled() ? 'enabled' : 'disabled'}${portalEnv.QUEUE_API_KEY ? '' : ' (set QUEUE_API_KEY on Render)'}`);
   console.log(`Server logs: ${serverLogs.isEnabled() ? 'enabled' : 'disabled'} (owner panel)`);
   console.log(`Anti-cheat API: ${acManager.isEnabled() ? 'enabled' : 'disabled'}${portalEnv.AC_API_KEY ? '' : ' (set AC_API_KEY on Render)'}`);
-  startAcDiscordBot({ acManager, portalEnv, roleMap }).catch((err) => {
-    console.error('AC Discord bot failed to start:', err.message);
+  startShadeDiscordBot({ acManager, ticketManager, portalEnv, roleMap, logManager: serverLogs }).catch((err) => {
+    console.error('Discord bot failed to start:', err.message);
   });
 });

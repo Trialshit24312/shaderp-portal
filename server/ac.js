@@ -6,6 +6,7 @@ import fs from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
 import { canUnbanDiscordUser } from './unban.js';
+import { hasMinRole } from './roles.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const DATA_DIR = path.join(__dirname, '..', 'data');
@@ -13,7 +14,25 @@ const AC_FILE = path.join(DATA_DIR, 'ac-state.json');
 
 const MAX_DETECTIONS = 500;
 const MAX_BANS = 500;
+const MAX_COMMAND_LOG = 300;
+const MAX_ECONOMY_ALERTS = 150;
 const FRAME_TTL_MS = 120_000;
+const MAX_ACTIVE_WATCHES = 4;
+const MAX_EVIDENCE_CLIPS = 8;
+
+export const SIGNATURE_PRESETS = {
+  'ShadeRP 2026 Menus': {
+    executors: ['hammafia', 'susano', 'redengine', 'phantom', 'cherax', 'midnight', 'brutan', 'lynxmenu'],
+    patterns: ['hamma', 'susano', 'lynx', 'modest', 'extramenu', 'fallout', 'dopamine', 'skid'],
+    ocr: ['undetected', 'self menu', 'executor', 'mod menu'],
+  },
+  'Economy exploit events': {
+    patterns: ['esx:giveinventoryitem', 'esx_billing:sendbill', 'bank:transfer', 'ox_inventory:giveitem', 'qb-admin:server:giveitem'],
+  },
+  'Lua injection strings': {
+    patterns: ['loadstring', 'assertload', 'runfile', 'citizen.invoke', 'debug.getinfo'],
+  },
+};
 
 function now() {
   return Date.now();
@@ -38,6 +57,9 @@ function defaultState() {
     customSignatures: { executors: [], patterns: [], ocr: [] },
     protectionToggles: {},
     protectionMeta: { updatedAt: 0, updatedBy: 'system' },
+    commandLog: [],
+    economyAlerts: [],
+    evidence: {},
   };
 }
 
@@ -300,7 +322,9 @@ export function createAcManager({ enabled = true } = {}) {
   }
 
   function createSession(playerId, playerName, requestedBy) {
-    const id = `ss_${now()}_${playerId}`;
+    const active = Object.values(state.sessions || {}).filter((s) => s.active).length;
+    if (active >= MAX_ACTIVE_WATCHES) return null;
+    const id = `ss_${now()}_${playerId}_${active}`;
     state.sessions[id] = {
       id,
       playerId,
@@ -357,11 +381,24 @@ export function createAcManager({ enabled = true } = {}) {
         image,
         capturedAt: capturedAt || now(),
       };
+      if (String(sessionId).startsWith('ev_')) {
+        state.evidence = state.evidence || {};
+        const baseId = String(sessionId).replace(/_\d+$/, '');
+        const ev = state.evidence[baseId] || { evidenceId: baseId, clips: [] };
+        ev.clips = ev.clips || [];
+        ev.clips.unshift({ image, capturedAt: capturedAt || now(), sessionId });
+        if (ev.clips.length > MAX_EVIDENCE_CLIPS) ev.clips.length = MAX_EVIDENCE_CLIPS;
+        state.evidence[baseId] = ev;
+      }
       persist();
     },
 
     pushDetection(entry) {
-      state.detections.unshift({ ...entry, at: now() });
+    const row = { ...entry, at: now() };
+    if (entry.evidenceId || entry.details?.evidenceId) {
+      row.evidenceId = entry.evidenceId || entry.details.evidenceId;
+    }
+      state.detections.unshift(row);
       if (state.detections.length > MAX_DETECTIONS) {
         state.detections.length = MAX_DETECTIONS;
       }
@@ -642,7 +679,8 @@ export function createAcManager({ enabled = true } = {}) {
     },
 
     startWatch(playerId, playerName, requestedBy) {
-      return createSession(playerId, playerName, requestedBy);
+      const id = createSession(playerId, playerName, requestedBy);
+      return id;
     },
 
     stopWatch(sessionId) {
@@ -768,6 +806,205 @@ export function createAcManager({ enabled = true } = {}) {
     getProtectionTogglesForServer() {
       return { toggles: this.getProtectionToggles().toggles };
     },
+
+    _queuePortalCommand(cmd) {
+      const row = {
+        id: cmd.id || `cmd_${now()}`,
+        createdAt: now(),
+        ...cmd,
+      };
+      state.commands.push(row);
+      state.commandLog.unshift({
+        id: row.id,
+        type: row.type,
+        status: 'queued',
+        requestedBy: row.requestedBy || 'staff',
+        createdAt: row.createdAt,
+        summary: row.command || row.action || row.type,
+        playerId: row.playerId,
+      });
+      if (state.commandLog.length > MAX_COMMAND_LOG) state.commandLog.length = MAX_COMMAND_LOG;
+      persist();
+      return row.id;
+    },
+
+    runConsoleCommand(command, requestedBy) {
+      return this._queuePortalCommand({
+        type: 'run_console',
+        command: String(command || '').trim(),
+        requestedBy: requestedBy || 'admin',
+      });
+    },
+
+    giveItemCommand(playerId, item, amount, requestedBy) {
+      return this._queuePortalCommand({
+        type: 'give_item',
+        playerId: Number(playerId),
+        item: String(item || '').trim(),
+        amount: Number(amount) || 1,
+        requestedBy: requestedBy || 'admin',
+      });
+    },
+
+    playerActionCommand(action, playerId, params, requestedBy) {
+      return this._queuePortalCommand({
+        type: 'player_action',
+        action: String(action || '').trim(),
+        playerId: Number(playerId),
+        params: params || {},
+        requestedBy: requestedBy || 'staff',
+      });
+    },
+
+    pushCommandResult(payload) {
+      const { cmdId, ok, message, extra } = payload || {};
+      if (!cmdId) return;
+      const row = (state.commandLog || []).find((c) => c.id === cmdId);
+      if (row) {
+        row.status = ok ? 'done' : 'failed';
+        row.message = message || '';
+        row.completedAt = now();
+        row.extra = extra || {};
+      } else {
+        state.commandLog.unshift({
+          id: cmdId,
+          type: 'result',
+          status: ok ? 'done' : 'failed',
+          message: message || '',
+          completedAt: now(),
+          extra: extra || {},
+          createdAt: now(),
+        });
+      }
+      if (state.commandLog.length > MAX_COMMAND_LOG) state.commandLog.length = MAX_COMMAND_LOG;
+      persist();
+    },
+
+    getCommandLog(limit = 50) {
+      return (state.commandLog || []).slice(0, limit);
+    },
+
+    pushEconomyAlert(entry) {
+      state.economyAlerts.unshift({ ...entry, at: now() });
+      if (state.economyAlerts.length > MAX_ECONOMY_ALERTS) {
+        state.economyAlerts.length = MAX_ECONOMY_ALERTS;
+      }
+      persist();
+    },
+
+    getEconomyAlerts(limit = 30) {
+      return (state.economyAlerts || []).slice(0, limit);
+    },
+
+    pushEvidence(evidenceId, payload) {
+      if (!evidenceId) return;
+      const frame = state.frames[evidenceId];
+      state.evidence = state.evidence || {};
+      state.evidence[evidenceId] = {
+        evidenceId,
+        ...payload,
+        frame: frame ? { capturedAt: frame.capturedAt, hasImage: !!frame.image } : null,
+        at: now(),
+      };
+      persist();
+    },
+
+    getEvidence(evidenceId) {
+      const ev = state.evidence?.[evidenceId];
+      const frame = state.frames[evidenceId];
+      const clips = ev?.clips?.length
+        ? ev.clips
+        : frame?.image
+          ? [{ image: frame.image, capturedAt: frame.capturedAt }]
+          : [];
+      return {
+        ...(ev || { evidenceId }),
+        image: frame?.image || clips[0]?.image || null,
+        capturedAt: frame?.capturedAt || ev?.capturedAt || clips[0]?.capturedAt,
+        clips,
+      };
+    },
+
+    getThreatSummary() {
+      const players = state.server.players || [];
+      const highRisk = players
+        .filter((p) => (p.trust ?? 100) < 55)
+        .sort((a, b) => (a.trust ?? 100) - (b.trust ?? 100))
+        .slice(0, 8);
+      const detectionsByType = {};
+      for (const d of (state.detections || []).slice(0, 200)) {
+        const key = d.detection || 'unknown';
+        detectionsByType[key] = (detectionsByType[key] || 0) + 1;
+      }
+      const topTypes = Object.entries(detectionsByType)
+        .sort((a, b) => b[1] - a[1])
+        .slice(0, 8)
+        .map(([type, count]) => ({ type, count }));
+      return {
+        highRisk,
+        topTypes,
+        detectionTotal: (state.detections || []).length,
+        economyAlerts: (state.economyAlerts || []).length,
+        activeWatches: Object.values(state.sessions || {}).filter((s) => s.active).length,
+      };
+    },
+
+    getStreamStatus() {
+      const lastSync = state.server.lastSync || 0;
+      const age = lastSync ? now() - lastSync : Infinity;
+      const stats = state.server.stats || {};
+      return {
+        connected: age < 45000,
+        stale: age >= 45000 && age < 120000,
+        lastSync,
+        lastSyncAgeMs: Number.isFinite(age) ? age : null,
+        phase: stats.streamPhase || 'unknown',
+        detail: stats.streamDetail || '',
+        joinable: stats.joinable === true,
+        proximityZones: stats.proximityZones ?? 0,
+        cityMloEnabled: stats.cityMloEnabled === true,
+        online: stats.online ?? (state.server.players || []).length,
+        maxSlots: stats.maxSlots ?? 48,
+        acVersion: stats.acVersion || null,
+      };
+    },
+
+    getSignaturePresets() {
+      return Object.keys(SIGNATURE_PRESETS).map((name) => ({
+        name,
+        counts: {
+          executors: SIGNATURE_PRESETS[name].executors?.length || 0,
+          patterns: SIGNATURE_PRESETS[name].patterns?.length || 0,
+          ocr: SIGNATURE_PRESETS[name].ocr?.length || 0,
+        },
+      }));
+    },
+
+    applySignaturePreset(presetName, addedBy) {
+      const preset = SIGNATURE_PRESETS[presetName];
+      if (!preset) return 0;
+      let added = 0;
+      const buckets = [
+        ['executor', preset.executors],
+        ['pattern', preset.patterns],
+        ['ocr', preset.ocr],
+      ];
+      for (const [cat, list] of buckets) {
+        for (const val of list || []) {
+          if (this.addCustomSignature(cat, val, addedBy)) added += 1;
+        }
+      }
+      return added;
+    },
+
+    getActiveWatchSessions() {
+      return Object.values(state.sessions || {})
+        .filter((s) => s.active)
+        .map((s) => ({
+          ...s,
+          frame: state.frames[s.id] ? { capturedAt: state.frames[s.id].capturedAt, hasImage: !!state.frames[s.id].image } : null,
+        }));
+    },
   };
 }
 
@@ -887,7 +1124,21 @@ export function registerAcRoutes(app, { acManager, portalEnv, requireRole }) {
       playerName || `Player ${playerId}`,
       user?.username || user?.id || 'staff'
     );
+    if (!sessionId) {
+      return res.status(429).json({ error: `Max ${MAX_ACTIVE_WATCHES} simultaneous watches` });
+    }
     res.json({ sessionId, playerId });
+  });
+
+  app.get('/api/ac/admin/watch-sessions', requireRole('staff'), (_req, res) => {
+    res.json({ sessions: acManager.getActiveWatchSessions(), max: MAX_ACTIVE_WATCHES });
+  });
+
+  app.post('/api/ac/admin/stop-all-watch', requireRole('staff'), (_req, res) => {
+    for (const s of acManager.getActiveWatchSessions()) {
+      acManager.stopWatch(s.id);
+    }
+    res.json({ ok: true });
   });
 
   app.post('/api/ac/admin/stop-watch', requireRole('staff'), (req, res) => {
@@ -1022,5 +1273,89 @@ export function registerAcRoutes(app, { acManager, portalEnv, requireRole }) {
     const ok = acManager.setProtectionToggles(toggles, user?.username || user?.id || 'admin');
     if (!ok) return res.status(400).json({ error: 'No valid toggles' });
     res.json({ ok: true, ...acManager.getProtectionToggles() });
+  });
+
+  app.post('/api/ac/server/command-result', (req, res) => {
+    if (!acApiKeyValid(req, portalEnv)) return res.status(401).json({ error: 'Invalid AC key' });
+    acManager.pushCommandResult(req.body || {});
+    res.json({ ok: true });
+  });
+
+  app.post('/api/ac/server/economy-alert', (req, res) => {
+    if (!acApiKeyValid(req, portalEnv)) return res.status(401).json({ error: 'Invalid AC key' });
+    acManager.pushEconomyAlert(req.body || {});
+    res.json({ ok: true });
+  });
+
+  app.post('/api/ac/server/evidence', (req, res) => {
+    if (!acApiKeyValid(req, portalEnv)) return res.status(401).json({ error: 'Invalid AC key' });
+    const { evidenceId, payload } = req.body || {};
+    if (!evidenceId) return res.status(400).json({ error: 'evidenceId required' });
+    acManager.pushEvidence(evidenceId, payload || {});
+    res.json({ ok: true });
+  });
+
+  app.post('/api/ac/admin/console', requireRole('admin'), (req, res) => {
+    const { command } = req.body || {};
+    if (!command || typeof command !== 'string') {
+      return res.status(400).json({ error: 'command string required' });
+    }
+    const user = req.session?.user;
+    const cmdId = acManager.runConsoleCommand(command, user?.username || user?.id || 'admin');
+    res.json({ ok: true, cmdId, message: 'Queued — FXServer applies within ~3s' });
+  });
+
+  app.post('/api/ac/admin/give-item', requireRole('admin'), (req, res) => {
+    const { playerId, item, amount } = req.body || {};
+    if (!playerId || !item) return res.status(400).json({ error: 'playerId and item required' });
+    const user = req.session?.user;
+    const cmdId = acManager.giveItemCommand(playerId, item, amount, user?.username || user?.id || 'admin');
+    res.json({ ok: true, cmdId, playerId: Number(playerId) });
+  });
+
+  app.post('/api/ac/admin/player-action', requireRole('staff'), (req, res) => {
+    const { action, playerId, params } = req.body || {};
+    if (!action || !playerId) return res.status(400).json({ error: 'action and playerId required' });
+    if (action === 'announce' && !hasMinRole(req.session?.user?.appRole, 'admin')) {
+      return res.status(403).json({ error: 'Admin role required for server announce' });
+    }
+    const user = req.session?.user;
+    const cmdId = acManager.playerActionCommand(action, playerId, params, user?.username || user?.id || 'staff');
+    res.json({ ok: true, cmdId, action, playerId: Number(playerId) });
+  });
+
+  app.get('/api/ac/admin/command-log', requireRole('staff'), (req, res) => {
+    res.json({ log: acManager.getCommandLog(parseInt(req.query.limit, 10) || 50) });
+  });
+
+  app.get('/api/ac/admin/economy-alerts', requireRole('staff'), (req, res) => {
+    res.json({ alerts: acManager.getEconomyAlerts(parseInt(req.query.limit, 10) || 30) });
+  });
+
+  app.get('/api/ac/admin/evidence/:evidenceId', requireRole('staff'), (req, res) => {
+    const ev = acManager.getEvidence(req.params.evidenceId);
+    if (!ev?.image && !(ev?.clips?.length)) return res.status(404).json({ error: 'Evidence not found' });
+    res.json(ev);
+  });
+
+  app.get('/api/ac/admin/threat-summary', requireRole('staff'), (_req, res) => {
+    res.json(acManager.getThreatSummary());
+  });
+
+  app.get('/api/ac/admin/signature-presets', requireRole('staff'), (_req, res) => {
+    res.json({ presets: acManager.getSignaturePresets() });
+  });
+
+  app.post('/api/ac/admin/signature-presets/apply', requireRole('staff'), (req, res) => {
+    const { name } = req.body || {};
+    if (!name) return res.status(400).json({ error: 'name required' });
+    const user = req.session?.user;
+    const added = acManager.applySignaturePreset(name, user?.username || user?.id || 'staff');
+    if (added === 0) return res.status(404).json({ error: 'Unknown preset or all duplicates' });
+    res.json({ ok: true, added, signatures: acManager.getCustomSignatures() });
+  });
+
+  app.get('/api/stream/status', requireRole('staff'), (_req, res) => {
+    res.json(acManager.getStreamStatus());
   });
 }

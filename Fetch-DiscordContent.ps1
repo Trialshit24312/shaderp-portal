@@ -2,7 +2,7 @@
 param(
     [string]$BotToken = $env:DISCORD_BOT_TOKEN,
     [string]$GuildId = $env:DISCORD_GUILD_ID,
-    [string]$BasePath = 'F:\txData\QBCore_A9FD7A.base',
+    [string]$BasePath = 'F:\txData\ShadeRP.base',
     [switch]$RulesOnly,
     [switch]$FaqOnly
 )
@@ -11,7 +11,7 @@ $ErrorActionPreference = 'Stop'
 $portalLua = Join-Path $BasePath 'resources\[standalone]\shade-config\config\portal_content.lua'
 
 if (-not $BotToken) {
-    Write-Host 'Set DISCORD_BOT_TOKEN (same bot as Render — needs Read Message History in your Discord channels).'
+    Write-Host 'Set DISCORD_BOT_TOKEN (same bot as Render - needs Read Message History in your Discord channels).'
     exit 1
 }
 if (-not $GuildId) {
@@ -20,7 +20,11 @@ if (-not $GuildId) {
 }
 
 function Get-DiscordJson([string]$Uri) {
-    $headers = @{ Authorization = "Bot $BotToken" }
+    # PowerShell sends a browser User-Agent by default; Discord returns 40333 if it looks like a browser.
+    $headers = @{
+        Authorization = "Bot $BotToken"
+        'User-Agent'  = 'DiscordBot (https://github.com/Trialshit24312/shaderp-website, 1.0)'
+    }
     return Invoke-RestMethod -Uri $Uri -Headers $headers
 }
 
@@ -33,13 +37,22 @@ function Parse-ChannelIds([string]$text) {
     return $ids
 }
 
+function Normalize-ChannelName([string]$name) {
+    if (-not $name) { return '' }
+    # Discord channels often use emoji + Mathematical Sans-Serif Bold (𝙖𝙗𝙘) — normalize for matching.
+    $n = $name.Normalize([Text.NormalizationForm]::FormKD)
+    $n = [regex]::Replace($n, '\p{M}', '')  # strip combining marks from NFKD
+    $n = $n -replace '[^\p{L}\p{N}\-_]', ''
+    return $n.ToLower()
+}
+
 function Find-ChannelByName($channels, [string[]]$names) {
-    foreach ($name in $names) {
-        $n = $name.ToLower()
+    foreach ($name in ($names | Where-Object { $_ })) {
+        $n = Normalize-ChannelName $name
         $hit = $channels | Where-Object {
             $_.type -in 0, 5, 15 -and (
-                ($_.name -replace '[^\w-]', '').ToLower() -eq ($n -replace '[^\w-]', '') -or
-                $_.name.ToLower() -like "*$n*"
+                (Normalize-ChannelName $_.name) -eq $n -or
+                (Normalize-ChannelName $_.name) -like "*$n*"
             )
         } | Select-Object -First 1
         if ($hit) { return $hit.id }
@@ -53,7 +66,7 @@ function Get-ChannelMessages([string]$channelId, [int]$limit = 20) {
     try {
         return @(Get-DiscordJson $uri)
     } catch {
-        Write-Warning "Could not read channel $channelId — check bot permissions and channel ID."
+        Write-Warning "Could not read channel $channelId - check bot permissions and channel ID."
         return @()
     }
 }
@@ -92,7 +105,7 @@ $allChannels = Get-DiscordJson "https://discord.com/api/v10/guilds/$GuildId/chan
 
 if (-not $channelIds.rules) {
     $channelIds.rules = Find-ChannelByName $allChannels @(
-        $env:DISCORD_CHANNEL_RULES, 'rules', 'server-rules', 'rule'
+        $env:DISCORD_CHANNEL_RULES, 'city-rules', 'rules', 'server-rules', 'rule'
     )
 }
 if (-not $channelIds.faq) {
@@ -111,7 +124,7 @@ if ($channelIds.faq) { Write-Host "FAQ channel: $($channelIds.faq)" }
 
 if (-not $channelIds.rules -and -not $channelIds.faq) {
     Write-Host ''
-    Write-Host 'Add channel IDs to portal_content.lua → discordChannels section, e.g.:'
+    Write-Host 'Add channel IDs to portal_content.lua discordChannels section, e.g.:'
     Write-Host "  rules = '1234567890123456789',"
     Write-Host ''
     Write-Host 'Listing guild channels (copy IDs into portal_content.lua discordChannels if auto-detect fails):'

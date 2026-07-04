@@ -1,4 +1,16 @@
 /** ShadeRP Portal — client app */
+import {
+  initLoadingScreen,
+  initRevealAnimations,
+  animatePanelSwitch,
+  showToast,
+  navIcon,
+  renderPageHeader,
+  bindBreadcrumbs,
+  getLastPanel,
+  setLastPanel,
+} from './ui.js';
+
 let ME = null;
 let DATA = null;
 let charts = {};
@@ -25,16 +37,18 @@ const NAV = [
   { id: 'economy', label: 'Economy', min: 'member' },
   { id: 'map', label: 'Map', min: 'member' },
   { section: 'Staff' },
+  { id: 'hub', label: 'Command Center', min: 'staff', highlight: true },
   { id: 'analytics', label: 'Analytics', min: 'staff' },
   { id: 'anticheat', label: 'Anti-Cheat', min: 'staff', highlight: true },
+  { id: 'tickets', label: 'Tickets', min: 'staff' },
   { id: 'staff', label: 'Staff Hub', min: 'staff' },
   { section: 'Admin' },
   { id: 'resources', label: 'Resources', min: 'admin' },
   { id: 'branding', label: 'Branding', min: 'admin' },
-  { id: 'commands', label: 'Commands', min: 'admin' },
+  { id: 'commands', label: 'Server control', min: 'admin' },
   { id: 'blocked', label: 'Blocked', min: 'admin' },
   { id: 'settings', label: 'Settings', min: 'admin' },
-  { id: 'logs', label: 'Server Logs', min: 'owner' },
+  { id: 'logs', label: 'Server Logs', min: 'staff' },
 ];
 
 const ROLE_LEVEL = { guest: 0, member: 1, moderator: 2, staff: 3, developer: 4, admin: 5, owner: 6 };
@@ -55,12 +69,8 @@ function discordAvatarUrl(discordId) {
   return `https://cdn.discordapp.com/embed/avatars/${idx}.png`;
 }
 
-function toast(msg = 'Copied') {
-  const t = el('toast');
-  t.textContent = msg;
-  t.hidden = false;
-  clearTimeout(toast._t);
-  toast._t = setTimeout(() => { t.hidden = true; }, 1800);
+function toast(msg = 'Copied', isError = false) {
+  showToast(msg, isError);
 }
 
 function copyText(text) {
@@ -113,9 +123,15 @@ function renderUserBar() {
   }
 
   if (!ME.user) {
-    bar.innerHTML = `<a href="/auth/discord?returnTo=/queue" class="btn-discord">Login with Discord</a>`;
+    bar.innerHTML = `
+      <a href="/auth/discord?returnTo=/" class="btn-discord">Login with Discord</a>
+      <span class="session-note">Stay signed in 90 days — no re-login after restarts</span>`;
     return;
   }
+
+  const sessionNote = ME.persistentSession
+    ? `<span class="session-note" title="Signed cookie — survives server restarts">Signed in · ${ME.sessionDays || 90}d</span>`
+    : '';
 
   const u = ME.user;
   const q = QUEUE?.me;
@@ -124,6 +140,7 @@ function renderUserBar() {
     : '';
   bar.innerHTML = `
     ${queueChip}
+    ${sessionNote}
     <div class="user-chip">
       ${u.avatar ? `<img src="${esc(u.avatar)}" alt="" />` : ''}
       <span>${esc(u.globalName)}</span>
@@ -145,18 +162,51 @@ function renderNav() {
     if (item.section) return `<div class="nav-section">${esc(item.section)}</div>`;
     const locked = !panels.has(item.id) && !hasRole(item.min);
     const hi = item.highlight ? ' nav-highlight' : '';
-    return `<button type="button" class="nav-btn${hi}${locked ? ' locked' : ''}" data-panel="${item.id}" ${locked ? 'disabled' : ''}>${esc(item.label)}</button>`;
+    const icon = navIcon(item.id);
+    return `<button type="button" class="nav-btn${hi}${locked ? ' locked' : ''}" data-panel="${item.id}" ${locked ? 'disabled' : ''}><span class="nav-icon" aria-hidden="true">${icon}</span><span>${esc(item.label)}</span></button>`;
   }).join('');
 
   nav.querySelectorAll('.nav-btn:not(.locked)').forEach((btn) => {
     btn.addEventListener('click', () => showPanel(btn.dataset.panel));
   });
+
+  const foot = document.querySelector('.sidebar-footer');
+  if (foot && !foot.querySelector('.login-note') && !ME?.user) {
+    const note = document.createElement('p');
+    note.className = 'login-note';
+    note.textContent = 'Login once — your session is saved for 90 days even when the site restarts on Render free tier.';
+    foot.insertBefore(note, foot.querySelector('.sync-time'));
+  }
+}
+
+function updateStatusBar() {
+  const dot = el('status-dot');
+  const text = el('status-text');
+  const sess = el('status-session');
+  if (!dot || !text) return;
+  dot.classList.add('online');
+  const q = QUEUE?.config || {};
+  const online = q.playersOnline != null ? `${q.playersOnline} online` : 'Portal online';
+  text.textContent = DATA?.generatedAt ? `${online} · synced ${DATA.generatedAt.slice(0, 10)}` : online;
+  if (sess) {
+    if (ME?.user) {
+      sess.textContent = ME.persistentSession
+        ? `${ME.user.globalName} · ${ME.user.appRole} · saved session`
+        : `${ME.user.globalName} · ${ME.user.appRole}`;
+    } else {
+      sess.textContent = 'Guest — login to save your session';
+    }
+  }
 }
 
 function showPanel(id) {
   document.querySelectorAll('.nav-btn').forEach((b) => b.classList.toggle('active', b.dataset.panel === id));
   document.querySelectorAll('.panel').forEach((p) => p.classList.toggle('active', p.id === `panel-${id}`));
+  const panelEl = el(`panel-${id}`);
+  animatePanelSwitch(panelEl);
+  setLastPanel(id);
   track('panel_view', { panel: id });
+  if (id === 'hub' && hasRole('staff')) renderHub();
   if (id === 'analytics' && hasRole('staff')) loadAnalytics();
   if (id === 'anticheat' && hasRole('staff')) {
     loadAcPanel();
@@ -164,10 +214,80 @@ function showPanel(id) {
   } else {
     stopAcAutoRefresh();
   }
+  if (id === 'commands' && hasRole('admin')) loadServerControl();
+  if (id === 'tickets' && hasRole('staff')) loadTicketsPanel();
+  if (id === 'logs' && hasRole('staff')) loadLogs();
   if (id === 'team') renderTeam();
-  if (id === 'logs' && hasRole('owner')) loadLogs();
   if (id === 'queue' || id === 'connect' || id === 'home') renderQueueWidgets();
   el('sidebar')?.classList.remove('open');
+}
+
+window.showPanel = showPanel;
+
+function renderHub() {
+  const root = el('hub-root');
+  if (!root || !DATA) return;
+  const u = ME?.user;
+  const q = QUEUE?.config || {};
+  const actions = [
+    { id: 'anticheat', icon: '🛡️', title: 'Anti-Cheat', desc: 'Players, bans, economy alerts, evidence' },
+    { id: 'tickets', icon: '🎫', title: 'Tickets', desc: 'Support threads linked to Discord' },
+    { id: 'logs', icon: '📋', title: 'Server logs', desc: 'Crashes, joins, errors from FXServer' },
+    { id: 'commands', icon: '🖥️', title: 'Server control', desc: 'Console, giveitem, announce', min: 'admin' },
+    { id: 'analytics', icon: '📈', title: 'Analytics', desc: 'Traffic and panel usage' },
+    { id: 'staff', icon: '⚡', title: 'Staff hub', desc: 'Quick restarts and docs' },
+    { id: 'queue', icon: '🎫', title: 'Queue', desc: `${q.inQueue ?? 0} waiting · manage join flow` },
+    { id: 'map', icon: '🗺️', title: 'Map & blips', desc: 'Locations and teleport IDs' },
+  ].filter((a) => !a.min || hasRole(a.min));
+
+  const feed = [
+    { type: 'ok', text: DATA.generatedAt ? `Dashboard synced ${DATA.generatedAt}` : 'Run sync script for live server data' },
+    { type: 'info', text: ME?.persistentSession ? 'Your login is saved — survives Render restarts' : 'Login with Discord to unlock staff tools' },
+    { type: q.enabled === false ? 'warn' : 'ok', text: q.enabled === false ? 'Web queue is disabled in env' : `Queue: ${q.inQueue ?? 0} waiting${q.playersOnline != null ? ` · ${q.playersOnline} in-city` : ''}` },
+  ];
+
+  root.innerHTML = `
+    ${renderPageHeader('Command Center', 'Everything staff needs in one place — pick a tool or check status below.', [{ id: 'home', label: 'Home' }, { id: 'hub', label: 'Command Center' }])}
+    <div class="hub-hero reveal">
+      <div>
+        <h2>Welcome back${u ? `, ${esc(u.globalName)}` : ''}</h2>
+        <p>Role: <strong>${esc(u?.appRole || 'staff')}</strong> · Use the cards below or sidebar for deep tools.</p>
+      </div>
+      <div class="hub-clock" id="hub-clock">${new Date().toLocaleString()}</div>
+    </div>
+    <div class="hub-grid">${actions.map((a) => `
+      <button type="button" class="hub-action reveal" data-panel="${a.id}">
+        <span class="hub-action-icon">${a.icon}</span>
+        <strong>${esc(a.title)}</strong>
+        <span>${esc(a.desc)}</span>
+      </button>`).join('')}</div>
+    <div class="hub-feed">
+      <div class="card reveal"><h3>Status</h3>${feed.map((f) => `
+        <div class="hub-feed-item"><span class="hub-feed-dot ${f.type}"></span><span>${esc(f.text)}</span></div>`).join('')}</div>
+      <div class="card reveal" id="hub-stream-card">
+        <h3>FXServer stream</h3>
+        <div id="hub-stream-stats" class="hub-stream-card">
+          <span class="hint">Loading stream status…</span>
+        </div>
+      </div>
+      <div class="card reveal"><h3>Quick tips</h3>
+        <div class="hub-feed-item"><span class="hub-feed-dot info"></span><span>Server logs need <code>shade:logsSyncEnabled 1</code> in server.cfg</span></div>
+        <div class="hub-feed-item"><span class="hub-feed-dot info"></span><span>AC panel requires shaderp-ac connected with matching API key</span></div>
+        <div class="hub-feed-item"><span class="hub-feed-dot warn"></span><span>Render free tier: ticket/log data resets on redeploy — FXServer re-syncs logs</span></div>
+      </div>
+    </div>`;
+
+  root.querySelectorAll('[data-panel]').forEach((btn) => {
+    btn.addEventListener('click', () => showPanel(btn.dataset.panel));
+  });
+  bindBreadcrumbs(root);
+  clearInterval(renderHub._clock);
+  renderHub._clock = setInterval(() => {
+    const c = el('hub-clock');
+    if (c) c.textContent = new Date().toLocaleString();
+  }, 30000);
+  loadHubStreamStatus(root);
+  initRevealAnimations(root);
 }
 
 function stat(label, value) {
@@ -1092,6 +1212,190 @@ function renderCommands() {
     ${restarts.length ? `<h4 class="section-sub">Resource restarts</h4><div class="command-grid">${restarts.map((c) => cmdBtn(c)).join('')}</div>` : ''}
     ${ingame.length ? `<h4 class="section-sub">In-game / txAdmin</h4><div class="command-grid">${ingame.map((c) => cmdBtn(c)).join('')}</div>` : ''}`;
   el('command-list').querySelectorAll('.cmd-btn').forEach((b) => b.addEventListener('click', () => { copyText(b.dataset.cmd); track('command_copy', { panel: 'commands' }); }));
+  initServerControlQuickBtns();
+}
+
+const SC_QUICK = [
+  'status', 'refresh', 'restart shaderp-ac', 'restart ox_inventory', 'restart es_extended',
+  'restart lb-tablet', 'restart shade-crime', 'ensure shade-vehicles',
+];
+
+function initServerControlQuickBtns() {
+  const wrap = el('sc-quick-btns');
+  if (!wrap) return;
+  wrap.innerHTML = SC_QUICK.map((c) => `<button type="button" class="cmd-btn sc-quick-cmd" data-cmd="${esc(c)}">${esc(c)}</button>`).join('');
+  wrap.querySelectorAll('.sc-quick-cmd').forEach((b) => {
+    b.addEventListener('click', () => runServerConsole(b.dataset.cmd));
+  });
+}
+
+async function runServerConsole(command) {
+  if (!command?.trim()) return;
+  try {
+    const res = await fetch('/api/ac/admin/console', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ command: command.trim() }),
+    });
+    const data = await res.json().catch(() => ({}));
+    if (!res.ok) throw new Error(data.error || res.statusText);
+    toast(`Queued: ${command.trim()}`);
+    setTimeout(() => loadServerControl(true), 1500);
+  } catch (e) {
+    toast(`Console failed: ${e.message}`, true);
+  }
+}
+
+async function runServerGiveItem() {
+  const playerId = el('sc-give-id')?.value;
+  const item = el('sc-give-item')?.value?.trim();
+  const amount = el('sc-give-amt')?.value || 1;
+  if (!playerId || !item) return toast('Player ID and item required', true);
+  try {
+    const res = await fetch('/api/ac/admin/give-item', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ playerId: Number(playerId), item, amount: Number(amount) }),
+    });
+    const data = await res.json().catch(() => ({}));
+    if (!res.ok) throw new Error(data.error || res.statusText);
+    toast(`Giveitem queued for #${playerId}`);
+    setTimeout(() => loadServerControl(true), 1500);
+  } catch (e) {
+    toast(`Give item failed: ${e.message}`, true);
+  }
+}
+
+async function runServerAnnounce() {
+  const message = el('sc-announce-msg')?.value?.trim();
+  if (!message) return toast('Message required', true);
+  try {
+    const res = await fetch('/api/ac/admin/player-action', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ action: 'announce', playerId: 1, params: { message } }),
+    });
+    const data = await res.json().catch(() => ({}));
+    if (!res.ok) throw new Error(data.error || res.statusText);
+    toast('Announce queued');
+    el('sc-announce-msg').value = '';
+  } catch (e) {
+    toast(`Announce failed: ${e.message}`, true);
+  }
+}
+
+function renderCommandLog(log) {
+  const wrap = el('sc-command-log');
+  if (!wrap) return;
+  if (!log?.length) {
+    wrap.innerHTML = '<p class="hint">No commands yet — run a console command above.</p>';
+    return;
+  }
+  wrap.innerHTML = `<table><thead><tr><th>Time</th><th>Type</th><th>Command</th><th>By</th><th>Status</th><th>Result</th></tr></thead><tbody>${
+    log.map((r) => `<tr>
+      <td>${r.createdAt ? new Date(r.createdAt).toLocaleTimeString() : '—'}</td>
+      <td><code>${esc(r.type || '?')}</code></td>
+      <td>${esc(r.summary || r.extra?.command || '—')}</td>
+      <td>${esc(r.requestedBy || '—')}</td>
+      <td><span class="sc-status-${esc(r.status || 'queued')}">${esc(r.status || 'queued')}</span></td>
+      <td>${esc(r.message || '—')}</td>
+    </tr>`).join('')
+  }</tbody></table>`;
+}
+
+async function loadTicketsPanel() {
+  if (!hasRole('staff')) return;
+  const status = el('ticket-filter')?.value || 'all';
+  try {
+    const res = await fetch(`/api/tickets/admin/list?status=${encodeURIComponent(status)}&limit=40`);
+    if (!res.ok) throw new Error('Tickets API unavailable');
+    const data = await res.json();
+    const stats = data.stats || {};
+    el('ticket-stats').innerHTML = [
+      stat('Open', stats.open ?? 0),
+      stat('Closed', stats.closed ?? 0),
+      stat('Avg rating', stats.avgRating ?? '—'),
+      stat('Total', stats.total ?? 0),
+    ].join('');
+    const tickets = data.tickets || [];
+    if (!tickets.length) {
+      el('tickets-wrap').innerHTML = '<p class="hint">No tickets yet. Post a panel in Discord with <code>/ticket panel</code>.</p>';
+      return;
+    }
+    el('tickets-wrap').innerHTML = `<table><thead><tr><th>ID</th><th>User</th><th>Category</th><th>Subject</th><th>Ban</th><th>Status</th><th>Staff</th><th>Rating</th><th>Actions</th></tr></thead><tbody>${
+      tickets.map((t) => `<tr>
+        <td><code>${esc(t.id)}</code></td>
+        <td>${esc(t.discordName)}</td>
+        <td>${esc(t.category)}</td>
+        <td>${esc(t.subject)}</td>
+        <td>${t.profile?.activeBan ? `<span class="ac-trust-low">ACTIVE</span>` : '—'}</td>
+        <td>${esc(t.status)}</td>
+        <td>${esc(t.claimedByName || '—')}</td>
+        <td>${t.rating ? `${t.rating}★` : '—'}</td>
+        <td class="ac-actions">
+          ${t.status === 'open' ? `<button type="button" class="btn ghost btn-sm tk-claim" data-id="${esc(t.id)}">Claim</button>
+          <button type="button" class="btn ghost btn-sm tk-close" data-id="${esc(t.id)}">Close</button>` : ''}
+          ${t.profile?.activeBan && canUnban() ? `<button type="button" class="btn danger btn-sm tk-unban" data-id="${esc(t.id)}">Unban</button>` : ''}
+        </td>
+      </tr>`).join('')
+    }</tbody></table>`;
+    el('tickets-wrap').querySelectorAll('.tk-claim').forEach((b) => b.addEventListener('click', async () => {
+      await fetch(`/api/tickets/admin/${b.dataset.id}/claim`, { method: 'POST' });
+      toast('Ticket claimed'); loadTicketsPanel();
+    }));
+    el('tickets-wrap').querySelectorAll('.tk-close').forEach((b) => b.addEventListener('click', async () => {
+      const reason = prompt('Close reason:') || 'Resolved';
+      await fetch(`/api/tickets/admin/${b.dataset.id}/close`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ reason }) });
+      toast('Ticket closed'); loadTicketsPanel();
+    }));
+    el('tickets-wrap').querySelectorAll('.tk-unban').forEach((b) => b.addEventListener('click', async () => {
+      if (!confirm('Unban this player from AC global ban list?')) return;
+      const r = await fetch(`/api/tickets/admin/${b.dataset.id}/unban`, { method: 'POST' });
+      const j = await r.json().catch(() => ({}));
+      toast(r.ok ? `Unbanned ${j.banId}` : (j.error || 'Unban failed'), !r.ok);
+      loadTicketsPanel();
+    }));
+  } catch (e) {
+    el('tickets-wrap').innerHTML = `<p class="hint warn-banner">${esc(e.message)}</p>`;
+  }
+}
+
+function bindTicketsPanel() {
+  el('ticket-refresh')?.addEventListener('click', () => loadTicketsPanel());
+  el('ticket-filter')?.addEventListener('change', () => loadTicketsPanel());
+}
+
+async function loadServerControl(silent = false) {
+  if (!hasRole('admin')) return;
+  try {
+    const [statusRes, logRes] = await Promise.all([
+      fetch('/api/ac/admin/status'),
+      fetch('/api/ac/admin/command-log?limit=40'),
+    ]);
+    const status = statusRes.ok ? await statusRes.json() : {};
+    const logData = logRes.ok ? await logRes.json() : { log: [] };
+    const connected = status.connected;
+    el('sc-status-stats').innerHTML = [
+      stat('FXServer', connected ? 'Connected' : (status.stale ? 'Stale' : 'Offline')),
+      stat('Players', status.online ?? '—'),
+      stat('Last sync', status.lastSync ? new Date(status.lastSync).toLocaleTimeString() : '—'),
+      stat('Commands', logData.log?.length ?? 0),
+    ].join('');
+    renderCommandLog(logData.log || []);
+    if (!silent && !connected) toast('FXServer not synced — check shaderp-ac + AC_API_KEY', true);
+  } catch (e) {
+    if (!silent) toast('Server control unavailable', true);
+  }
+}
+
+function bindServerControlEvents() {
+  el('sc-console-run')?.addEventListener('click', () => runServerConsole(el('sc-console-input')?.value));
+  el('sc-console-input')?.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter') runServerConsole(el('sc-console-input')?.value);
+  });
+  el('sc-give-run')?.addEventListener('click', runServerGiveItem);
+  el('sc-announce-run')?.addEventListener('click', runServerAnnounce);
+  el('sc-log-refresh')?.addEventListener('click', () => loadServerControl());
 }
 
 function cmdBtn(c) {
@@ -1111,7 +1415,7 @@ function renderStaff() {
   el('staff-tools').innerHTML = [
     ['Analytics', 'Traffic, logins, panel usage', 'analytics', '📊'],
     ['Resources', 'Enabled/disabled scripts', 'resources', '📦'],
-    ['Commands', 'txAdmin restart list', 'commands', '⌨️'],
+    ['Server control', 'Live console + giveitem from web', 'commands', '🖥️'],
     ['Map & blips', 'IDs + /gotobiz teleports', 'map', '🗺️'],
     ['Branding', 'Resource + location names', 'branding', '🏷️'],
     ['Blocked mods', 'Missing deps / entitlements', 'blocked', '🚫'],
@@ -1161,6 +1465,7 @@ function renderSettings() {
   el('settings-env').innerHTML = [
     ['Discord OAuth', ME?.authConfigured ? '✓ Configured' : '✗ Missing'],
     ['Login', ME?.oauthReady ? '✓ Ready' : '✗ Need client secret'],
+    ['Saved session', ME?.persistentSession ? `✓ ${ME.sessionDays || 90} days (survives restarts)` : ME?.user ? 'Session only (re-login after deploy)' : '—'],
     ['Data sync', DATA?.generatedAt ? `✓ ${DATA.generatedAt}` : '✗ Run Sync-PortalToRender.ps1'],
     ['CFX join', DATA?.portal?.cfxJoinCode?.includes('YOUR') ? '⚠ Set portal.lua' : '✓ Set'],
   ].map(([k, v]) => `<div class="env-row"><span>${esc(k)}</span><span>${esc(v)}</span></div>`).join('');
@@ -1315,14 +1620,286 @@ function setupLogsPanel() {
 }
 
 let acState = {
-  sessionId: null,
-  pollTimer: null,
+  watches: new Map(),
+  watchPollTimer: null,
   snapshotId: null,
   refreshTimer: null,
   lastDetectionAt: 0,
   banPending: null,
   playerFilter: '',
+  lastPlayers: [],
 };
+
+function acFrameSrc(src) {
+  if (!src) return '';
+  return src.startsWith('data:') ? src : `data:image/jpeg;base64,${src}`;
+}
+
+function acRenderWatchGrid() {
+  const grid = el('ac-watch-grid');
+  if (!grid) return;
+  const slots = [];
+  const entries = [...acState.watches.entries()];
+  for (let i = 0; i < 4; i++) {
+    const entry = entries[i];
+    if (entry) {
+      const [sessionId, w] = entry;
+      slots.push(`<div class="ac-watch-slot" data-session="${esc(sessionId)}">
+        ${w.lastImage ? `<img src="${acFrameSrc(w.lastImage)}" alt="" />` : '<span class="hint" style="padding:1rem">Waiting…</span>'}
+        <span class="ac-watch-slot-label">${esc(w.playerName)} #${w.playerId}</span>
+        <button type="button" class="ac-watch-slot-close" data-stop="${esc(sessionId)}">×</button>
+      </div>`);
+    } else {
+      slots.push('<div class="ac-watch-slot empty">Empty slot</div>');
+    }
+  }
+  grid.innerHTML = slots.join('');
+  const countEl = el('ac-watch-count');
+  if (countEl) countEl.textContent = `${acState.watches.size}/4 watches`;
+  grid.querySelectorAll('.ac-watch-slot[data-session]').forEach((slot) => {
+    slot.addEventListener('click', (e) => {
+      if (e.target.closest('.ac-watch-slot-close')) return;
+      const sid = slot.dataset.session;
+      const w = acState.watches.get(sid);
+      if (w?.lastImage) acShowFrameExpanded(w.lastImage, `${w.playerName} (#${w.playerId})`);
+    });
+  });
+  grid.querySelectorAll('[data-stop]').forEach((btn) => {
+    btn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      stopAcWatch(btn.dataset.stop);
+    });
+  });
+}
+
+function acShowFrameExpanded(src, title) {
+  const wrap = el('ac-frame-wrap');
+  const img = el('ac-frame');
+  if (!wrap || !img) return;
+  img.src = acFrameSrc(src);
+  wrap.hidden = false;
+  if (title) el('ac-watch-hint').textContent = title;
+}
+
+async function startAcWatch(playerId, playerName) {
+  if (acState.watches.size >= 4) {
+    toast('Max 4 watches — stop one first', true);
+    return;
+  }
+  try {
+    const res = await fetch('/api/ac/admin/watch', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ playerId: Number(playerId), playerName }),
+    });
+    if (!res.ok) {
+      const err = await res.json().catch(() => ({}));
+      throw new Error(err.error || await res.text());
+    }
+    const data = await res.json();
+    acState.watches.set(data.sessionId, {
+      playerId: Number(playerId),
+      playerName,
+      lastImage: null,
+    });
+    acRenderWatchGrid();
+    toast(`Watch started: ${playerName}`);
+    scheduleWatchPoll();
+  } catch (err) {
+    toast(err.message || 'Watch failed', true);
+    console.error(err);
+  }
+}
+
+async function stopAcWatch(sessionId) {
+  if (sessionId) {
+    try {
+      await fetch('/api/ac/admin/stop-watch', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ sessionId }),
+      });
+    } catch (_) {}
+    acState.watches.delete(sessionId);
+  }
+  acRenderWatchGrid();
+  if (acState.watches.size === 0 && acState.watchPollTimer) {
+    clearTimeout(acState.watchPollTimer);
+    acState.watchPollTimer = null;
+  }
+}
+
+async function stopAllAcWatches() {
+  try {
+    await fetch('/api/ac/admin/stop-all-watch', { method: 'POST' });
+  } catch (_) {}
+  acState.watches.clear();
+  acRenderWatchGrid();
+  if (acState.watchPollTimer) clearTimeout(acState.watchPollTimer);
+  acState.watchPollTimer = null;
+  el('ac-frame-wrap').hidden = true;
+}
+
+async function watchSuspiciousPlayers() {
+  const suspicious = (acState.lastPlayers || [])
+    .filter((p) => (p.trust ?? 100) < 50)
+    .slice(0, 4 - acState.watches.size);
+  if (!suspicious.length) {
+    toast('No low-trust players online');
+    return;
+  }
+  for (const p of suspicious) {
+    if (acState.watches.size >= 4) break;
+    const already = [...acState.watches.values()].some((w) => w.playerId === p.id);
+    if (!already) await startAcWatch(p.id, p.name);
+  }
+}
+
+function scheduleWatchPoll() {
+  if (acState.watchPollTimer) clearTimeout(acState.watchPollTimer);
+  acState.watchPollTimer = setTimeout(pollAllWatchFrames, 700);
+}
+
+async function pollAllWatchFrames() {
+  if (acState.watches.size === 0) return;
+  for (const sessionId of acState.watches.keys()) {
+    try {
+      const res = await fetch(`/api/ac/admin/frame/${encodeURIComponent(sessionId)}`);
+      if (res.ok) {
+        const frame = await res.json();
+        const w = acState.watches.get(sessionId);
+        if (w && frame.image) {
+          w.lastImage = frame.image;
+          acState.watches.set(sessionId, w);
+        }
+      }
+    } catch (_) {}
+  }
+  acRenderWatchGrid();
+  scheduleWatchPoll();
+}
+
+async function acRenderThreatSummary() {
+  const bar = el('ac-threat-summary');
+  if (!bar) return;
+  try {
+    const res = await fetch('/api/ac/admin/threat-summary');
+    if (!res.ok) { bar.innerHTML = ''; return; }
+    const data = await res.json();
+    const chips = [];
+    for (const p of data.highRisk || []) {
+      chips.push(`<span class="ac-threat-chip danger">${esc(p.name)} trust ${p.trust ?? '?'}</span>`);
+    }
+    for (const t of data.topTypes || []) {
+      chips.push(`<span class="ac-threat-chip warn">${esc(t.type)} ×${t.count}</span>`);
+    }
+    if (data.activeWatches) chips.push(`<span class="ac-threat-chip">${data.activeWatches} active watches</span>`);
+    bar.innerHTML = chips.length ? chips.join('') : '<span class="hint">No elevated threats right now</span>';
+  } catch {
+    bar.innerHTML = '';
+  }
+}
+
+async function loadHubStreamStatus(root) {
+  if (!hasRole('staff')) return;
+  const statsEl = root?.querySelector('#hub-stream-stats') || el('hub-stream-stats');
+  if (!statsEl) return;
+  try {
+    const res = await fetch('/api/stream/status');
+    if (!res.ok) {
+      statsEl.innerHTML = '<span class="hint">Stream status unavailable — log in as staff with AC enabled</span>';
+      return;
+    }
+    const s = await res.json();
+    const syncClass = s.connected ? 'ok' : s.stale ? 'warn' : 'danger';
+    statsEl.innerHTML = `
+      <div class="hub-stream-stat"><strong>${esc(s.phase || '?')}</strong>Phase</div>
+      <div class="hub-stream-stat"><strong>${s.joinable ? 'Open' : 'Closed'}</strong>Join gate</div>
+      <div class="hub-stream-stat"><strong>${s.online ?? '?'}/${s.maxSlots ?? 48}</strong>Players</div>
+      <div class="hub-stream-stat"><strong>${s.proximityZones ?? 0}</strong>MLO zones</div>
+      <div class="hub-stream-stat"><strong>${s.cityMloEnabled ? 'On' : 'Off'}</strong>City MLO</div>
+      <div class="hub-stream-stat hub-stream-stat-${syncClass}"><strong>${s.connected ? 'Live' : s.stale ? 'Stale' : 'Offline'}</strong>AC sync</div>`;
+    initRevealAnimations(root || document);
+  } catch (_) {
+    statsEl.innerHTML = '<span class="hint">Could not load stream status</span>';
+  }
+}
+
+async function showEvidenceReplay(evidenceId) {
+  if (!evidenceId) return;
+  try {
+    const res = await fetch(`/api/ac/admin/evidence/${encodeURIComponent(evidenceId)}`);
+    if (!res.ok) throw new Error('Evidence not ready yet');
+    const data = await res.json();
+    const clips = data.clips?.length ? data.clips : (data.image ? [{ image: data.image }] : []);
+    if (!clips.length) throw new Error('No frames captured');
+    const modal = el('evidence-replay-modal');
+    const strip = el('evidence-replay-strip');
+    const main = el('evidence-replay-main');
+    el('evidence-replay-title').textContent = `Evidence ${evidenceId}`;
+    strip.innerHTML = clips.map((c, i) =>
+      `<img class="ac-replay-thumb${i === 0 ? ' active' : ''}" src="${acFrameSrc(c.image)}" data-idx="${i}" alt="Frame ${i + 1}" />`
+    ).join('');
+    main.src = acFrameSrc(clips[0].image);
+    strip.querySelectorAll('.ac-replay-thumb').forEach((thumb) => {
+      thumb.addEventListener('click', () => {
+        strip.querySelectorAll('.ac-replay-thumb').forEach((t) => t.classList.remove('active'));
+        thumb.classList.add('active');
+        main.src = thumb.src;
+      });
+    });
+    modal.hidden = false;
+    modal.setAttribute('aria-hidden', 'false');
+  } catch (e) {
+    toast(e.message || 'Evidence unavailable', true);
+  }
+}
+
+function closeEvidenceReplay() {
+  const modal = el('evidence-replay-modal');
+  if (modal) {
+    modal.hidden = true;
+    modal.setAttribute('aria-hidden', 'true');
+  }
+}
+
+async function loadAcSignaturePresets() {
+  const sel = el('ac-sig-preset');
+  if (!sel) return;
+  try {
+    const res = await fetch('/api/ac/admin/signature-presets');
+    if (!res.ok) return;
+    const data = await res.json();
+    sel.innerHTML = '<option value="">Apply preset pack…</option>' + (data.presets || []).map((p) =>
+      `<option value="${esc(p.name)}">${esc(p.name)} (${(p.counts.executors || 0) + (p.counts.patterns || 0) + (p.counts.ocr || 0)} sigs)</option>`
+    ).join('');
+  } catch (_) {}
+}
+
+async function syncAcWatchSessions() {
+  try {
+    const res = await fetch('/api/ac/admin/watch-sessions');
+    if (!res.ok) return;
+    const data = await res.json();
+    const serverIds = new Set();
+    for (const s of data.sessions || []) {
+      const sid = s.id || s.sessionId;
+      if (!sid) continue;
+      serverIds.add(sid);
+      const existing = acState.watches.get(sid);
+      acState.watches.set(sid, {
+        playerId: s.playerId,
+        playerName: s.playerName || existing?.playerName || `Player #${s.playerId}`,
+        lastImage: existing?.lastImage || null,
+      });
+    }
+    for (const sid of [...acState.watches.keys()]) {
+      if (!serverIds.has(sid)) acState.watches.delete(sid);
+    }
+    acRenderWatchGrid();
+    if (acState.watches.size > 0) scheduleWatchPoll();
+  } catch (_) {}
+}
 
 function acTrustClass(score) {
   const n = Number(score);
@@ -1418,13 +1995,7 @@ async function acAdminAction(path, playerId, playerName, extra = {}, useConfirm 
 }
 
 function acShowFrame(src, title) {
-  const img = el('ac-frame');
-  const loading = el('ac-frame-loading');
-  if (!img) return;
-  img.src = src?.startsWith('data:') ? src : `data:image/jpeg;base64,${src}`;
-  img.hidden = false;
-  if (loading) loading.hidden = true;
-  if (title) el('ac-watch-title').textContent = title;
+  acShowFrameExpanded(src, title);
 }
 
 async function pollAcSnapshot(requestId, playerName) {
@@ -1440,6 +2011,25 @@ async function pollAcSnapshot(requestId, playerName) {
   if (acState.snapshotId === requestId) {
     setTimeout(() => pollAcSnapshot(requestId, playerName), 800);
   }
+}
+
+async function acPlayerAction(action, playerId, params = {}) {
+  try {
+    const res = await fetch('/api/ac/admin/player-action', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ action, playerId: Number(playerId), params }),
+    });
+    const data = await res.json().catch(() => ({}));
+    if (!res.ok) throw new Error(data.error || res.statusText);
+    toast(`${action} queued for #${playerId}`);
+  } catch (e) {
+    toast(`${action} failed: ${e.message}`, true);
+  }
+}
+
+async function acViewEvidence(evidenceId) {
+  await showEvidenceReplay(evidenceId);
 }
 
 function acBindPlayerActions() {
@@ -1458,6 +2048,18 @@ function acBindPlayerActions() {
   el('ac-players-wrap')?.querySelectorAll('.ac-ban-btn').forEach((btn) => {
     btn.addEventListener('click', () => openAcBanModal(btn.dataset.pid, btn.dataset.pname));
   });
+  el('ac-players-wrap')?.querySelectorAll('.ac-freeze-btn').forEach((btn) => {
+    btn.addEventListener('click', () => acPlayerAction('freeze', btn.dataset.pid));
+  });
+  el('ac-players-wrap')?.querySelectorAll('.ac-heal-btn').forEach((btn) => {
+    btn.addEventListener('click', () => acPlayerAction('heal', btn.dataset.pid));
+  });
+  el('ac-players-wrap')?.querySelectorAll('.ac-dm-btn').forEach((btn) => {
+    btn.addEventListener('click', () => {
+      const msg = prompt('Message to player:');
+      if (msg) acPlayerAction('direct_message', btn.dataset.pid, { message: msg });
+    });
+  });
 }
 
 function acBindDetectionActions() {
@@ -1472,13 +2074,8 @@ function acBindDetectionActions() {
       openAcBanModal(btn.dataset.pid, btn.dataset.pname, btn.dataset.reason || 'Cheating — AC detection');
     });
   });
-  el('ac-detections-wrap')?.querySelectorAll('.ac-screenshot-link').forEach((link) => {
-    link.addEventListener('click', (e) => {
-      const url = link.getAttribute('href') || '';
-      if (url.startsWith('http')) return;
-      e.preventDefault();
-      acShowFrame(url, `Evidence — ${link.dataset.pname || 'player'}`);
-    });
+  el('ac-detections-wrap')?.querySelectorAll('.ac-det-evidence').forEach((btn) => {
+    btn.addEventListener('click', () => acViewEvidence(btn.dataset.evid));
   });
 }
 
@@ -1508,6 +2105,7 @@ function acBindUnbanActions() {
 }
 
 function acRenderPlayers(players) {
+  acState.lastPlayers = players;
   const q = acState.playerFilter.trim().toLowerCase();
   const filtered = q
     ? players.filter((p) => `${p.name} ${p.id}`.toLowerCase().includes(q))
@@ -1527,6 +2125,9 @@ function acRenderPlayers(players) {
         <button type="button" class="btn ghost btn-sm ac-watch-btn" data-pid="${p.id}" data-pname="${esc(p.name)}">Watch</button>
         <button type="button" class="btn ghost btn-sm ac-snap-btn" data-pid="${p.id}" data-pname="${esc(p.name)}">Snap</button>
         <button type="button" class="btn ghost btn-sm ac-kick-btn" data-pid="${p.id}" data-pname="${esc(p.name)}">Kick</button>
+        <button type="button" class="btn ghost btn-sm ac-freeze-btn" data-pid="${p.id}">Freeze</button>
+        <button type="button" class="btn ghost btn-sm ac-heal-btn" data-pid="${p.id}">Heal</button>
+        <button type="button" class="btn ghost btn-sm ac-dm-btn" data-pid="${p.id}">DM</button>
         <button type="button" class="btn danger btn-sm ac-ban-btn" data-pid="${p.id}" data-pname="${esc(p.name)}">Ban</button>
       </td>
     </tr>`;
@@ -1549,6 +2150,7 @@ function acRenderDetections(dets) {
     const pname = d.playerName || '?';
     const detail = d.details?.detail || d.details?.details?.detail || d.details?.menu || d.details?.executor || '';
     const screenshot = d.details?.screenshot || d.details?.details?.screenshot;
+    const evidenceId = d.evidenceId || d.details?.evidenceId;
     const canAct = pid !== '' && pid != null;
     return `<tr class="ac-det-row">
       <td>${d.at ? new Date(d.at).toLocaleString() : '—'}</td>
@@ -1556,7 +2158,8 @@ function acRenderDetections(dets) {
       <td><span class="ac-det-type">${esc(d.detection || 'unknown')}</span></td>
       <td>${d.trust != null ? `<span class="ac-trust ${acTrustClass(d.trust)}">${d.trust}</span>` : '—'}</td>
       <td><span class="ac-det-detail" title="${esc(String(detail))}">${esc(String(detail || '—'))}</span>
-        ${screenshot ? `<a href="${esc(screenshot)}" class="ac-screenshot-link" data-pname="${esc(pname)}" target="_blank" rel="noopener">📷 evidence</a>` : ''}</td>
+        ${screenshot ? `<a href="${esc(screenshot)}" class="ac-screenshot-link" target="_blank" rel="noopener">📷</a>` : ''}
+        ${evidenceId ? `<button type="button" class="btn ghost btn-sm ac-det-evidence" data-evid="${esc(evidenceId)}">Evidence</button>` : ''}</td>
       <td class="ac-actions">${canAct ? `
         <button type="button" class="btn ghost btn-sm ac-det-watch" data-pid="${pid}" data-pname="${esc(pname)}">Watch</button>
         <button type="button" class="btn ghost btn-sm ac-det-snap" data-pid="${pid}" data-pname="${esc(pname)}">Snap</button>
@@ -1693,10 +2296,46 @@ function acRenderSignatures(sig) {
   });
 }
 
+function acRenderEconomy(alerts) {
+  const wrap = el('ac-economy-wrap');
+  if (!wrap) return;
+  if (!alerts?.length) {
+    wrap.innerHTML = '<p class="hint">No economy alerts — money monitor watches ESX/QBCore cash & bank deltas.</p>';
+    return;
+  }
+  wrap.innerHTML = `<table><thead><tr><th>Time</th><th>Player</th><th>Detail</th><th>Cash Δ</th><th>Bank Δ</th><th>Trust</th><th>Actions</th></tr></thead><tbody>${
+    alerts.map((a) => `<tr>
+      <td>${a.at ? new Date(a.at).toLocaleString() : '—'}</td>
+      <td><strong>${esc(a.playerName || '?')}</strong> <small>#${a.playerId ?? '?'}</small></td>
+      <td>${esc(a.detail || '—')}</td>
+      <td>${a.cashDelta != null ? esc(String(a.cashDelta)) : '—'}</td>
+      <td>${a.bankDelta != null ? esc(String(a.bankDelta)) : '—'}</td>
+      <td>${a.trust != null ? esc(String(a.trust)) : '—'}</td>
+      <td class="ac-actions">${a.playerId ? `
+        <button type="button" class="btn ghost btn-sm ac-eco-watch" data-pid="${a.playerId}" data-pname="${esc(a.playerName || '?')}">Watch</button>
+        <button type="button" class="btn ghost btn-sm ac-eco-freeze" data-pid="${a.playerId}">Freeze</button>
+        <button type="button" class="btn ghost btn-sm ac-eco-snap" data-pid="${a.playerId}" data-pname="${esc(a.playerName || '?')}">Snap</button>
+        <button type="button" class="btn danger btn-sm ac-eco-ban" data-pid="${a.playerId}" data-pname="${esc(a.playerName || '?')}" data-reason="${esc(`Money exploit — ${a.detail || ''}`)}">Ban</button>` : ''}</td>
+    </tr>`).join('')
+  }</tbody></table>`;
+  wrap.querySelectorAll('.ac-eco-watch').forEach((btn) => {
+    btn.addEventListener('click', () => startAcWatch(btn.dataset.pid, btn.dataset.pname));
+  });
+  wrap.querySelectorAll('.ac-eco-freeze').forEach((btn) => {
+    btn.addEventListener('click', () => acPlayerAction('freeze', btn.dataset.pid));
+  });
+  wrap.querySelectorAll('.ac-eco-snap').forEach((btn) => {
+    btn.addEventListener('click', () => acAdminAction('snapshot', btn.dataset.pid, btn.dataset.pname));
+  });
+  wrap.querySelectorAll('.ac-eco-ban').forEach((btn) => {
+    btn.addEventListener('click', () => openAcBanModal(btn.dataset.pid, btn.dataset.pname, btn.dataset.reason));
+  });
+}
+
 async function loadAcPanel(silent = false) {
   if (!hasRole('staff')) return;
   try {
-    const [statusRes, playersRes, detectionsRes, bansRes, denialsRes, hintsRes, altRes] = await Promise.all([
+    const [statusRes, playersRes, detectionsRes, bansRes, denialsRes, hintsRes, altRes, economyRes] = await Promise.all([
       fetch('/api/ac/admin/status'),
       fetch('/api/ac/admin/players'),
       fetch('/api/ac/admin/detections?limit=20'),
@@ -1704,6 +2343,7 @@ async function loadAcPanel(silent = false) {
       fetch('/api/ac/admin/join-denials?limit=8'),
       fetch('/api/ac/admin/rate-hints'),
       fetch('/api/ac/admin/alt-clusters?limit=10'),
+      fetch('/api/ac/admin/economy-alerts?limit=15'),
     ]);
 
     if (!playersRes.ok) {
@@ -1720,6 +2360,7 @@ async function loadAcPanel(silent = false) {
     const denialsData = denialsRes.ok ? await denialsRes.json() : { denials: [] };
     const hintsData = hintsRes.ok ? await hintsRes.json() : { events: [] };
     const altData = altRes.ok ? await altRes.json() : { clusters: [] };
+    const economyData = economyRes.ok ? await economyRes.json() : { alerts: [] };
 
     acSetServerStatus(statusData);
     const stats = playersData.stats || statusData.stats || {};
@@ -1731,6 +2372,7 @@ async function loadAcPanel(silent = false) {
     ].join('');
 
     acRenderPlayers(playersData.players || []);
+    acRenderEconomy(economyData.alerts || []);
     const dets = detectionsData.detections || [];
     acNotifyNewDetections(dets);
     acRenderDetections(dets);
@@ -1790,72 +2432,16 @@ async function loadAcPanel(silent = false) {
         ).join('')
       : '<p class="hint">No alt clusters detected yet — fingerprints build as players connect.</p>';
 
+    acRenderThreatSummary();
+    syncAcWatchSessions();
     loadAcSignatures();
     loadAcToggles();
+    loadAcSignaturePresets();
     loadAcPortalVersion();
   } catch (err) {
     console.error(err);
     if (!silent) el('ac-players-wrap').innerHTML = '<p class="hint">Failed to load anti-cheat data.</p>';
   }
-}
-
-async function startAcWatch(playerId, playerName) {
-  try {
-    if (acState.sessionId) await stopAcWatch();
-    const loading = el('ac-frame-loading');
-    const img = el('ac-frame');
-    if (loading) loading.hidden = false;
-    if (img) img.hidden = true;
-
-    const res = await fetch('/api/ac/admin/watch', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ playerId: Number(playerId), playerName }),
-    });
-    if (!res.ok) throw new Error(await res.text());
-    const data = await res.json();
-    acState.sessionId = data.sessionId;
-    el('ac-watch-title').textContent = `Watching ${playerName} (#${playerId})`;
-    el('ac-watch-hint').textContent = 'Live stream active — frames arrive every ~1s once FXServer picks up the command.';
-    el('ac-stop-watch').disabled = false;
-    toast(`Watch started for ${playerName}`);
-    pollAcFrame();
-  } catch (err) {
-    toast('Watch failed — is player online?');
-    console.error(err);
-  }
-}
-
-async function stopAcWatch() {
-  if (acState.pollTimer) clearTimeout(acState.pollTimer);
-  acState.pollTimer = null;
-  if (acState.sessionId) {
-    try {
-      await fetch('/api/ac/admin/stop-watch', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ sessionId: acState.sessionId }),
-      });
-    } catch (_) {}
-  }
-  acState.sessionId = null;
-  el('ac-frame').hidden = true;
-  el('ac-frame-loading').hidden = true;
-  el('ac-watch-title').textContent = 'Select a player to watch';
-  el('ac-watch-hint').textContent = 'Click Watch on a player or on a detection below. Live frames update every ~1s.';
-  el('ac-stop-watch').disabled = true;
-}
-
-async function pollAcFrame() {
-  if (!acState.sessionId) return;
-  try {
-    const res = await fetch(`/api/ac/admin/frame/${encodeURIComponent(acState.sessionId)}`);
-    if (res.ok) {
-      const frame = await res.json();
-      acShowFrame(frame.image, el('ac-watch-title').textContent);
-    }
-  } catch (_) {}
-  acState.pollTimer = setTimeout(pollAcFrame, 700);
 }
 
 function startAcAutoRefresh() {
@@ -1874,8 +2460,11 @@ function stopAcAutoRefresh() {
 
 function setupAcPanel() {
   closeAcBanModal();
+  closeEvidenceReplay();
   el('ac-refresh')?.addEventListener('click', () => loadAcPanel());
-  el('ac-stop-watch')?.addEventListener('click', () => stopAcWatch());
+  el('ac-watch-suspicious')?.addEventListener('click', () => watchSuspiciousPlayers());
+  el('ac-stop-all-watch')?.addEventListener('click', () => stopAllAcWatches());
+  el('ac-frame-close')?.addEventListener('click', () => { el('ac-frame-wrap').hidden = true; });
   el('ac-auto-refresh')?.addEventListener('change', () => {
     if (document.querySelector('#panel-anticheat.active')) startAcAutoRefresh();
     else stopAcAutoRefresh();
@@ -1890,10 +2479,36 @@ function setupAcPanel() {
   el('ac-ban-cancel')?.addEventListener('click', closeAcBanModal);
   el('ac-ban-confirm')?.addEventListener('click', confirmAcBan);
   el('ac-ban-modal')?.querySelector('[data-ac-close-ban]')?.addEventListener('click', closeAcBanModal);
+  el('evidence-replay-modal')?.querySelectorAll('[data-evidence-close]').forEach((btn) => {
+    btn.addEventListener('click', closeEvidenceReplay);
+  });
   document.addEventListener('keydown', (e) => {
-    if (e.key === 'Escape' && !el('ac-ban-modal')?.hidden) closeAcBanModal();
+    if (e.key !== 'Escape') return;
+    if (!el('evidence-replay-modal')?.hidden) closeEvidenceReplay();
+    else if (!el('ac-ban-modal')?.hidden) closeAcBanModal();
   });
   el('ac-toggles-save')?.addEventListener('click', saveAcToggles);
+  el('ac-sig-apply-preset')?.addEventListener('click', async () => {
+    const name = el('ac-sig-preset')?.value;
+    if (!name) return toast('Pick a preset first', true);
+    if (!confirm(`Apply signature preset "${name}" to the live server?`)) return;
+    try {
+      const res = await fetch('/api/ac/admin/signature-presets/apply', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ name }),
+      });
+      if (!res.ok) {
+        const err = await res.json().catch(() => ({}));
+        throw new Error(err.error || 'Apply failed');
+      }
+      const data = await res.json();
+      toast(`Added ${data.added ?? 0} signatures — syncs within 60s`);
+      loadAcSignatures();
+    } catch (e) {
+      toast(e.message || 'Preset apply failed', true);
+    }
+  });
   el('ac-sig-add')?.addEventListener('click', async () => {
     const category = el('ac-sig-category')?.value;
     const value = el('ac-sig-value')?.value?.trim();
@@ -1987,7 +2602,13 @@ function renderAll() {
     renderBlocked();
     renderSettings();
   }
-  if (hasRole('staff')) renderStaff();
+  if (hasRole('staff')) {
+    renderStaff();
+    renderHub();
+  }
+  updateStatusBar();
+  document.querySelectorAll('#panel-home .feature-card, #panel-home .card, #panel-home .hero-stat').forEach((n) => n.classList.add('reveal'));
+  initRevealAnimations(el('panel-home') || document);
 }
 
 async function init() {
@@ -2003,12 +2624,14 @@ async function init() {
   });
 
   const params = new URLSearchParams(location.search);
-  if (params.get('error')) toast('Login failed — check Discord OAuth config');
+  if (params.get('error')) toast('Login failed — check Discord OAuth config', true);
 
   await loadMe();
   await loadDashboard();
   startQueuePolling();
   setInterval(queueHeartbeat, 45000);
+  updateStatusBar();
+  initLoadingScreen();
 
   document.body.addEventListener('click', (e) => {
     const join = e.target.closest('[data-queue-action="join"]');
@@ -2026,10 +2649,16 @@ async function init() {
     showPanel(pathPanel);
   } else if (location.hash === '#queue' || location.hash === '#connect') {
     showPanel(location.hash.slice(1));
+  } else if (hasRole('staff')) {
+    const last = getLastPanel();
+    if (last && document.getElementById(`panel-${last}`)) showPanel(last);
+    else showPanel('hub');
   }
 
   setupLogsPanel();
   setupAcPanel();
+  bindServerControlEvents();
+  bindTicketsPanel();
 
   track('page_view', { path: location.pathname });
 }

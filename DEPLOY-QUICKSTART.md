@@ -14,7 +14,7 @@
 **Option A — whole repo (easiest if txData is already on GitHub)**
 
 1. Push `F:\txData` to GitHub
-2. On Render, set **Root Directory** to: `QBCore_A9FD7A.base/tools/shaderp-dashboard`
+2. On Render, set **Root Directory** to: `ShadeRP.base/tools/shaderp-dashboard`
 
 **Option B — portal-only repo**
 
@@ -97,7 +97,7 @@ Save → Render redeploys automatically.
 
 2. From PowerShell:
    ```powershell
-   cd F:\txData\QBCore_A9FD7A.base\tools\shaderp-dashboard
+   cd F:\txData\ShadeRP.base\tools\shaderp-dashboard
    .\Apply-PortalLinks.ps1
    ```
 
@@ -133,7 +133,7 @@ Save → Render redeploys automatically.
 ```powershell
 $env:PORTAL_URL = "https://YOUR-APP.onrender.com"
 $env:SYNC_API_KEY = "your-key"
-F:\txData\QBCore_A9FD7A.base\tools\shaderp-dashboard\Sync-PortalToRender.ps1
+F:\txData\ShadeRP.base\tools\shaderp-dashboard\Sync-PortalToRender.ps1
 ```
 
 ---

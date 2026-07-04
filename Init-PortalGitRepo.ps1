@@ -1,6 +1,6 @@
 # Init standalone git repo for Render deploy (small upload, not full txData)
 param(
-    [string]$PortalDir = 'F:\txData\QBCore_A9FD7A.base\tools\shaderp-dashboard',
+    [string]$PortalDir = 'F:\txData\ShadeRP.base\tools\shaderp-dashboard',
     [string]$RemoteName = 'shaderp-portal',
     [switch]$Push
 )
@@ -13,7 +13,7 @@ if (-not (Test-Path 'package.json')) {
 }
 
 # Ensure logo is present for GitHub/Render
-$logoSrc = 'F:\txData\QBCore_A9FD7A.base\resources\[standalone]\shade-config\assets\shaderp-logo.png'
+$logoSrc = 'F:\txData\ShadeRP.base\resources\[standalone]\shade-config\assets\shaderp-logo.png'
 $logoDst = Join-Path $PortalDir 'public\assets\shaderp-logo.png'
 if ((Test-Path -LiteralPath $logoSrc) -and -not (Test-Path -LiteralPath $logoDst)) {
     New-Item -ItemType Directory -Force -Path (Split-Path $logoDst) | Out-Null

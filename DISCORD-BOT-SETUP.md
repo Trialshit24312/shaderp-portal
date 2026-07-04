@@ -60,7 +60,7 @@ Save → Render redeploys.
 ## Step 4 — One local file (your PC)
 
 ```powershell
-cd F:\txData\QBCore_A9FD7A.base\tools\shaderp-dashboard
+cd F:\txData\ShadeRP.base\tools\shaderp-dashboard
 copy .env.example .env
 ```
 

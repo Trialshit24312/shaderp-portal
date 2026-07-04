@@ -10,10 +10,17 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="/styles.css?v=2.3.1" />
+  <link rel="stylesheet" href="/styles.css?v=3.1.1" />
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js" defer></script>
 </head>
 <body>
+  <div id="app-loading" class="app-loading" aria-live="polite">
+    <div class="app-loading-inner">
+      <img src="/assets/shaderp-logo.png" alt="" class="app-loading-logo" />
+      <div class="app-loading-bar"><span></span></div>
+      <p>Loading ShadeRP Portal…</p>
+    </div>
+  </div>
   <div class="bg-grid"></div>
   <div class="bg-glow"></div>
 
@@ -230,6 +237,10 @@
     </section>
 
     <!-- STAFF+ -->
+    <section id="panel-hub" class="panel" data-min-role="staff">
+      <div id="hub-root"></div>
+    </section>
+
     <section id="panel-analytics" class="panel" data-min-role="staff">
       <h2>Analytics</h2>
       <div class="stat-grid" id="analytics-stats"></div>
@@ -274,8 +285,43 @@
     </section>
 
     <section id="panel-commands" class="panel" data-min-role="admin">
-      <h2>Console commands</h2>
-      <div id="command-list" class="command-grid"></div>
+      <h2>Server control</h2>
+      <p class="hint">Run whitelisted FXServer commands live — no txAdmin needed. Requires <code>shaderp-ac</code> connected with matching API key.</p>
+      <div class="stat-grid" id="sc-status-stats"></div>
+      <div class="split-panels" style="margin-top:1rem">
+        <div class="card">
+          <h3>Console</h3>
+          <div class="sc-console-row">
+            <input type="text" id="sc-console-input" class="admin-search sc-console-input" placeholder="restart ox_inventory" autocomplete="off" spellcheck="false" />
+            <button type="button" class="btn primary" id="sc-console-run">Run</button>
+          </div>
+          <p class="hint">Allowed: restart, ensure, stop, giveitem, announce, status, refresh, shaderp/*</p>
+          <h4 class="section-sub">Quick actions</h4>
+          <div id="sc-quick-btns" class="command-grid"></div>
+        </div>
+        <div class="card">
+          <h3>Give item to player</h3>
+          <div class="sc-form-grid">
+            <label>Player ID<input type="number" id="sc-give-id" min="1" placeholder="1" /></label>
+            <label>Item<input type="text" id="sc-give-item" placeholder="WEAPON_PISTOL" /></label>
+            <label>Amount<input type="number" id="sc-give-amt" min="1" value="1" /></label>
+          </div>
+          <button type="button" class="btn ghost btn-sm" id="sc-give-run" style="margin-top:0.5rem">Give item</button>
+          <h4 class="section-sub" style="margin-top:1rem">Server announce</h4>
+          <div class="sc-console-row">
+            <input type="text" id="sc-announce-msg" class="admin-search" placeholder="Server restart in 5 minutes" />
+            <button type="button" class="btn ghost btn-sm" id="sc-announce-run">Announce</button>
+          </div>
+        </div>
+      </div>
+      <div class="card" style="margin-top:1rem">
+        <h3>Command log <button type="button" class="btn ghost btn-sm" id="sc-log-refresh">Refresh</button></h3>
+        <div id="sc-command-log" class="table-wrap"></div>
+      </div>
+      <details class="card" style="margin-top:1rem">
+        <summary>Copy-paste reference (txAdmin fallback)</summary>
+        <div id="command-list" class="command-grid" style="margin-top:0.75rem"></div>
+      </details>
     </section>
 
     <section id="panel-blocked" class="panel" data-min-role="admin">
@@ -308,9 +354,12 @@
           <span id="ac-server-status" class="ac-status ac-status-offline">Server offline</span>
           <input type="search" id="ac-player-search" class="admin-search" placeholder="Search players…" autocomplete="off" />
           <label class="ac-auto-label"><input type="checkbox" id="ac-auto-refresh" checked /> Auto-refresh</label>
+          <button type="button" class="btn ghost btn-sm" id="ac-watch-suspicious">Watch low trust</button>
+          <button type="button" class="btn ghost btn-sm" id="ac-stop-all-watch">Stop all</button>
+          <span id="ac-watch-count" class="hint ac-watch-count">0/4 watches</span>
           <button type="button" class="btn ghost btn-sm" id="ac-refresh">Refresh now</button>
-          <button type="button" class="btn ghost btn-sm" id="ac-stop-watch" disabled>Stop watching</button>
         </div>
+        <div id="ac-threat-summary" class="ac-threat-bar"></div>
         <div class="stat-grid" id="ac-stats"></div>
         <div class="split-panels logs-split ac-main-split">
           <div class="card logs-list-card">
@@ -318,16 +367,21 @@
             <div id="ac-players-wrap" class="table-wrap"></div>
           </div>
           <div class="card logs-detail-card ac-watch-card">
-            <h3 id="ac-watch-title">Select a player to watch</h3>
-            <p id="ac-watch-hint" class="hint">Click <strong>Watch</strong> on a player or on a detection below. Live frames update every ~1s.</p>
-            <div id="ac-frame-wrap" class="ac-frame-wrap">
-              <div id="ac-frame-loading" class="ac-frame-loading" hidden>Waiting for live frame…</div>
-              <img id="ac-frame" alt="Live frame" hidden />
+            <h3>Live watch grid <span class="hint" style="font-weight:400">— up to 4 players</span></h3>
+            <p id="ac-watch-hint" class="hint">Click <strong>Watch</strong> on a player or detection. Frames update every ~1s.</p>
+            <div id="ac-watch-grid" class="ac-watch-grid"></div>
+            <div id="ac-frame-wrap" class="ac-frame-wrap ac-frame-expanded" hidden>
+              <button type="button" class="btn ghost btn-sm" id="ac-frame-close">Close viewer</button>
+              <img id="ac-frame" alt="Live frame" />
             </div>
           </div>
         </div>
         <div class="card" style="margin-top:1rem">
-          <h3>Recent detections <span class="hint" style="font-weight:400">— ban or watch directly from alerts</span></h3>
+          <h3>Economy alerts <span class="hint" style="font-weight:400">— impossible cash/bank spikes (ESX / QBCore)</span></h3>
+          <div id="ac-economy-wrap" class="table-wrap"></div>
+        </div>
+        <div class="card" style="margin-top:1rem">
+          <h3>Recent detections <span class="hint" style="font-weight:400">— ban, watch, or view evidence</span></h3>
           <div id="ac-detections-wrap" class="table-wrap"></div>
         </div>
         <div class="split-panels" style="margin-top:1rem">
@@ -350,8 +404,12 @@
           </div>
         </div>
         <div class="card" style="margin-top:1rem">
-          <h3>Cheat signatures <span class="hint" style="font-weight:400">— add from website, syncs to live server every 60s</span></h3>
-          <div class="ac-toolbar" style="margin-bottom:0.5rem">
+          <h3>Cheat signatures <span class="hint" style="font-weight:400">— syncs to live server every 60s</span></h3>
+          <div class="ac-toolbar" style="margin-bottom:0.5rem;flex-wrap:wrap">
+            <select id="ac-sig-preset" class="admin-search" style="min-width:200px">
+              <option value="">Apply preset pack…</option>
+            </select>
+            <button type="button" class="btn ghost btn-sm" id="ac-sig-apply-preset">Apply preset</button>
             <select id="ac-sig-category" class="admin-search">
               <option value="executor">Executor name</option>
               <option value="pattern">Partial pattern</option>
@@ -363,8 +421,29 @@
           <div id="ac-signatures-wrap" class="table-wrap"></div>
         </div>
         <div class="card" style="margin-top:1rem">
+          <h3>Staff playbook <span class="hint" style="font-weight:400">— quick AC workflow</span></h3>
+          <div class="ac-playbook">
+            <div class="ac-playbook-step"><strong>1. Detection fires</strong> — trust drops, 3-frame evidence auto-captures. Click Evidence on the detection row.</div>
+            <div class="ac-playbook-step"><strong>2. Watch live</strong> — add up to 4 players in the watch grid. Use “Watch low trust” for suspicious players.</div>
+            <div class="ac-playbook-step"><strong>3. Economy spike</strong> — player auto-frozen + snapshot. Freeze/Ban from economy alerts table.</div>
+            <div class="ac-playbook-step"><strong>4. New cheat menu</strong> — apply a signature preset or add executor name. Server picks it up within 60s.</div>
+            <div class="ac-playbook-step"><strong>5. Ban</strong> — portal ban syncs to shaderp-ac + Discord. Owner-only unban from Recent bans.</div>
+          </div>
+        </div>
+        <div class="card" style="margin-top:1rem">
           <h3>Alt / fingerprint clusters</h3>
           <div id="ac-alt-wrap"></div>
+        </div>
+      </div>
+      <div id="evidence-replay-modal" class="ac-modal" hidden aria-hidden="true">
+        <div class="ac-modal-backdrop" data-evidence-close></div>
+        <div class="ac-modal-box card ac-replay-box">
+          <h3 id="evidence-replay-title">Evidence replay</h3>
+          <div id="evidence-replay-strip" class="ac-replay-strip"></div>
+          <img id="evidence-replay-main" alt="Evidence frame" class="ac-replay-main" />
+          <div class="ac-modal-actions">
+            <button type="button" class="btn ghost" data-evidence-close>Close</button>
+          </div>
         </div>
       </div>
       <div id="ac-ban-modal" class="ac-modal" hidden aria-hidden="true">
@@ -382,9 +461,24 @@
       </div>
     </section>
 
-    <section id="panel-logs" class="panel" data-min-role="owner">
+    <section id="panel-tickets" class="panel" data-min-role="staff">
+      <h2>Support tickets</h2>
+      <p class="hint">Discord tickets synced here — AC ban profile, evidence, claim/close/unban.</p>
+      <div class="stat-grid" id="ticket-stats"></div>
+      <div class="ac-toolbar" style="margin:0.75rem 0">
+        <select id="ticket-filter" class="admin-search">
+          <option value="all">All</option>
+          <option value="open">Open</option>
+          <option value="closed">Closed</option>
+        </select>
+        <button type="button" class="btn ghost btn-sm" id="ticket-refresh">Refresh</button>
+      </div>
+      <div id="tickets-wrap" class="table-wrap"></div>
+    </section>
+
+    <section id="panel-logs" class="panel" data-min-role="staff">
       <h2>Server logs</h2>
-      <p class="hint">Live crash, disconnect, lag, and error events from <code>shade-crashlog</code> — owners only.</p>
+      <p class="hint">Crash, disconnect, lag, and error events from <code>shade-crashlog</code> (live sync enabled).</p>
       <div id="logs-panel-body">
         <div class="stat-grid" id="logs-stats"></div>
         <div class="logs-toolbar">
@@ -421,7 +515,14 @@
 
   <footer class="site-footer" id="site-footer"></footer>
 
+  <div class="status-bar" id="status-bar" aria-live="polite">
+    <span class="status-dot" id="status-dot"></span>
+    <span id="status-text">Connecting…</span>
+    <span class="status-sep">·</span>
+    <span id="status-session" class="hint">Guest session</span>
+  </div>
+
   <div id="toast" class="toast" hidden>Copied</div>
-  <script src="/app.js?v=2.3.1" type="module"></script>
+  <script src="/app.js?v=3.1.1" type="module"></script>
 </body>
 </html>

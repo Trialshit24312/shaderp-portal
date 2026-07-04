@@ -1,11 +1,16 @@
 # Sync portal URL from shade-config → tuff-loading + gen_pausev2 discord
 param(
-    [string]$BasePath = 'F:\txData\QBCore_A9FD7A.base'
+    [string]$BasePath = 'F:\txData\ShadeRP.base'
 )
 
 $ErrorActionPreference = 'Stop'
 $portalLua = Join-Path $BasePath 'resources\[standalone]\shade-config\config\portal.lua'
 $loadingJson = Join-Path $BasePath 'resources\[standalone]\tuff-loading\config.json'
+$syncBranding = Join-Path (Split-Path $MyInvocation.MyCommand.Path -Parent) 'Sync-LoadingBranding.ps1'
+
+if (Test-Path -LiteralPath $syncBranding) {
+    & $syncBranding -BasePath $BasePath
+}
 
 if (-not (Test-Path -LiteralPath $portalLua)) {
     Write-Error "Missing $portalLua"

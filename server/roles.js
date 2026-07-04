@@ -21,14 +21,16 @@ export const PANEL_ACCESS = {
   map: 1,
   team: 1,
   analytics: 3,
+  hub: 3,
   resources: 4,
   branding: 4,
   commands: 4,
   staff: 3,
   anticheat: 3,
+  tickets: 3,
   blocked: 5,
   settings: 5,
-  logs: 6,
+  logs: 3,
 };
 
 export function parseRoleMap(envStr) {

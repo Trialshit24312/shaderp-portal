@@ -15,7 +15,7 @@ On Render → connect **`shaderp-website`** — **Root Directory must be blank**
 To publish updates from your PC:
 
 ```powershell
-cd F:\txData\QBCore_A9FD7A.base\tools\shaderp-dashboard
+cd F:\txData\ShadeRP.base\tools\shaderp-dashboard
 git add -A
 git commit -m "Your message"
 git push website main
@@ -97,7 +97,7 @@ Also set `PORTAL_OWNER_IDS` to your Discord user ID for emergency owner access.
 After each local config change:
 
 ```powershell
-cd F:\txData\QBCore_A9FD7A.base\tools\shaderp-dashboard
+cd F:\txData\ShadeRP.base\tools\shaderp-dashboard
 .\Build-DashboardData.ps1
 
 $env:PORTAL_URL = "https://YOUR-APP.onrender.com"

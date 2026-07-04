@@ -2,7 +2,7 @@
 param(
     [string]$PortalUrl = $env:PORTAL_URL,
     [string]$SyncKey = $env:SYNC_API_KEY,
-    [string]$BasePath = 'F:\txData\QBCore_A9FD7A.base'
+    [string]$BasePath = 'F:\txData\ShadeRP.base'
 )
 
 $ErrorActionPreference = 'Stop'
@@ -22,10 +22,10 @@ if (-not $SyncKey) {
 $jsonPath = Join-Path $tools 'data\dashboard.json'
 $body = Get-Content -LiteralPath $jsonPath -Raw -Encoding UTF8
 
-$uri = "$PortalUrl.TrimEnd('/')/api/dashboard/sync"
+$uri = "$($PortalUrl.TrimEnd('/'))/api/dashboard/sync"
 $response = Invoke-RestMethod -Uri $uri -Method POST -Headers @{
     'Content-Type' = 'application/json'
     'x-sync-key'   = $SyncKey
 } -Body $body
 
-Write-Host "Synced to $PortalUrl — $($response.generatedAt)"
+Write-Host "Synced to $PortalUrl - $($response.generatedAt)"

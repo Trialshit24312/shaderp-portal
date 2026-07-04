@@ -100,6 +100,7 @@ const NAV_ICONS = {
   analytics: '📈',
   anticheat: '🛡️',
   tickets: '🎫',
+  discord: '🌐',
   support: '💬',
   staff: '⚡',
   hub: '✨',

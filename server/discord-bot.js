@@ -25,6 +25,8 @@ import {
   runTicketSetup,
   closeTicketWithTranscript,
 } from './discord-ticket-helpers.js';
+import { applyGuildTemplate, applyAllTemplates } from './discord-guild-setup.js';
+import { GUILD_KEYS, GUILD_TEMPLATES } from './discord-guild-templates.js';
 
 function staffRoleOk(member, roleMap, ownerIds, userId, minRole = 'staff') {
   if (!member) return false;
@@ -96,7 +98,18 @@ function buildAllCommands() {
     .setDescription('ShadeRP server security status')
     .addSubcommand((sub) => sub.setName('status').setDescription('Portal + AC + logs sync'));
 
-  return [ac.toJSON(), ticket.toJSON(), security.toJSON()];
+  const guildChoices = GUILD_KEYS.map((k) => ({ name: GUILD_TEMPLATES[k].displayName.slice(0, 90), value: k }));
+  const discordSetup = new SlashCommandBuilder()
+    .setName('discord')
+    .setDescription('ShadeRP multi-guild setup & monitoring')
+    .addSubcommand((sub) => sub.setName('status').setDescription('Status of all linked Discord servers'))
+    .addSubcommand((sub) =>
+      sub.setName('setup').setDescription('Apply channel/role template to a guild (owner)')
+        .addStringOption((o) => o.setName('template').setDescription('Which server template').setRequired(true).addChoices(...guildChoices)))
+    .addSubcommand((sub) =>
+      sub.setName('setup-all').setDescription('Setup ALL configured guilds from env (owner)'));
+
+  return [ac.toJSON(), ticket.toJSON(), security.toJSON(), discordSetup.toJSON()];
 }
 
 function ticketActionRow(ticket, canUnban) {
@@ -192,7 +205,7 @@ async function createTicketChannel(guild, user, category, subject, description, 
   return { ticket, channel };
 }
 
-export async function startShadeDiscordBot({ acManager, ticketManager, portalEnv, roleMap, logManager }) {
+export async function startShadeDiscordBot({ acManager, ticketManager, portalEnv, roleMap, logManager, guildMonitor }) {
   if (process.env.DISCORD_BOT_ENABLED === '0') {
     console.log('Discord bot disabled (DISCORD_BOT_ENABLED=0)');
     return null;
@@ -338,6 +351,57 @@ export async function startShadeDiscordBot({ acManager, ticketManager, portalEnv
 
       const member = await fetchGuildMemberBot(interaction.user.id, guildId, token);
       const actor = interaction.user.globalName || interaction.user.username;
+
+      if (interaction.commandName === 'discord') {
+        if (!ownerRoleOk(member, roleMap, ownerIds, interaction.user.id)) {
+          await interaction.reply({ content: '⛔ Owner only — guild setup changes server structure.', ephemeral: true });
+          return;
+        }
+        const sub = interaction.options.getSubcommand();
+        if (sub === 'status') {
+          const data = guildMonitor ? await guildMonitor.checkAll(token) : { guilds: [] };
+          const lines = (data.guilds || []).map((g) => {
+            const status = g.connected
+              ? `✅ ${g.name} (${g.memberCount ?? '?'} members)`
+              : `❌ ${g.error || 'not configured'}`;
+            return `**${g.label}** — ${status}`;
+          });
+          await interaction.reply({
+            embeds: [new EmbedBuilder()
+              .setTitle('🌐 ShadeRP Discord Network')
+              .setDescription(lines.join('\n') || 'No guilds configured — set DISCORD_GUILD_*_ID on Render')
+              .setColor(0x7c5cff)],
+            ephemeral: true,
+          });
+          return;
+        }
+        if (sub === 'setup') {
+          const templateKey = interaction.options.getString('template');
+          await interaction.deferReply({ ephemeral: true });
+          const report = await applyGuildTemplate(interaction.guild, templateKey);
+          guildMonitor?.recordSetup(templateKey, report);
+          await interaction.editReply({
+            content: `✅ **${templateKey}** setup on **${interaction.guild.name}**\n`
+              + `Roles +${report.rolesCreated} · Categories +${report.categoriesCreated} · Channels +${report.channelsCreated}`
+              + (report.errors.length ? `\n⚠️ ${report.errors.slice(0, 3).join('; ')}` : ''),
+          });
+          return;
+        }
+        if (sub === 'setup-all') {
+          await interaction.deferReply({ ephemeral: true });
+          const network = guildMonitor?.getNetwork() || {};
+          const results = await applyAllTemplates(client, network);
+          for (const r of results) {
+            if (r.ok) guildMonitor?.recordSetup(r.key, r.report);
+          }
+          await interaction.editReply({
+            content: results.map((r) => r.ok
+              ? `✅ **${r.key}** — +${r.report.channelsCreated} channels`
+              : `❌ **${r.key}** — ${r.error}`).join('\n'),
+          });
+          return;
+        }
+      }
 
       if (interaction.commandName === 'security') {
         if (!staffRoleOk(member, roleMap, ownerIds, interaction.user.id)) {

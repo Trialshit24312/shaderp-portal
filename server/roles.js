@@ -34,6 +34,7 @@ export const PANEL_ACCESS = {
   blocked: 6,
   settings: 6,
   logs: 3,
+  discord: 3,
 };
 
 export function parseRoleMap(envStr) {

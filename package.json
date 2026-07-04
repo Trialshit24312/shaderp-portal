@@ -1,6 +1,6 @@
 {
   "name": "shaderp-portal",
-  "version": "4.0.0",
+  "version": "4.1.0",
   "type": "module",
   "description": "ShadeRP community portal — Discord roles, analytics, server dashboard",
   "main": "server/index.js",
@@ -10,7 +10,8 @@
   "scripts": {
     "start": "node server/index.js",
     "dev": "node --watch server/index.js",
-    "test:smoke": "node scripts/smoke-test.mjs"
+    "test:smoke": "node scripts/smoke-test.mjs",
+    "setup:discord": "node scripts/setup-discord-guilds.mjs"
   },
   "dependencies": {
     "cookie-parser": "^1.4.7",

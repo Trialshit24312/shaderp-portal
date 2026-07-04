@@ -21,6 +21,7 @@ import { createLogManager, logsApiKeyValid } from './logs.js';
 import { createAcManager, registerAcRoutes } from './ac.js';
 import { createTicketManager, registerTicketRoutes } from './tickets.js';
 import { createAuditManager, registerAuditRoutes } from './audit.js';
+import { createGuildMonitor, registerGuildMonitorRoutes } from './discord-guild-monitor.js';
 import { startShadeDiscordBot } from './discord-bot.js';
 import { canUnbanDiscordUser } from './unban.js';
 import {
@@ -44,6 +45,7 @@ const serverLogs = createLogManager({
   retentionDays: portalEnv.LOGS_RETENTION_DAYS,
 });
 const auditManager = createAuditManager({ logManager: serverLogs });
+const guildMonitor = createGuildMonitor({ portalEnv });
 const acManager = createAcManager({ enabled: portalEnv.AC_ENABLED, auditManager });
 const ticketManager = createTicketManager({ acManager, auditManager });
 
@@ -385,13 +387,14 @@ app.get('/api/logs/:id', requireRole('staff'), (req, res) => {
 registerAcRoutes(app, { acManager, portalEnv, requireRole });
 registerTicketRoutes(app, { ticketManager, acManager, portalEnv, requireRole, auditManager });
 registerAuditRoutes(app, { auditManager, requireRole });
+registerGuildMonitorRoutes(app, { guildMonitor, requireRole, portalEnv });
 
 app.get('/api/portal/version', (_req, res) => {
   res.setHeader('Cache-Control', 'no-cache, must-revalidate');
   res.json({
-    version: '4.0.0',
+    version: '4.1.0',
     acEnabled: acManager.isEnabled(),
-    features: ['anticheat', 'multi-watch', 'evidence-replay', 'tickets-web', 'ticket-setup', 'transcripts', 'audit-log', 'v4-theme', 'persistent-auth', 'command-center'],
+    features: ['anticheat', 'multi-watch', 'evidence-replay', 'tickets-web', 'discord-hub', 'multi-guild-setup', 'guild-monitors', 'v4-theme', 'persistent-auth', 'command-center'],
   });
 });
 
@@ -422,7 +425,7 @@ app.listen(PORT, '0.0.0.0', () => {
   console.log(`Web queue: ${webQueue.isEnabled() ? 'enabled' : 'disabled'}${portalEnv.QUEUE_API_KEY ? '' : ' (set QUEUE_API_KEY on Render)'}`);
   console.log(`Server logs: ${serverLogs.isEnabled() ? 'enabled' : 'disabled'} (owner panel)`);
   console.log(`Anti-cheat API: ${acManager.isEnabled() ? 'enabled' : 'disabled'}${portalEnv.AC_API_KEY ? '' : ' (set AC_API_KEY on Render)'}`);
-  startShadeDiscordBot({ acManager, ticketManager, portalEnv, roleMap, logManager: serverLogs }).catch((err) => {
+  startShadeDiscordBot({ acManager, ticketManager, portalEnv, roleMap, logManager: serverLogs, guildMonitor }).catch((err) => {
     console.error('Discord bot failed to start:', err.message);
   });
 });

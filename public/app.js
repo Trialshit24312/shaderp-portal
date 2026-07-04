@@ -42,6 +42,7 @@ const NAV = [
   { id: 'analytics', label: 'Analytics', min: 'staff' },
   { id: 'anticheat', label: 'Anti-Cheat', min: 'staff', highlight: true },
   { id: 'tickets', label: 'Tickets', min: 'staff' },
+  { id: 'discord', label: 'Discord Hub', min: 'staff' },
   { id: 'staff', label: 'Staff Hub', min: 'staff' },
   { section: 'Admin' },
   { id: 'resources', label: 'Resources', min: 'admin' },
@@ -219,6 +220,7 @@ function showPanel(id) {
   if (id === 'tickets' && hasRole('staff')) loadTicketsPanel();
   if (id === 'support' && hasRole('member')) renderSupport();
   if (id === 'credits') renderCredits();
+  if (id === 'discord' && hasRole('staff')) loadDiscordPanel();
   if (id === 'logs' && hasRole('staff')) loadLogs();
   if (id === 'team') renderTeam();
   if (id === 'queue' || id === 'connect' || id === 'home') renderQueueWidgets();
@@ -235,6 +237,7 @@ function renderHub() {
   const actions = [
     { id: 'anticheat', icon: '🛡️', title: 'Anti-Cheat', desc: 'Players, bans, economy alerts, evidence' },
     { id: 'tickets', icon: '🎫', title: 'Tickets', desc: 'Support threads linked to Discord' },
+    { id: 'discord', icon: '🌐', title: 'Discord Hub', desc: 'All 5 servers — status, setup, bots' },
     { id: 'logs', icon: '📋', title: 'Server logs', desc: 'Crashes, joins, errors from FXServer' },
     { id: 'commands', icon: '🖥️', title: 'Server control', desc: 'Console, giveitem, announce', min: 'admin' },
     { id: 'analytics', icon: '📈', title: 'Analytics', desc: 'Traffic and panel usage' },
@@ -1626,6 +1629,43 @@ function formatLogDetail(entry) {
     data.player.identifiers.forEach((id) => lines.push(`  ${id}`));
   }
   return lines.join('\n');
+}
+
+async function loadDiscordPanel() {
+  if (!hasRole('staff')) return;
+  const root = el('discord-root');
+  if (!root) return;
+  root.innerHTML = '<p class="hint">Loading Discord network…</p>';
+  try {
+    const res = await fetch('/api/discord/guilds');
+    if (!res.ok) throw new Error('Discord API unavailable');
+    const data = await res.json();
+    const guilds = data.guilds || [];
+    root.innerHTML = `
+      ${renderPageHeader('Discord Hub', 'Monitor all ShadeRP Discord servers — main, EMS, DOJ, Jobs, Appeals.', [{ id: 'hub', label: 'Command Center' }, { id: 'discord', label: 'Discord Hub' }])}
+      <div class="hint reveal" style="margin-bottom:1rem">Owner: run <code>/discord setup-all</code> after setting guild IDs on Render. Per-server: <code>/discord setup</code></div>
+      <div class="hub-grid">${guilds.map((g) => `
+        <div class="hub-action reveal" style="cursor:default;text-align:left">
+          ${g.icon ? `<img src="${esc(g.icon)}" alt="" style="width:48px;height:48px;border-radius:12px;margin-bottom:0.5rem" />` : '<span class="hub-action-icon">🌐</span>'}
+          <strong>${esc(g.label)}</strong>
+          <span>${g.connected ? `✅ ${esc(g.name)} · ${g.memberCount ?? '?'} members` : `❌ ${esc(g.error || 'Not configured')}`}</span>
+          ${g.configuredId ? `<span class="hint mono">ID: ${esc(g.configuredId)}</span>` : '<span class="hint">Set DISCORD_GUILD_*_ID on Render</span>'}
+        </div>`).join('')}</div>
+      <div class="card reveal" style="margin-top:1rem">
+        <h3>Setup checklist</h3>
+        <ul class="check-list">
+          <li>Add bot to all 5 servers with Administrator (first-time setup)</li>
+          <li>Set guild IDs in Render env (see .env.example)</li>
+          <li>Run <code>/discord setup-all</code> or <code>npm run setup:discord all</code></li>
+          <li>Invite LoggerBot, Carl-bot, Wick manually</li>
+          <li>Upload server icon/banner in Discord settings (manual)</li>
+        </ul>
+      </div>`;
+    bindBreadcrumbs(root);
+    initRevealAnimations(root);
+  } catch (e) {
+    root.innerHTML = `<p class="hint warn-banner">${esc(e.message)}</p>`;
+  }
 }
 
 async function loadLogs(resetOffset = true) {

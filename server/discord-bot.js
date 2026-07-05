@@ -27,17 +27,31 @@ import {
 } from './discord-ticket-helpers.js';
 import { applyGuildTemplate, applyAllTemplates, auditGuildTemplate } from './discord-guild-setup.js';
 import { GUILD_KEYS, GUILD_TEMPLATES } from './discord-guild-templates.js';
+import { deferEphemeral, replyEphemeral, safeInteractionReply } from './discord-interactions.js';
+
+function memberRoleIds(member) {
+  if (!member) return [];
+  if (Array.isArray(member.roles)) return member.roles;
+  if (member.roles?.cache) return [...member.roles.cache.keys()];
+  return [];
+}
+
+async function resolveInteractionMember(interaction, guildId, botToken) {
+  if (interaction.member?.roles) return interaction.member;
+  return fetchGuildMemberBot(interaction.user.id, guildId, botToken);
+}
 
 function staffRoleOk(member, roleMap, ownerIds, userId, minRole = 'staff') {
+  if (ownerIds?.includes(userId)) return true;
   if (!member) return false;
-  const appRole = resolveAppRole(member.roles || [], { roleMap, ownerIds, userId });
+  const appRole = resolveAppRole(memberRoleIds(member), { roleMap, ownerIds, userId });
   return (ROLE_LEVEL[appRole] ?? 0) >= (ROLE_LEVEL[minRole] ?? ROLE_LEVEL.staff);
 }
 
 function ownerRoleOk(member, roleMap, ownerIds, userId) {
   if (ownerIds?.includes(userId)) return true;
   if (!member) return false;
-  const appRole = resolveAppRole(member.roles || [], { roleMap, ownerIds, userId });
+  const appRole = resolveAppRole(memberRoleIds(member), { roleMap, ownerIds, userId });
   return appRole === 'owner';
 }
 
@@ -61,8 +75,11 @@ function buildAllCommands() {
         .addIntegerOption((o) => o.setName('player_id').setDescription('FiveM ID').setRequired(true)))
     .addSubcommand((sub) => sub.setName('status').setDescription('AC sync status'))
     .addSubcommand((sub) =>
-      sub.setName('unban').setDescription('Remove global ban')
-        .addStringOption((o) => o.setName('ban_id').setDescription('Ban ID').setRequired(true)));
+      sub.setName('unban').setDescription('Remove ban on FXServer + portal')
+        .addStringOption((o) => o.setName('ban_id').setDescription('SHADE-000001, discord id, license, name, or all').setRequired(true)))
+    .addSubcommand((sub) =>
+      sub.setName('unban-ip').setDescription('Remove portal IP flag + local IP ban')
+        .addStringOption((o) => o.setName('ip').setDescription('IP (1.2.3.4) or all').setRequired(true)));
 
   const ticket = new SlashCommandBuilder()
     .setName('ticket')
@@ -163,6 +180,9 @@ async function createTicketChannel(guild, user, category, subject, description, 
     description: description || '',
     discordId: user.id,
     discordName: user.globalName || user.username,
+    source: 'discord',
+    channelId: null,
+    threadId: null,
   });
 
   const categoryId = process.env.DISCORD_TICKET_CATEGORY_ID || portalEnv.DISCORD_TICKET_CATEGORY_ID || ticketManager.getSetup()?.categoryId;
@@ -178,6 +198,7 @@ async function createTicketChannel(guild, user, category, subject, description, 
         permissionOverwrites: buildStaffOverwrites(guild, user.id, roleMap),
       });
       ticketManager.updateTicketChannel(ticket.id, channel.id, null);
+      ticketManager.markDiscordSynced?.(ticket.id, channel.id, null);
     } else if (parentId) {
       const parent = await guild.channels.fetch(parentId);
       channel = await parent.threads.create({
@@ -188,6 +209,7 @@ async function createTicketChannel(guild, user, category, subject, description, 
       });
       await channel.members.add(user.id);
       ticketManager.updateTicketChannel(ticket.id, parentId, channel.id);
+      ticketManager.markDiscordSynced?.(ticket.id, parentId, channel.id);
     }
   } catch (err) {
     console.error('Create ticket channel failed:', err.message);
@@ -261,7 +283,7 @@ export async function startShadeDiscordBot({ acManager, ticketManager, portalEnv
 
         if (parts[2] === 'open') {
           const category = parts[3] || 'general';
-          await interaction.deferReply({ ephemeral: true });
+          await deferEphemeral(interaction);
           const guild = interaction.guild;
           const result = await createTicketChannel(
             guild,
@@ -274,18 +296,19 @@ export async function startShadeDiscordBot({ acManager, ticketManager, portalEnv
             roleMap,
           );
           if (result.error) {
-            await interaction.editReply({ content: `❌ ${result.error}` });
+            await replyEphemeral(interaction, { content: `❌ ${result.error}` });
             return;
           }
-          await interaction.editReply({
+          await replyEphemeral(interaction, {
             content: `✅ Ticket **${result.ticket.id}** opened → <#${result.channel.id}>`,
           });
           return;
         }
 
+        await deferEphemeral(interaction);
         const member = await fetchGuildMemberBot(interaction.user.id, guildId, token);
         if (!staffRoleOk(member, roleMap, ownerIds, interaction.user.id)) {
-          await interaction.reply({ content: '⛔ Staff only.', ephemeral: true });
+          await replyEphemeral(interaction, { content: '⛔ Staff only.' });
           return;
         }
 
@@ -293,10 +316,10 @@ export async function startShadeDiscordBot({ acManager, ticketManager, portalEnv
           const ticketId = parts[3];
           const t = ticketManager.claimTicket(ticketId, interaction.user.id, interaction.user.username);
           if (!t) {
-            await interaction.reply({ content: 'Cannot claim.', ephemeral: true });
+            await replyEphemeral(interaction, { content: 'Cannot claim.' });
             return;
           }
-          await interaction.reply({ content: `✋ **${interaction.user.username}** claimed ${ticketId}` });
+          await replyEphemeral(interaction, { content: `✋ **${interaction.user.username}** claimed ${ticketId}` }, { ephemeral: false });
           return;
         }
 
@@ -304,7 +327,7 @@ export async function startShadeDiscordBot({ acManager, ticketManager, portalEnv
           const ticketId = parts[3];
           const ticket = ticketManager.getTicket(ticketId);
           if (!ticket) {
-            await interaction.reply({ content: 'Ticket not found.', ephemeral: true });
+            await replyEphemeral(interaction, { content: 'Ticket not found.' });
             return;
           }
           const { closed, transcriptSaved } = await closeTicketWithTranscript({
@@ -317,26 +340,25 @@ export async function startShadeDiscordBot({ acManager, ticketManager, portalEnv
             reason: 'Closed via Discord button',
           });
           if (!closed) {
-            await interaction.reply({ content: 'Cannot close.', ephemeral: true });
+            await replyEphemeral(interaction, { content: 'Cannot close.' });
             return;
           }
-          await interaction.reply({
+          await replyEphemeral(interaction, {
             content: `✅ Ticket **${ticketId}** closed${transcriptSaved ? ' · transcript saved' : ''}. Rate your experience:`,
             components: [ratingRow(ticketId)],
-          });
+          }, { ephemeral: false });
           return;
         }
 
         if (parts[2] === 'unban') {
           const ticketId = parts[3];
           if (!canUnbanDiscordUser(interaction.user.id, portalEnv)) {
-            await interaction.reply({ content: '⛔ Unban permission required.', ephemeral: true });
+            await replyEphemeral(interaction, { content: '⛔ Unban permission required.' });
             return;
           }
           const result = ticketManager.unbanFromTicket(ticketId, interaction.user.id, acManager, portalEnv);
-          await interaction.reply({
+          await replyEphemeral(interaction, {
             content: result.ok ? `🔓 Unbanned **${result.banId}**` : `❌ ${result.error}`,
-            ephemeral: true,
           });
           return;
         }
@@ -345,23 +367,115 @@ export async function startShadeDiscordBot({ acManager, ticketManager, portalEnv
           const ticketId = parts[3];
           const stars = parts[4];
           ticketManager.rateTicket(ticketId, stars, `Discord rating by ${interaction.user.username}`);
-          await interaction.reply({ content: `⭐ Thanks! Rated **${stars}/5**`, ephemeral: true });
+          await replyEphemeral(interaction, { content: `⭐ Thanks! Rated **${stars}/5**` });
           return;
         }
       }
 
       if (!interaction.isChatInputCommand()) return;
 
-      const member = await fetchGuildMemberBot(interaction.user.id, guildId, token);
       const actor = interaction.user.globalName || interaction.user.username;
+
+      if (interaction.commandName === 'ac') {
+        if (process.env.AC_DISCORD_SLASH_COMMANDS === '0') {
+          await replyEphemeral(interaction, { content: 'AC commands disabled.' });
+          return;
+        }
+        await deferEphemeral(interaction);
+        const member = await resolveInteractionMember(interaction, guildId, token);
+        if (!staffRoleOk(member, roleMap, ownerIds, interaction.user.id)) {
+          await replyEphemeral(interaction, { content: '⛔ Staff role required.' });
+          return;
+        }
+
+        const sub = interaction.options.getSubcommand();
+
+        if (sub === 'status') {
+          const data = acManager.getPlayers();
+          const st = acManager.getStatus?.() || {};
+          await replyEphemeral(interaction, {
+            content: `**ShadeRP AC**\nOnline: **${st.online ?? data.players?.length ?? 0}**\nSync: ${st.connected ? '✅' : '❌'}\nPortal: ${portalEnv.AC_ENABLED ? 'on' : 'off'}`,
+          });
+          return;
+        }
+
+        if (sub === 'unban') {
+          if (!canUnbanDiscordUser(interaction.user.id, portalEnv) && !ownerRoleOk(member, roleMap, ownerIds, interaction.user.id)) {
+            await replyEphemeral(interaction, { content: '⛔ Unban permission required.' });
+            return;
+          }
+          const banId = interaction.options.getString('ban_id');
+          const preview = acManager.searchUnban?.(banId) || { matches: [] };
+          const result = acManager.queueUnban({ banId, requestedBy: `discord:${actor}` });
+          const st = acManager.getStatus?.() || {};
+          const matchLines = (result.portalMatches?.length ? result.portalMatches : preview.matches || [])
+            .slice(0, 3)
+            .map((m) => `• ${m.playerName || '?'} (\`${m.banId}\`)`)
+            .join('\n');
+          const noPortal = !(result.portalMatches?.length || preview.matches?.length);
+          const syncNote = st.connected ? 'FXServer linked ✅' : '⚠️ FXServer offline — set AC_API_KEY on Render + restart shaderp-ac';
+          await replyEphemeral(interaction, {
+            content: result.ok
+              ? `✅ Unban queued for **${result.query || banId}**\n`
+                + `${result.note}\n`
+                + (matchLines ? `Portal matches:\n${matchLines}\n` : noPortal ? `No portal ban for \`${banId}\` — still unbanning FXServer + clearing flags\n` : '')
+                + `Server tries: \`${(result.serverQueries || []).slice(0, 6).join('`, `')}\`\n`
+                + `${syncNote}\n`
+                + `Still blocked? \`/ac unban-ip ip:all\` or \`secureunbanip all\` in console`
+              : `❌ ${result.error || 'Unban failed'}`,
+          });
+          return;
+        }
+
+        if (sub === 'unban-ip') {
+          if (!canUnbanDiscordUser(interaction.user.id, portalEnv) && !ownerRoleOk(member, roleMap, ownerIds, interaction.user.id)) {
+            await replyEphemeral(interaction, { content: '⛔ Unban permission required.' });
+            return;
+          }
+          const ip = interaction.options.getString('ip');
+          const result = acManager.queueUnflagIp({ ip, requestedBy: `discord:${actor}` });
+          const st = acManager.getStatus?.() || {};
+          const syncNote = st.connected ? 'FXServer linked' : '⚠️ FXServer not synced';
+          const flagged = acManager.getFlaggedIps?.() || [];
+          await replyEphemeral(interaction, {
+            content: result.ok
+              ? `✅ IP unflag **${ip}**\n${result.note}\nRemaining flagged: ${flagged.length ? flagged.join(', ') : 'none'}\n${syncNote}`
+              : `❌ ${result.error || 'Failed'}`,
+          });
+          return;
+        }
+
+        const playerId = interaction.options.getInteger('player_id');
+        const players = acManager.getPlayers().players || [];
+        const match = players.find((p) => Number(p.id) === playerId);
+        const playerName = match?.name || `Player ${playerId}`;
+
+        if (sub === 'ban') {
+          acManager.banPlayer(playerId, interaction.options.getString('reason') || 'Discord /ac', `discord:${actor}`);
+          await replyEphemeral(interaction, { content: `🔨 Ban queued **${playerName}** (#${playerId})` });
+        } else if (sub === 'kick') {
+          acManager.kickPlayer(playerId, interaction.options.getString('reason') || 'Discord /ac', `discord:${actor}`);
+          await replyEphemeral(interaction, { content: `👢 Kick queued **${playerName}**` });
+        } else if (sub === 'watch') {
+          const sessionId = acManager.startWatch(playerId, playerName, `discord:${actor}`);
+          await replyEphemeral(interaction, { content: `👁 Watch **${playerName}** · session \`${sessionId}\`` });
+        } else if (sub === 'snapshot') {
+          const requestId = acManager.snapshotPlayer(playerId, `discord:${actor}`);
+          await replyEphemeral(interaction, { content: `📸 Snapshot **${playerName}** · \`${requestId}\`` });
+        }
+        return;
+      }
+
+      const member = await resolveInteractionMember(interaction, guildId, token);
 
       if (interaction.commandName === 'discord') {
         if (!ownerRoleOk(member, roleMap, ownerIds, interaction.user.id)) {
-          await interaction.reply({ content: '⛔ Owner only — guild setup changes server structure.', ephemeral: true });
+          await replyEphemeral(interaction, { content: '⛔ Owner only — guild setup changes server structure.' });
           return;
         }
         const sub = interaction.options.getSubcommand();
         if (sub === 'status') {
+          await deferEphemeral(interaction);
           const data = guildMonitor ? await guildMonitor.checkAll(token) : { guilds: [] };
           const lines = (data.guilds || []).map((g) => {
             const status = g.connected
@@ -369,20 +483,19 @@ export async function startShadeDiscordBot({ acManager, ticketManager, portalEnv
               : `❌ ${g.error || 'not configured'}`;
             return `**${g.label}** — ${status}`;
           });
-          await interaction.reply({
+          await replyEphemeral(interaction, {
             embeds: [new EmbedBuilder()
               .setTitle('🌐 ShadeRP Discord Network')
               .setDescription(lines.join('\n') || 'No guilds configured — set DISCORD_GUILD_*_ID on Render')
               .setColor(0x7c5cff)],
-            ephemeral: true,
           });
           return;
         }
         if (sub === 'audit') {
           const templateKey = interaction.options.getString('template');
-          await interaction.deferReply({ ephemeral: true });
+          await deferEphemeral(interaction);
           const audit = await auditGuildTemplate(interaction.guild, templateKey);
-          await interaction.editReply({
+          await replyEphemeral(interaction, {
             content: `📋 **${templateKey}** audit — **${interaction.guild.name}**\n`
               + `Missing roles (${audit.roles.missing.length}): ${audit.roles.missing.slice(0, 8).join(', ') || 'none'}\n`
               + `Missing categories (${audit.categories.missing.length}): ${audit.categories.missing.slice(0, 4).join(', ') || 'none'}\n`
@@ -392,10 +505,10 @@ export async function startShadeDiscordBot({ acManager, ticketManager, portalEnv
         }
         if (sub === 'setup') {
           const templateKey = interaction.options.getString('template');
-          await interaction.deferReply({ ephemeral: true });
+          await deferEphemeral(interaction);
           const report = await applyGuildTemplate(interaction.guild, templateKey);
           guildMonitor?.recordSetup(templateKey, report);
-          await interaction.editReply({
+          await replyEphemeral(interaction, {
             content: `✅ **${templateKey}** setup on **${interaction.guild.name}**\n`
               + `Roles +${report.rolesCreated} (~${report.rolesUpdated} synced) · Categories +${report.categoriesCreated} · Channels +${report.channelsCreated}\n`
               + `Permissions synced: ${report.permissionsSynced} · Legacy removed: ${report.legacyRemoved}`
@@ -404,13 +517,13 @@ export async function startShadeDiscordBot({ acManager, ticketManager, portalEnv
           return;
         }
         if (sub === 'setup-all') {
-          await interaction.deferReply({ ephemeral: true });
+          await deferEphemeral(interaction);
           const network = guildMonitor?.getNetwork() || {};
           const results = await applyAllTemplates(client, network);
           for (const r of results) {
             if (r.ok) guildMonitor?.recordSetup(r.key, r.report);
           }
-          await interaction.editReply({
+          await replyEphemeral(interaction, {
             content: results.map((r) => r.ok
               ? `✅ **${r.key}** — +${r.report.channelsCreated} ch · ${r.report.permissionsSynced} perm syncs · -${r.report.legacyRemoved} legacy`
               : `❌ **${r.key}** — ${r.error}`).join('\n'),
@@ -420,14 +533,15 @@ export async function startShadeDiscordBot({ acManager, ticketManager, portalEnv
       }
 
       if (interaction.commandName === 'security') {
+        await deferEphemeral(interaction);
         if (!staffRoleOk(member, roleMap, ownerIds, interaction.user.id)) {
-          await interaction.reply({ content: '⛔ Staff only.', ephemeral: true });
+          await replyEphemeral(interaction, { content: '⛔ Staff only.' });
           return;
         }
         const acStatus = acManager?.getStatus?.() || {};
         const logStats = logManager?.stats?.() || {};
         const ticketStats = ticketManager?.getStats?.() || {};
-        await interaction.reply({
+        await replyEphemeral(interaction, {
           embeds: [
             new EmbedBuilder()
               .setTitle('🛡 ShadeRP Security Status')
@@ -439,7 +553,6 @@ export async function startShadeDiscordBot({ acManager, ticketManager, portalEnv
                 { name: 'Portal', value: portalEnv.PORTAL_URL || 'shaderp-website.onrender.com', inline: false },
               ),
           ],
-          ephemeral: true,
         });
         return;
       }
@@ -448,7 +561,7 @@ export async function startShadeDiscordBot({ acManager, ticketManager, portalEnv
         const sub = interaction.options.getSubcommand();
 
         if (sub === 'open') {
-          await interaction.deferReply({ ephemeral: true });
+          await deferEphemeral(interaction);
           const result = await createTicketChannel(
             interaction.guild,
             interaction.user,
@@ -460,17 +573,18 @@ export async function startShadeDiscordBot({ acManager, ticketManager, portalEnv
             roleMap,
           );
           if (result.error) {
-            await interaction.editReply({ content: `❌ ${result.error}` });
+            await replyEphemeral(interaction, { content: `❌ ${result.error}` });
             return;
           }
-          await interaction.editReply({
+          await replyEphemeral(interaction, {
             content: `✅ Ticket **${result.ticket.id}** → <#${result.channel.id}>`,
           });
           return;
         }
 
+        await deferEphemeral(interaction);
         if (!staffRoleOk(member, roleMap, ownerIds, interaction.user.id)) {
-          await interaction.reply({ content: '⛔ Staff only.', ephemeral: true });
+          await replyEphemeral(interaction, { content: '⛔ Staff only.' });
           return;
         }
 
@@ -487,16 +601,15 @@ export async function startShadeDiscordBot({ acManager, ticketManager, portalEnv
 
           const msg = await interaction.channel.send({ embeds: [embed], components: [panelRow()] });
           ticketManager.setPanel(interaction.channelId, msg.id);
-          await interaction.reply({ content: '✅ Ticket panel posted.', ephemeral: true });
+          await replyEphemeral(interaction, { content: '✅ Ticket panel posted.' });
           return;
         }
 
         if (sub === 'setup') {
           if (!staffRoleOk(member, roleMap, ownerIds, interaction.user.id, 'admin')) {
-            await interaction.reply({ content: '⛔ Admin role required for setup.', ephemeral: true });
+            await replyEphemeral(interaction, { content: '⛔ Admin role required for setup.' });
             return;
           }
-          await interaction.deferReply({ ephemeral: true });
           const result = await runTicketSetup(interaction.guild, ticketManager, roleMap);
           const panelEmbed = new EmbedBuilder()
             .setTitle('🎫 ShadeRP Support')
@@ -504,7 +617,7 @@ export async function startShadeDiscordBot({ acManager, ticketManager, portalEnv
             .setColor(0x7c5cff);
           const panelMsg = await result.panel.send({ embeds: [panelEmbed], components: [panelRow()] });
           ticketManager.setPanel(result.panel.id, panelMsg.id);
-          await interaction.editReply({
+          await replyEphemeral(interaction, {
             content: `✅ Ticket system configured:\n`
               + `• Category: <#${result.category.id}>\n`
               + `• Panel: <#${result.panel.id}>\n`
@@ -516,14 +629,13 @@ export async function startShadeDiscordBot({ acManager, ticketManager, portalEnv
 
         if (sub === 'delete') {
           if (!ownerRoleOk(member, roleMap, ownerIds, interaction.user.id)) {
-            await interaction.reply({ content: '⛔ Owner only — use close instead of delete.', ephemeral: true });
+            await replyEphemeral(interaction, { content: '⛔ Owner only — use close instead of delete.' });
             return;
           }
           const ticketId = interaction.options.getString('ticket_id');
           const ok = ticketManager.deleteTicket(ticketId, interaction.user.id, interaction.user.username);
-          await interaction.reply({
+          await replyEphemeral(interaction, {
             content: ok ? `🗑 Deleted ticket **${ticketId}** from portal records.` : '❌ Ticket not found.',
-            ephemeral: true,
           });
           return;
         }
@@ -532,12 +644,12 @@ export async function startShadeDiscordBot({ acManager, ticketManager, portalEnv
           const chId = interaction.channelId;
           const ticket = ticketManager.getByChannel(chId);
           if (!ticket) {
-            await interaction.reply({ content: 'Not a ticket channel.', ephemeral: true });
+            await replyEphemeral(interaction, { content: 'Not a ticket channel.' });
             return;
           }
           if (sub === 'claim') {
             ticketManager.claimTicket(ticket.id, interaction.user.id, actor);
-            await interaction.reply({ content: `✋ Claimed **${ticket.id}**` });
+            await replyEphemeral(interaction, { content: `✋ Claimed **${ticket.id}**` }, { ephemeral: false });
           } else {
             const reason = interaction.options.getString('reason') || 'Resolved';
             const { closed, transcriptSaved } = await closeTicketWithTranscript({
@@ -550,74 +662,20 @@ export async function startShadeDiscordBot({ acManager, ticketManager, portalEnv
               reason,
             });
             if (!closed) {
-              await interaction.reply({ content: 'Cannot close.', ephemeral: true });
+              await replyEphemeral(interaction, { content: 'Cannot close.' });
               return;
             }
-            await interaction.reply({
+            await replyEphemeral(interaction, {
               content: `✅ Closed **${ticket.id}**${transcriptSaved ? ' · transcript saved' : ''}`,
               components: [ratingRow(ticket.id)],
-            });
+            }, { ephemeral: false });
           }
         }
         return;
       }
-
-      if (interaction.commandName !== 'ac') return;
-      if (process.env.AC_DISCORD_SLASH_COMMANDS === '0') {
-        await interaction.reply({ content: 'AC commands disabled.', ephemeral: true });
-        return;
-      }
-      if (!staffRoleOk(member, roleMap, ownerIds, interaction.user.id)) {
-        await interaction.reply({ content: '⛔ Staff role required.', ephemeral: true });
-        return;
-      }
-
-      const sub = interaction.options.getSubcommand();
-
-      if (sub === 'status') {
-        const data = acManager.getPlayers();
-        const st = acManager.getStatus?.() || {};
-        await interaction.reply({
-          content: `**ShadeRP AC**\nOnline: **${st.online ?? data.players?.length ?? 0}**\nSync: ${st.connected ? '✅' : '❌'}\nPortal: ${portalEnv.AC_ENABLED ? 'on' : 'off'}`,
-          ephemeral: true,
-        });
-        return;
-      }
-
-      if (sub === 'unban') {
-        if (!canUnbanDiscordUser(interaction.user.id, portalEnv)) {
-          await interaction.reply({ content: '⛔ Unban permission required.', ephemeral: true });
-          return;
-        }
-        const banId = interaction.options.getString('ban_id');
-        const ok = acManager.unbanBan({ banId });
-        await interaction.reply({ content: ok ? `✅ Unbanned **${banId}**` : `❌ Not found`, ephemeral: true });
-        return;
-      }
-
-      const playerId = interaction.options.getInteger('player_id');
-      const players = acManager.getPlayers().players || [];
-      const match = players.find((p) => Number(p.id) === playerId);
-      const playerName = match?.name || `Player ${playerId}`;
-
-      if (sub === 'ban') {
-        acManager.banPlayer(playerId, interaction.options.getString('reason') || 'Discord /ac', `discord:${actor}`);
-        await interaction.reply({ content: `🔨 Ban queued **${playerName}** (#${playerId})`, ephemeral: true });
-      } else if (sub === 'kick') {
-        acManager.kickPlayer(playerId, interaction.options.getString('reason') || 'Discord /ac', `discord:${actor}`);
-        await interaction.reply({ content: `👢 Kick queued **${playerName}**`, ephemeral: true });
-      } else if (sub === 'watch') {
-        const sessionId = acManager.startWatch(playerId, playerName, `discord:${actor}`);
-        await interaction.reply({ content: `👁 Watch **${playerName}** · session \`${sessionId}\``, ephemeral: true });
-      } else if (sub === 'snapshot') {
-        const requestId = acManager.snapshotPlayer(playerId, `discord:${actor}`);
-        await interaction.reply({ content: `📸 Snapshot **${playerName}** · \`${requestId}\``, ephemeral: true });
-      }
     } catch (err) {
       console.error('Discord interaction error:', err);
-      const msg = { content: 'Command failed.', ephemeral: true };
-      if (interaction.replied || interaction.deferred) await interaction.followUp(msg).catch(() => {});
-      else await interaction.reply(msg).catch(() => {});
+      await safeInteractionReply(interaction, { content: 'Command failed.' });
     }
   });
 

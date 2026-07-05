@@ -1,4 +1,4 @@
-import { resolveAppRole } from './roles.js';
+import { resolveAppRole, ROLE_LEVEL } from './roles.js';
 
 const DISCORD_API = 'https://discord.com/api/v10';
 
@@ -63,6 +63,123 @@ export async function fetchGuildRoles(guildId, botToken) {
   });
   if (!res.ok) return [];
   return res.json();
+}
+
+/** CDN avatar URL from Discord user id + optional avatar hash. */
+export function discordAvatarUrl(userId, avatarHash, size = 256) {
+  if (!userId) return '';
+  if (avatarHash) {
+    const ext = avatarHash.startsWith('a_') ? 'gif' : 'png';
+    return `https://cdn.discordapp.com/avatars/${userId}/${avatarHash}.${ext}?size=${size}`;
+  }
+  const idx = Number(BigInt(userId) >> 22n) % 6;
+  return `https://cdn.discordapp.com/embed/avatars/${idx}.png`;
+}
+
+export function formatGuildMemberProfile(member, guildRoles = [], roleMap = {}, ownerIds = []) {
+  if (!member?.user) return null;
+  const user = member.user;
+  const discordRoleIds = member.roles || [];
+  const appRole = resolveAppRole(discordRoleIds, { roleMap, ownerIds, userId: user.id });
+  const portalRoleIds = new Set(Object.keys(roleMap));
+  const discordRoles = discordRoleIds
+    .filter((id) => portalRoleIds.has(id))
+    .map((id) => {
+      const gr = guildRoles.find((r) => r.id === id);
+      return { id, name: gr?.name || id, color: gr?.color ? `#${gr.color.toString(16).padStart(6, '0')}` : null };
+    });
+  return {
+    id: user.id,
+    username: user.username,
+    globalName: user.global_name || user.username,
+    displayName: member.nick || user.global_name || user.username,
+    avatar: discordAvatarUrl(user.id, user.avatar),
+    appRole,
+    discordRoles,
+    inGuild: true,
+  };
+}
+
+/** Paginated guild member list — requires Server Members intent on the bot. */
+export async function fetchGuildMembers(guildId, botToken, maxMembers = 1000) {
+  if (!botToken || !guildId) return { members: [], partial: true, error: 'missing config' };
+  const members = [];
+  let after = '0';
+  try {
+    while (members.length < maxMembers) {
+      const res = await fetch(
+        `${DISCORD_API}/guilds/${guildId}/members?limit=1000&after=${after}`,
+        { headers: { Authorization: `Bot ${botToken}` } },
+      );
+      if (res.status === 403) {
+        return { members, partial: true, error: 'members intent required' };
+      }
+      if (!res.ok) {
+        return { members, partial: true, error: `HTTP ${res.status}` };
+      }
+      const batch = await res.json();
+      if (!batch.length) break;
+      members.push(...batch);
+      after = batch[batch.length - 1].user.id;
+      if (batch.length < 1000) break;
+    }
+    return { members, partial: false, error: null };
+  } catch (e) {
+    return { members, partial: true, error: e.message };
+  }
+}
+
+export async function enrichCredits(credits, guildId, botToken, guildRoles = [], roleMap = {}, ownerIds = []) {
+  const out = [];
+  for (const credit of credits || []) {
+    const base = { ...credit };
+    if (!credit.discordId || !botToken) {
+      base.avatar = discordAvatarUrl(credit.discordId);
+      out.push(base);
+      continue;
+    }
+    const member = await fetchGuildMemberBot(credit.discordId, guildId, botToken);
+    if (member?.user) {
+      const profile = formatGuildMemberProfile(member, guildRoles, roleMap, ownerIds);
+      base.avatar = profile.avatar;
+      base.displayName = profile.displayName || base.displayName;
+      base.username = profile.username || base.username;
+      base.globalName = profile.globalName;
+      base.discordRoles = profile.discordRoles;
+      base.inGuild = true;
+    } else {
+      base.avatar = discordAvatarUrl(credit.discordId);
+      base.inGuild = false;
+    }
+    out.push(base);
+  }
+  return out;
+}
+
+export function buildStaffRoster(guildMembers, guildRoles, roleMap, ownerIds) {
+  const portalRoleIds = new Set(Object.keys(roleMap));
+  const seen = new Set();
+  const roster = [];
+
+  for (const member of guildMembers) {
+    const roleIds = member.roles || [];
+    if (!roleIds.some((id) => portalRoleIds.has(id))) continue;
+    const profile = formatGuildMemberProfile(member, guildRoles, roleMap, ownerIds);
+    if (!profile || seen.has(profile.id)) continue;
+    seen.add(profile.id);
+    roster.push(profile);
+  }
+
+  roster.sort((a, b) => {
+    const la = ROLE_LEVEL[a.appRole] ?? 0;
+    const lb = ROLE_LEVEL[b.appRole] ?? 0;
+    if (lb !== la) return lb - la;
+    return a.displayName.localeCompare(b.displayName);
+  });
+
+  const tiers = ['owner', 'admin', 'manager', 'developer', 'staff', 'moderator'];
+  const grouped = Object.fromEntries(tiers.map((t) => [t, roster.filter((m) => m.appRole === t)]));
+  return { roster, grouped };
 }
 
 export async function buildUserSession(discordUser, accessToken, env, roleMap) {

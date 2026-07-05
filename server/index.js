@@ -12,6 +12,9 @@ import {
   fetchDiscordUser,
   buildUserSession,
   fetchGuildRoles,
+  fetchGuildMembers,
+  enrichCredits,
+  buildStaffRoster,
 } from './discord.js';
 import { trackPageView, trackEvent, getAnalyticsSummary } from './analytics.js';
 import { getPortalEnv, isAuthConfigured, isOAuthReady, portalBaseUrl } from './env.js';
@@ -26,10 +29,11 @@ import { registerThreatMlRoutes } from './threat-ml.js';
 import { registerEconomyForensicsRoutes } from './economy-forensics.js';
 import { registerWebrtcRoutes, cleanupWebrtcSessions, registerIceConfigRoute } from './webrtc-signaling.js';
 import { createTicketManager, registerTicketRoutes } from './tickets.js';
+import { setTicketDiscordClient, syncTicketToDiscord, startTicketDiscordSyncLoop, mirrorTicketMessageToDiscord } from './ticket-discord-sync.js';
 import { createAuditManager, registerAuditRoutes } from './audit.js';
 import { createGuildMonitor, registerGuildMonitorRoutes } from './discord-guild-monitor.js';
 import { startShadeDiscordBot } from './discord-bot.js';
-import { canUnbanDiscordUser } from './unban.js';
+import { canUnbanDiscordUser, canUnbanPortalUser } from './unban.js';
 import {
   resolveUser,
   setAuthCookie,
@@ -151,7 +155,7 @@ app.get('/api/me', async (req, res) => {
       user = cached.user;
     }
   }
-  const canUnban = user ? canUnbanDiscordUser(user.id, portalEnv) : false;
+  const canUnban = user ? canUnbanPortalUser(user, portalEnv) : false;
   res.json({
     user: user ? { ...user, canUnban } : null,
     canUnban,
@@ -168,38 +172,65 @@ app.get('/api/me', async (req, res) => {
 
 app.get('/api/team', async (_req, res) => {
   const data = loadDashboardData();
-  const credits = data?.credits || [];
+  const creditsRaw = data?.credits || [];
+  const guildId = portalEnv.DISCORD_GUILD_ID;
+  const botToken = portalEnv.DISCORD_BOT_TOKEN;
+  const ownerIds = (portalEnv.PORTAL_OWNER_IDS || '').split(',').map((s) => s.trim()).filter(Boolean);
+
   let guildRoles = [];
   try {
-    guildRoles = await fetchGuildRoles(portalEnv.DISCORD_GUILD_ID, portalEnv.DISCORD_BOT_TOKEN);
+    guildRoles = await fetchGuildRoles(guildId, botToken);
   } catch { /* bot optional */ }
 
-  const roles = Object.entries(roleMap)
+  const roleDefs = Object.entries(roleMap)
     .map(([discordRoleId, appRole]) => ({
       discordRoleId,
       appRole,
       discordName: guildRoles.find((r) => r.id === discordRoleId)?.name || discordRoleId,
+      color: guildRoles.find((r) => r.id === discordRoleId)?.color,
       level: ROLE_LEVEL[appRole] ?? 0,
     }))
     .sort((a, b) => b.level - a.level || a.discordName.localeCompare(b.discordName));
 
-  const tiers = ['owner', 'admin', 'developer', 'staff', 'moderator', 'member'];
-  const grouped = Object.fromEntries(
-    tiers.map((tier) => [tier, roles.filter((r) => r.appRole === tier)])
-  );
+  let credits = creditsRaw;
+  let staff = { roster: [], grouped: {} };
+  let membersPartial = false;
+  let membersError = null;
+
+  try {
+    credits = await enrichCredits(creditsRaw, guildId, botToken, guildRoles, roleMap, ownerIds);
+  } catch { /* keep raw credits */ }
+
+  try {
+    const { members, partial, error } = await fetchGuildMembers(guildId, botToken);
+    membersPartial = partial;
+    membersError = error;
+    if (members.length) {
+      staff = buildStaffRoster(members, guildRoles, roleMap, ownerIds);
+    }
+  } catch (e) {
+    membersPartial = true;
+    membersError = e.message;
+  }
+
+  const tiers = ['owner', 'admin', 'manager', 'developer', 'staff', 'moderator'];
+  const grouped = staff.grouped || Object.fromEntries(tiers.map((t) => [t, []]));
 
   res.json({
     credits,
-    roles,
+    staff: staff.roster || [],
     grouped,
+    roleDefs,
     invite: portalEnv.DISCORD_INVITE_URL,
+    membersPartial,
+    membersError,
     tierMeta: {
       owner: { label: 'Owner', icon: '👑', desc: 'Full portal + server control' },
       admin: { label: 'Admin', icon: '🛡️', desc: 'Resources, branding, blocked mods' },
+      manager: { label: 'Manager', icon: '📊', desc: 'Operations and staff oversight' },
       developer: { label: 'Developer', icon: '⚙️', desc: 'Dev tools + staff panels' },
-      staff: { label: 'Staff', icon: '📋', desc: 'Analytics + staff hub' },
-      moderator: { label: 'Moderator', icon: '🔨', desc: 'Community member access' },
-      member: { label: 'Member', icon: '✅', desc: 'Overview, economy, map' },
+      staff: { label: 'Staff', icon: '📋', desc: 'Analytics, tickets, moderation' },
+      moderator: { label: 'Moderator', icon: '🔨', desc: 'Community moderation + bans' },
     },
   });
 });
@@ -405,7 +436,16 @@ registerEconomyForensicsRoutes(app, { requireRole, portalEnv });
 registerWebrtcRoutes(app, { requireRole });
 registerIceConfigRoute(app, { requireRole, portalEnv });
 setInterval(() => cleanupWebrtcSessions(), 120000);
-registerTicketRoutes(app, { ticketManager, acManager, portalEnv, requireRole, auditManager });
+const syncTicketToDiscordBridge = (ticket) => syncTicketToDiscord(ticket, { ticketManager, portalEnv, roleMap });
+registerTicketRoutes(app, {
+  ticketManager,
+  acManager,
+  portalEnv,
+  requireRole,
+  auditManager,
+  syncTicketToDiscord: syncTicketToDiscordBridge,
+  mirrorTicketMessageToDiscord,
+});
 registerAuditRoutes(app, { auditManager, requireRole });
 registerGuildMonitorRoutes(app, { guildMonitor, requireRole, portalEnv });
 
@@ -469,7 +509,13 @@ app.listen(PORT, '0.0.0.0', () => {
   console.log(`Anti-cheat API: ${acManager.isEnabled() ? 'enabled' : 'disabled'}${portalEnv.AC_API_KEY ? '' : ' (set AC_API_KEY on Render)'}`);
   console.log(`AC storage: ${getDbMode()}${dbInfo.mode === 'postgres' ? '' : ' (set DATABASE_URL for PostgreSQL)'}`);
   console.log(`Trust cache: ${getRedisMode()}${redisInfo.mode === 'redis' ? '' : ' (set REDIS_URL for Redis)'}`);
-  startShadeDiscordBot({ acManager, ticketManager, portalEnv, roleMap, logManager: serverLogs, guildMonitor }).catch((err) => {
+  startShadeDiscordBot({ acManager, ticketManager, portalEnv, roleMap, logManager: serverLogs, guildMonitor }).then((client) => {
+    if (client) {
+      setTicketDiscordClient(client);
+      startTicketDiscordSyncLoop({ ticketManager, portalEnv, roleMap });
+      console.log('Ticket ↔ Discord sync active');
+    }
+  }).catch((err) => {
     console.error('Discord bot failed to start:', err.message);
   });
 });

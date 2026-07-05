@@ -5,7 +5,12 @@
 import fs from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
-import { canUnbanDiscordUser } from './unban.js';
+import { canUnbanPortalUser } from './unban.js';
+import {
+  banMatchesQuery,
+  normalizeIp,
+  resolveUnbanPlan,
+} from './ac-unban.js';
 import { hasMinRole } from './roles.js';
 import { updateTrustFromSync, updateTrustOnDetection } from './trust-cache.js';
 import { ingestPlayerSync } from './threat-ml.js';
@@ -15,7 +20,7 @@ const DATA_DIR = path.join(__dirname, '..', 'data');
 const AC_FILE = path.join(DATA_DIR, 'ac-state.json');
 
 const MAX_DETECTIONS = 500;
-const MAX_BANS = 500;
+const MAX_BANS = 2000;
 const MAX_COMMAND_LOG = 300;
 const MAX_ECONOMY_ALERTS = 150;
 const FRAME_TTL_MS = 120_000;
@@ -202,6 +207,11 @@ function pruneFrames(state) {
   }
 }
 
+function licenseTail(v) {
+  if (typeof v !== 'string') return '';
+  return v.replace(/^license2?:/i, '').toLowerCase();
+}
+
 function flattenIdentifiers(identifiers) {
   const values = [];
   if (!identifiers || typeof identifiers !== 'object') return values;
@@ -213,20 +223,6 @@ function flattenIdentifiers(identifiers) {
     }
   }
   return values;
-}
-
-function normalizeIp(value) {
-  if (!value || typeof value !== 'string') return null;
-  let ip = value.replace(/^ip:/i, '').trim();
-  if (ip.startsWith('[')) {
-    const m = ip.match(/^\[([^\]]+)\]/);
-    if (m) ip = m[1];
-  } else {
-    ip = ip.split(':')[0];
-  }
-  ip = ip.trim();
-  if (!ip || ip === '127.0.0.1' || ip === '0.0.0.0') return null;
-  return `ip:${ip}`;
 }
 
 function discordIdFrom(identifiers) {
@@ -241,10 +237,11 @@ function steamIdFrom(identifiers) {
   return String(s).replace(/^steam:/i, '');
 }
 
+/** Derive join-screen flags only from active portal bans (never merge stale flagged entries). */
 function rebuildFlagged(state) {
-  const discs = new Set(state.flagged?.discordIds || []);
-  const steams = new Set(state.flagged?.steamIds || []);
-  const ips = new Set(state.flagged?.ipAddresses || []);
+  const discs = new Set();
+  const steams = new Set();
+  const ips = new Set();
   for (const ban of state.bans || []) {
     const d = discordIdFrom(ban.identifiers);
     if (d) discs.add(d);
@@ -258,6 +255,63 @@ function rebuildFlagged(state) {
     steamIds: [...steams],
     ipAddresses: [...ips],
   };
+}
+
+/** Drop flagged IDs with no matching active ban (fixes stale IP_BANNED after unban). */
+function healStaleFlags(state) {
+  const activeDisc = new Set();
+  const activeSteam = new Set();
+  const activeIps = new Set();
+  for (const ban of state.bans || []) {
+    const d = discordIdFrom(ban.identifiers);
+    if (d) activeDisc.add(d);
+    const s = steamIdFrom(ban.identifiers);
+    if (s) activeSteam.add(s);
+    const ip = normalizeIp(ban.identifiers?.ip || ban.identifiers?.endpoint);
+    if (ip) activeIps.add(ip);
+  }
+  const flagged = state.flagged || { discordIds: [], steamIds: [], ipAddresses: [] };
+  const next = {
+    discordIds: (flagged.discordIds || []).filter((id) => activeDisc.has(id)),
+    steamIds: (flagged.steamIds || []).filter((id) => activeSteam.has(id)),
+    ipAddresses: (flagged.ipAddresses || []).filter((ip) => activeIps.has(ip)),
+  };
+  const before = JSON.stringify(flagged);
+  const after = JSON.stringify(next);
+  state.flagged = next;
+  return before !== after;
+}
+
+/** Remove explicit identifier from flagged (IP/discord/steam) when staff unban by id. */
+function removeFlaggedIdentifier(state, query) {
+  const q = String(query || '').trim();
+  if (!q) return false;
+  if (q.toLowerCase() === 'all') {
+    state.flagged = { discordIds: [], steamIds: [], ipAddresses: [] };
+    return true;
+  }
+  let changed = false;
+  const flagged = state.flagged || { discordIds: [], steamIds: [], ipAddresses: [] };
+  const nip = normalizeIp(q);
+  if (nip) {
+    const next = (flagged.ipAddresses || []).filter((ip) => ip !== nip);
+    if (next.length !== (flagged.ipAddresses || []).length) changed = true;
+    flagged.ipAddresses = next;
+  }
+  const qdisc = q.replace(/^discord:/i, '');
+  if (/^\d{15,20}$/.test(qdisc)) {
+    const next = (flagged.discordIds || []).filter((id) => id !== qdisc);
+    if (next.length !== (flagged.discordIds || []).length) changed = true;
+    flagged.discordIds = next;
+  }
+  const qsteam = q.replace(/^steam:/i, '');
+  if (/^\d+$/.test(qsteam)) {
+    const next = (flagged.steamIds || []).filter((id) => id !== qsteam);
+    if (next.length !== (flagged.steamIds || []).length) changed = true;
+    flagged.steamIds = next;
+  }
+  state.flagged = flagged;
+  return changed;
 }
 
 async function discordMemberInGuild(guildId, userId, botToken) {
@@ -279,6 +333,67 @@ async function discordBannedFromGuild(guildId, userId, botToken) {
     return res.status === 200;
   } catch {
     return false;
+  }
+}
+
+const AC_BAN_ADMINS = new Set([
+  'Anti-Cheat System',
+  'ShadeRP Anti-Cheat',
+  'AC Presence',
+  'Trust Enforcer',
+  'system',
+]);
+
+function tokenList(identifiers) {
+  if (!identifiers || typeof identifiers !== 'object') return [];
+  const raw = identifiers.tokens;
+  if (Array.isArray(raw)) return raw.filter(Boolean);
+  if (raw && typeof raw === 'object') return Object.values(raw).filter(Boolean);
+  return [];
+}
+
+function classifyBan(ban) {
+  const admin = String(ban.admin || ban.requestedBy || 'unknown');
+  const tokens = tokenList(ban.identifiers);
+  const hasHw = tokens.length > 0;
+  const isAc = AC_BAN_ADMINS.has(admin)
+    || (ban.source === 'fxserver' && Boolean(ban.detection))
+    || String(ban.reason || '').toLowerCase().includes('anti-cheat');
+  let category = 'moderator';
+  if (hasHw && isAc) category = 'hardware';
+  else if (isAc) category = 'ac';
+  else if (hasHw) category = 'hardware';
+  return { category, hasHardware: hasHw, tokenCount: tokens.length, tokens: tokens.slice(0, 4) };
+}
+
+function enrichBanRow(ban) {
+  const idents = ban.identifiers || {};
+  const meta = classifyBan(ban);
+  return {
+    ...ban,
+    banId: ban.banId || ban.id,
+    category: meta.category,
+    hasHardware: meta.hasHardware,
+    tokenCount: meta.tokenCount,
+    tokensPreview: meta.tokens,
+    license: idents.license || idents.license2 || null,
+    discord: idents.discord || null,
+    steam: idents.steam || null,
+    ip: idents.ip || idents.endpoint || null,
+  };
+}
+
+async function withTimeout(promise, ms, fallback = null) {
+  let timer;
+  try {
+    return await Promise.race([
+      promise,
+      new Promise((resolve) => {
+        timer = setTimeout(() => resolve(fallback), ms);
+      }),
+    ]);
+  } finally {
+    if (timer) clearTimeout(timer);
   }
 }
 
@@ -343,6 +458,9 @@ function acLogIngest(logManager, type, entry) {
 
 export function createAcManager({ enabled = true, auditManager, logManager, initialState = null, persistAsync = null } = {}) {
   let state = initialState ? { ...defaultState(), ...initialState } : loadState();
+  if (healStaleFlags(state)) saveState(state);
+  rebuildFlagged(state);
+  if (!initialState) saveState(state);
   let persistTimer = null;
 
   function persist() {
@@ -512,12 +630,15 @@ export function createAcManager({ enabled = true, auditManager, logManager, init
     pushBan(entry) {
       const ban = {
         ...entry,
-        at: now(),
-        banId: entry.banId || entry.id || `ban_${now()}`,
+        at: entry.at || now(),
+        banId: String(entry.banId || entry.id || `ban_${now()}`),
         admin: entry.admin || entry.requestedBy || 'system',
         source: entry.source || 'fxserver',
+        evidenceId: entry.evidenceId || null,
       };
-      state.bans.unshift(ban);
+      const idx = (state.bans || []).findIndex((b) => String(b.banId || b.id) === ban.banId);
+      if (idx >= 0) state.bans[idx] = { ...state.bans[idx], ...ban };
+      else state.bans.unshift(ban);
       if (state.bans.length > MAX_BANS) state.bans.length = MAX_BANS;
       rebuildFlagged(state);
       auditManager?.log('ac_ban', {
@@ -526,7 +647,7 @@ export function createAcManager({ enabled = true, auditManager, logManager, init
         targetName: ban.playerName || entry.playerName,
         reason: ban.reason,
         source: ban.source,
-        meta: { identifiers: ban.identifiers, playerId: ban.playerId },
+        meta: { identifiers: ban.identifiers, playerId: ban.playerId, evidenceId: ban.evidenceId },
       });
       const webhook = process.env.AC_BAN_WEBHOOK || process.env.AC_DISCORD_WEBHOOK;
       if (webhook) {
@@ -544,6 +665,7 @@ export function createAcManager({ enabled = true, auditManager, logManager, init
                 { name: 'Reason', value: String(ban.reason || '—').slice(0, 500), inline: false },
                 { name: 'Staff', value: String(ban.admin || '—'), inline: true },
                 { name: 'Ban ID', value: `\`${ban.banId}\``, inline: true },
+                ...(ban.evidenceId ? [{ name: 'Evidence', value: `\`${ban.evidenceId}\``, inline: true }] : []),
               ],
               timestamp: new Date().toISOString(),
             }],
@@ -551,6 +673,17 @@ export function createAcManager({ enabled = true, auditManager, logManager, init
         }).catch(() => {});
       }
       persist();
+      return ban;
+    },
+
+    syncAllBans(bans = []) {
+      let synced = 0;
+      for (const entry of bans) {
+        if (!entry?.banId && !entry?.id) continue;
+        this.pushBan(entry);
+        synced += 1;
+      }
+      return { ok: true, synced };
     },
 
     checkGlobalBan(identifiers) {
@@ -581,14 +714,24 @@ export function createAcManager({ enabled = true, auditManager, logManager, init
         };
       }
 
-      rebuildFlagged(state);
+      if (healStaleFlags(state)) {
+        rebuildFlagged(state);
+        persist();
+      } else {
+        rebuildFlagged(state);
+      }
+
       const flagged = state.flagged || { discordIds: [], steamIds: [], ipAddresses: [] };
       const discordId = discordIdFrom(identifiers);
       const steamId = steamIdFrom(identifiers);
       const ip = normalizeIp(identifiers?.ip || identifiers?.endpoint);
 
       if (ip && flagged.ipAddresses.includes(ip)) {
-        return { allowed: false, reason: 'IP address is banned or flagged', code: 'IP_BANNED' };
+        return {
+          allowed: false,
+          reason: 'Your IP is flagged from a prior ban (portal). Staff: /ac unban-ip ip:all',
+          code: 'IP_BANNED',
+        };
       }
 
       if (discordId && flagged.discordIds.includes(discordId)) {
@@ -622,9 +765,14 @@ export function createAcManager({ enabled = true, auditManager, logManager, init
 
       const botToken = portalEnv.AC_DISCORD_BOT_TOKEN;
       const communityGuild = portalEnv.AC_DISCORD_GUILD_ID;
+      const discordTimeout = Number(portalEnv.AC_JOIN_DISCORD_TIMEOUT_MS) || 4000;
 
       if (botToken && discordId && communityGuild) {
-        const banned = await discordBannedFromGuild(communityGuild, discordId, botToken);
+        const banned = await withTimeout(
+          discordBannedFromGuild(communityGuild, discordId, botToken),
+          discordTimeout,
+          false,
+        );
         if (banned) {
           return {
             allowed: false,
@@ -634,7 +782,11 @@ export function createAcManager({ enabled = true, auditManager, logManager, init
         }
 
         if (portalEnv.AC_REQUIRE_DISCORD_MEMBER === '1') {
-          const member = await discordMemberInGuild(communityGuild, discordId, botToken);
+          const member = await withTimeout(
+            discordMemberInGuild(communityGuild, discordId, botToken),
+            discordTimeout,
+            true,
+          );
           if (!member) {
             return {
               allowed: false,
@@ -651,14 +803,19 @@ export function createAcManager({ enabled = true, auditManager, logManager, init
         .filter(Boolean);
 
       if (botToken && discordId && cheatGuilds.length && portalEnv.AC_CHEAT_GUILD_CHECK !== '0') {
-        for (const gid of cheatGuilds) {
-          if (await discordMemberInGuild(gid, discordId, botToken)) {
-            return {
-              allowed: false,
-              reason: 'Member of a known cheat Discord server',
-              code: 'CHEAT_DISCORD',
-            };
-          }
+        const checks = await Promise.all(
+          cheatGuilds.map((gid) => withTimeout(
+            discordMemberInGuild(gid, discordId, botToken),
+            discordTimeout,
+            false,
+          )),
+        );
+        if (checks.some(Boolean)) {
+          return {
+            allowed: false,
+            reason: 'Member of a known cheat Discord server',
+            code: 'CHEAT_DISCORD',
+          };
         }
       }
 
@@ -697,30 +854,217 @@ export function createAcManager({ enabled = true, auditManager, logManager, init
     },
 
     unbanBan({ banId, identifier }) {
-      const needle = String(banId || identifier || '');
-      if (!needle) return false;
-      let removed = false;
-      state.bans = (state.bans || []).filter((ban) => {
-        const id = String(ban.banId || ban.id || '');
-        if (id === needle) {
-          removed = true;
-          return false;
-        }
-        if (identifier) {
-          const vals = flattenIdentifiers(ban.identifiers);
-          const nip = normalizeIp(identifier);
-          for (const v of vals) {
-            if (v === identifier || (nip && normalizeIp(v) === nip)) {
-              removed = true;
-              return false;
-            }
-          }
-        }
-        return true;
-      });
-      if (removed) rebuildFlagged(state);
+      const query = String(banId || identifier || '').trim();
+      if (!query) return { removed: 0, portalMatches: [] };
+      const plan = resolveUnbanPlan(state, query);
+      if (!plan.ok) return { removed: 0, portalMatches: [] };
+
+      if (plan.query === 'all') {
+        const count = (state.bans || []).length;
+        state.bans = [];
+        state.flagged = { discordIds: [], steamIds: [], ipAddresses: [] };
+        rebuildFlagged(state);
+        persist();
+        return { removed: count, portalMatches: plan.portalMatches, query: plan.query };
+      }
+
+      const before = (state.bans || []).length;
+      state.bans = (state.bans || []).filter((ban) => !banMatchesQuery(ban, plan.query));
+      const removed = before - state.bans.length;
+      removeFlaggedIdentifier(state, plan.query);
+      for (const sq of plan.serverQueries || []) {
+        removeFlaggedIdentifier(state, sq);
+      }
+      for (const ban of plan.portalMatches) {
+        const ids = ban.identifiers || {};
+        if (ids.discord) removeFlaggedIdentifier(state, ids.discord);
+        if (ids.steam) removeFlaggedIdentifier(state, ids.steam);
+        const ip = normalizeIp(ids.ip || ids.endpoint);
+        if (ip) removeFlaggedIdentifier(state, ip);
+      }
+      rebuildFlagged(state);
       persist();
-      return removed;
+      return { removed, portalMatches: plan.portalMatches, query: plan.query };
+    },
+
+    searchUnban(query, limit = 10) {
+      const plan = resolveUnbanPlan(state, query);
+      if (!plan.ok) return plan;
+      const matches = (state.bans || [])
+        .filter((b) => banMatchesQuery(b, plan.query))
+        .slice(0, limit)
+        .map((b) => ({
+          banId: b.banId || b.id,
+          playerName: b.playerName,
+          reason: b.reason,
+          at: b.at,
+          identifiers: {
+            discord: b.identifiers?.discord,
+            license: b.identifiers?.license,
+            ip: b.identifiers?.ip,
+          },
+        }));
+      return {
+        ok: true,
+        query: plan.query,
+        matches,
+        serverQueries: plan.serverQueries,
+        fingerprintHits: (plan.fingerprintHits || []).length,
+        portalCount: (state.bans || []).length,
+        canUnban: true,
+        hint: matches.length
+          ? null
+          : 'No portal ban — unban still clears FXServer + flagged IDs when server is linked',
+      };
+    },
+
+    /** Portal + FXServer unban — always queues server even if portal had no record. */
+    queueUnban({ banId, identifier, requestedBy }) {
+      const raw = String(banId || identifier || '').trim();
+      if (!raw) return { ok: false, error: 'banId or identifier required' };
+      const by = requestedBy || 'staff';
+      const plan = resolveUnbanPlan(state, raw);
+      if (!plan.ok) return plan;
+
+      const portalResult = this.unbanBan({ banId: plan.query, identifier: plan.query });
+      const cmdId = `cmd_unban_${now()}`;
+
+      this._queuePortalCommand({
+        id: cmdId,
+        type: 'unban_bundle',
+        query: plan.query,
+        queries: plan.serverQueries,
+        requestedBy: by,
+      });
+      this._queuePortalCommand({
+        type: 'run_console',
+        command: 'shaderpclearconnect',
+        requestedBy: by,
+      });
+
+      const st = this.getStatus?.() || {};
+      if (st.connected) {
+        this._queuePortalCommand({
+          type: 'request_bans_sync',
+          requestedBy: by,
+        });
+      }
+
+      auditManager?.log('unban', {
+        actorName: by,
+        targetId: plan.query,
+        reason: portalResult.removed ? 'portal+server' : 'server-only',
+        source: 'portal',
+        meta: { serverQueries: plan.serverQueries, portalRemoved: portalResult.removed },
+      });
+
+      return {
+        ok: true,
+        query: plan.query,
+        portalRemoved: portalResult.removed,
+        portalMatches: (portalResult.portalMatches || []).map((b) => ({
+          banId: b.banId || b.id,
+          playerName: b.playerName,
+        })),
+        serverQueries: plan.serverQueries,
+        serverQueued: true,
+        fxConnected: !!st.connected,
+        cmdId,
+        note: portalResult.removed
+          ? `Removed ${portalResult.removed} portal ban(s); FXServer unban queued`
+          : 'No portal ban found — FXServer unban still queued (ban may only exist in-game)',
+      };
+    },
+
+    getFlaggedIps() {
+      if (healStaleFlags(state)) {
+        rebuildFlagged(state);
+        persist();
+      }
+      return (state.flagged?.ipAddresses || []).slice();
+    },
+
+    healStalePortalFlags(requestedBy = 'system') {
+      const before = {
+        ips: (state.flagged?.ipAddresses || []).slice(),
+        discs: (state.flagged?.discordIds || []).slice(),
+        steams: (state.flagged?.steamIds || []).slice(),
+        bans: (state.bans || []).length,
+      };
+      const healed = healStaleFlags(state);
+      rebuildFlagged(state);
+      persist();
+      return {
+        ok: true,
+        healed,
+        before,
+        after: {
+          ips: state.flagged?.ipAddresses || [],
+          discs: state.flagged?.discordIds || [],
+          steams: state.flagged?.steamIds || [],
+          bans: (state.bans || []).length,
+        },
+        requestedBy,
+      };
+    },
+
+    /** Clear portal join-screen IP flag (+ matching portal IP bans). Queues shaderpunbanip on FXServer. */
+    queueUnflagIp({ ip, requestedBy }) {
+      const raw = String(ip || '').trim();
+      if (!raw) return { ok: false, error: 'ip required (1.2.3.4, ip:1.2.3.4, or all)' };
+      const by = requestedBy || 'staff';
+      const clearAll = raw.toLowerCase() === 'all';
+      const nip = clearAll ? null : normalizeIp(raw);
+      if (!clearAll && !nip) return { ok: false, error: 'Invalid IP address' };
+
+      const before = (state.flagged?.ipAddresses || []).slice();
+      let portalRemoved = false;
+
+      if (clearAll) {
+        portalRemoved = before.length > 0;
+        state.flagged = state.flagged || { discordIds: [], steamIds: [], ipAddresses: [] };
+        state.flagged.ipAddresses = [];
+        state.bans = (state.bans || []).filter((ban) => {
+          const banIp = normalizeIp(ban.identifiers?.ip || ban.identifiers?.endpoint);
+          return !banIp;
+        });
+      } else {
+        portalRemoved = removeFlaggedIdentifier(state, nip) || removeFlaggedIdentifier(state, raw);
+        state.bans = (state.bans || []).filter((ban) => !banMatchesQuery(ban, nip) && !banMatchesQuery(ban, raw));
+      }
+
+      rebuildFlagged(state);
+      persist();
+
+      const consoleArg = clearAll ? 'all' : nip.replace(/^ip:/, '');
+      this._queuePortalCommand({
+        type: 'run_console',
+        command: `shaderpunbanip ${consoleArg}`,
+        requestedBy: by,
+      });
+      this._queuePortalCommand({
+        type: 'run_console',
+        command: 'shaderpclearconnect',
+        requestedBy: by,
+      });
+
+      auditManager?.log('unban', {
+        actorName: by,
+        targetId: clearAll ? 'all-ips' : nip,
+        reason: 'ip-unflag',
+        source: 'portal',
+      });
+
+      return {
+        ok: true,
+        portalRemoved: portalRemoved || before.length !== (state.flagged?.ipAddresses || []).length,
+        cleared: clearAll ? before : [nip].filter((x) => before.includes(x)),
+        remaining: state.flagged?.ipAddresses || [],
+        serverQueued: true,
+        note: clearAll
+          ? `Cleared ${before.length} flagged IP(s) on portal`
+          : `Unflagged ${nip} on portal (was flagged: ${before.includes(nip)})`,
+      };
     },
 
     pushFingerprint(entry) {
@@ -793,6 +1137,43 @@ export function createAcManager({ enabled = true, auditManager, logManager, init
 
     getBans(limit = 100) {
       return state.bans.slice(0, limit);
+    },
+
+    getBanManagerSnapshot(limit = 250) {
+      if (healStaleFlags(state)) {
+        rebuildFlagged(state);
+        persist();
+      } else {
+        rebuildFlagged(state);
+      }
+      const flagged = state.flagged || { discordIds: [], steamIds: [], ipAddresses: [] };
+      const bans = (state.bans || []).slice(0, limit).map(enrichBanRow);
+      const acBans = bans.filter((b) => b.category === 'ac' || b.category === 'hardware');
+      const modBans = bans.filter((b) => b.category === 'moderator');
+      const hwBans = bans.filter((b) => b.hasHardware);
+      return {
+        stats: {
+          totalBans: (state.bans || []).length,
+          acBans: acBans.length,
+          moderatorBans: modBans.length,
+          hardwareBans: hwBans.length,
+          flaggedIps: (flagged.ipAddresses || []).length,
+          flaggedDiscord: (flagged.discordIds || []).length,
+          flaggedSteam: (flagged.steamIds || []).length,
+          platformFlags: (state.flaggedPlatforms || []).length,
+        },
+        bans,
+        acBans,
+        moderatorBans: modBans,
+        hardwareBans: hwBans,
+        flagged: {
+          ipAddresses: flagged.ipAddresses || [],
+          discordIds: flagged.discordIds || [],
+          steamIds: flagged.steamIds || [],
+        },
+        flaggedPlatforms: (state.flaggedPlatforms || []).slice(0, limit),
+        joinDenials: this.getJoinDenials(40),
+      };
     },
 
     getFrame(sessionId) {
@@ -1186,6 +1567,12 @@ export function registerAcRoutes(app, { acManager, portalEnv, requireRole }) {
     res.json({ ok: true });
   });
 
+  app.post('/api/ac/server/bans-sync', (req, res) => {
+    if (!acApiKeyValid(req, portalEnv)) return res.status(401).json({ error: 'Invalid AC key' });
+    const result = acManager.syncAllBans((req.body || {}).bans || []);
+    res.json(result);
+  });
+
   app.post('/api/ac/server/ban-check', (req, res) => {
     if (!acApiKeyValid(req, portalEnv)) return res.status(401).json({ error: 'Invalid AC key' });
     const { identifiers } = req.body || {};
@@ -1225,8 +1612,65 @@ export function registerAcRoutes(app, { acManager, portalEnv, requireRole }) {
 
   app.post('/api/ac/server/unban', (req, res) => {
     if (!acApiKeyValid(req, portalEnv)) return res.status(401).json({ error: 'Invalid AC key' });
-    const ok = acManager.unbanBan(req.body || {});
-    res.json({ ok });
+    const body = req.body || {};
+    const ipHint = body.ip || body.unflagIp;
+    const banId = body.banId || body.identifier;
+    if (ipHint || (banId && (String(banId).toLowerCase().startsWith('ip:') || /^\d+\.\d+\.\d+\.\d+/.test(String(banId))))) {
+      const result = acManager.queueUnflagIp({
+        ip: ipHint || banId,
+        requestedBy: body.admin || 'fxserver-api',
+      });
+      return res.json(result);
+    }
+    const query = String(banId || '').trim();
+    if (query.toLowerCase() === 'all') {
+      const result = acManager.queueUnban({
+        banId: 'all',
+        requestedBy: body.admin || body.requestedBy || 'fxserver-api',
+      });
+      return res.json(result);
+    }
+    const result = acManager.queueUnban({
+      banId: query,
+      identifier: body.identifier,
+      requestedBy: body.admin || body.requestedBy || 'fxserver-api',
+    });
+    res.json(result);
+  });
+
+  /** Mass unban — portal bans, flagged IDs, FXServer bundle (AC key). */
+  app.post('/api/ac/server/unban-all', (req, res) => {
+    if (!acApiKeyValid(req, portalEnv)) return res.status(401).json({ error: 'Invalid AC key' });
+    const by = (req.body || {}).requestedBy || (req.body || {}).admin || 'mass-unban';
+    acManager.healStalePortalFlags(by);
+    const unban = acManager.queueUnban({ banId: 'all', requestedBy: by });
+    const unflag = acManager.queueUnflagIp({ ip: 'all', requestedBy: by });
+    res.json({
+      ok: true,
+      unban,
+      unflag,
+      note: 'All portal bans cleared; FXServer unban_bundle + IP unflag queued',
+    });
+  });
+
+  /** Clear stale join-screen flags (no active ban) — fixes IP_BANNED after unban. */
+  app.post('/api/ac/server/heal-flags', (req, res) => {
+    if (!acApiKeyValid(req, portalEnv)) return res.status(401).json({ error: 'Invalid AC key' });
+    const by = (req.body || {}).requestedBy || (req.body || {}).admin || 'heal-flags';
+    res.json(acManager.healStalePortalFlags(by));
+  });
+
+  app.post('/api/ac/server/unflag-ip', (req, res) => {
+    if (!acApiKeyValid(req, portalEnv)) return res.status(401).json({ error: 'Invalid AC key' });
+    const { ip } = req.body || {};
+    if (!ip) return res.status(400).json({ error: 'ip required (or "all")' });
+    const result = acManager.queueUnflagIp({ ip, requestedBy: 'fxserver-api' });
+    res.json(result);
+  });
+
+  app.get('/api/ac/server/flagged-ips', (req, res) => {
+    if (!acApiKeyValid(req, portalEnv)) return res.status(401).json({ error: 'Invalid AC key' });
+    res.json({ ips: acManager.getFlaggedIps() });
   });
 
   app.post('/api/ac/server/flag-platform', (req, res) => {
@@ -1266,6 +1710,30 @@ export function registerAcRoutes(app, { acManager, portalEnv, requireRole }) {
 
   app.get('/api/ac/admin/bans', requireRole('staff'), (req, res) => {
     res.json({ bans: acManager.getBans(parseInt(req.query.limit, 10) || 100) });
+  });
+
+  app.get('/api/ac/admin/ban-manager', requireRole('moderator'), (req, res) => {
+    res.json(acManager.getBanManagerSnapshot(parseInt(req.query.limit, 10) || 250));
+  });
+
+  app.post('/api/ac/admin/heal-flags', requireRole('staff'), (req, res) => {
+    const user = req.session?.user;
+    if (!canUnbanPortalUser(user, portalEnv)) {
+      return res.status(403).json({ error: 'Unban permission required' });
+    }
+    const result = acManager.healStalePortalFlags(user?.username || user?.id || 'staff');
+    res.json(result);
+  });
+
+  app.post('/api/ac/admin/unban-all', requireRole('staff'), (req, res) => {
+    const user = req.session?.user;
+    if (!canUnbanPortalUser(user, portalEnv)) {
+      return res.status(403).json({ error: 'Unban permission required' });
+    }
+    const by = user?.username || user?.id || 'staff';
+    acManager.healStalePortalFlags(by);
+    const unban = acManager.queueUnban({ banId: 'all', requestedBy: by });
+    res.json({ ok: true, unban, note: 'Mass unban queued — clears portal + FXServer' });
   });
 
   app.get('/api/ac/admin/sessions', requireRole('staff'), (_req, res) => {
@@ -1335,7 +1803,7 @@ export function registerAcRoutes(app, { acManager, portalEnv, requireRole }) {
     res.json({ ok: true, requestId, playerId: Number(playerId) });
   });
 
-  app.get('/api/ac/admin/flagged-platforms', requireRole('staff'), (req, res) => {
+  app.get('/api/ac/admin/flagged-platforms', requireRole('moderator'), (req, res) => {
     res.json({ flagged: acManager.getFlaggedPlatforms(parseInt(req.query.limit, 10) || 100) });
   });
 
@@ -1359,16 +1827,43 @@ export function registerAcRoutes(app, { acManager, portalEnv, requireRole }) {
     res.json(acManager.getRateHints());
   });
 
-  app.post('/api/ac/admin/unban', requireRole('staff'), (req, res) => {
+  app.post('/api/ac/admin/unban', requireRole('moderator'), (req, res) => {
     const user = req.session?.user;
-    if (!canUnbanDiscordUser(user?.id, portalEnv)) {
-      return res.status(403).json({ error: 'Only the server owner can unban players' });
+    if (!canUnbanPortalUser(user, portalEnv)) {
+      return res.status(403).json({ error: 'Unban permission required (owner or configured unban list)' });
     }
     const { banId, identifier } = req.body || {};
     if (!banId && !identifier) return res.status(400).json({ error: 'banId or identifier required' });
-    const ok = acManager.unbanBan({ banId, identifier });
-    if (!ok) return res.status(404).json({ error: 'Ban not found' });
-    res.json({ ok: true });
+    const result = acManager.queueUnban({
+      banId: banId || identifier,
+      identifier,
+      requestedBy: user?.username || user?.id || 'staff',
+    });
+    res.json(result);
+  });
+
+  app.get('/api/ac/admin/unban-search', requireRole('moderator'), (req, res) => {
+    const q = String(req.query.q || '').trim();
+    if (!q) return res.status(400).json({ error: 'q required' });
+    res.json(acManager.searchUnban(q, parseInt(req.query.limit, 10) || 10));
+  });
+
+  app.get('/api/ac/admin/flagged-ips', requireRole('moderator'), (_req, res) => {
+    res.json({ ips: acManager.getFlaggedIps() });
+  });
+
+  app.post('/api/ac/admin/unflag-ip', requireRole('moderator'), (req, res) => {
+    const user = req.session?.user;
+    if (!canUnbanPortalUser(user, portalEnv)) {
+      return res.status(403).json({ error: 'Unban permission required' });
+    }
+    const { ip } = req.body || {};
+    if (!ip) return res.status(400).json({ error: 'ip required (1.2.3.4 or all)' });
+    const result = acManager.queueUnflagIp({
+      ip,
+      requestedBy: user?.username || user?.id || 'staff',
+    });
+    res.json(result);
   });
 
   app.get('/api/ac/admin/alt-clusters', requireRole('staff'), (req, res) => {

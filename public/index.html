@@ -344,6 +344,33 @@
       <div class="card" style="margin-top:1rem"><h3>Server paths (sync source)</h3><div id="settings-paths" class="table-wrap"></div></div>
     </section>
 
+    <section id="panel-bans" class="panel" data-min-role="moderator">
+      <header class="page-header">
+        <h2 class="page-title">Ban Manager</h2>
+        <p class="page-subtitle">Unified view of moderator bans, anti-cheat bans, hardware tokens, IP flags, and platform flags — synced from portal + FXServer.</p>
+      </header>
+      <div id="ban-manager-root">
+        <div class="ac-toolbar">
+          <input type="search" id="ban-mgr-search" class="admin-search" placeholder="Search name, SHADE ID, discord, license, IP…" autocomplete="off" />
+          <button type="button" class="btn ghost btn-sm" id="ban-mgr-refresh">Refresh</button>
+        </div>
+        <div class="stat-grid" id="ban-mgr-stats"></div>
+        <div class="ac-tabs" id="ban-mgr-tabs">
+          <button type="button" class="ac-tab active" data-ban-tab="all">All bans</button>
+          <button type="button" class="ac-tab" data-ban-tab="ac">AC bans</button>
+          <button type="button" class="ac-tab" data-ban-tab="moderator">Moderator</button>
+          <button type="button" class="ac-tab" data-ban-tab="hardware">Hardware</button>
+          <button type="button" class="ac-tab" data-ban-tab="ip">IP flags</button>
+          <button type="button" class="ac-tab" data-ban-tab="platform">Platform flags</button>
+          <button type="button" class="ac-tab" data-ban-tab="denials">Join denials</button>
+          <button type="button" class="ac-tab" data-ban-tab="ops">Ops</button>
+        </div>
+        <div id="ban-mgr-body" class="card" style="margin-top:1rem">
+          <p class="hint">Loading ban data…</p>
+        </div>
+      </div>
+    </section>
+
     <section id="panel-anticheat" class="panel" data-min-role="staff">
       <header class="page-header ac-hub-header">
         <h2 class="page-title">Anti-Cheat Command Center <span id="ac-portal-version" class="hint" style="font-weight:400;font-size:0.9rem"></span></h2>
@@ -404,7 +431,8 @@
         <div class="split-panels" style="margin-top:1rem">
           <div class="card">
             <h3>Recent bans</h3>
-            <p class="hint" style="margin-bottom:0.75rem">Synced from in-game AC and portal actions. Only the server owner can unban from here.</p>
+            <p class="hint" style="margin-bottom:0.75rem">Portal + FXServer bans. Search by SHADE ID, Discord, license, or name — unban clears both portal and live server.</p>
+            <div id="ac-unban-tool"></div>
             <div id="ac-bans-wrap"></div>
           </div>
           <div class="card">

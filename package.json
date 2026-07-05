@@ -12,7 +12,10 @@
     "dev": "node --watch server/index.js",
     "test:smoke": "node scripts/smoke-test.mjs",
     "setup:discord": "node scripts/setup-discord-guilds.mjs",
-    "revert:discord": "node scripts/revert-discord-guilds.mjs"
+    "revert:discord": "node scripts/revert-discord-guilds.mjs",
+    "unflag-ip": "node scripts/unflag-ip.mjs",
+    "unban-all": "node scripts/unban-all.mjs",
+    "heal-flags": "node scripts/heal-flags.mjs"
   },
   "dependencies": {
     "cookie-parser": "^1.4.7",

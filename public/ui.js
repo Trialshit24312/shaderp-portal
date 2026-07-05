@@ -99,6 +99,7 @@ const NAV_ICONS = {
   map: '🗺️',
   analytics: '📈',
   anticheat: '🛡️',
+  bans: '⛔',
   tickets: '🎫',
   discord: '🌐',
   support: '💬',

@@ -5,7 +5,7 @@ import fs from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
 import { hasMinRole } from './roles.js';
-import { canUnbanDiscordUser } from './unban.js';
+import { canUnbanDiscordUser, canUnbanPortalUser } from './unban.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const TICKETS_FILE = path.join(__dirname, '..', 'data', 'tickets-state.json');
@@ -129,8 +129,12 @@ export function createTicketManager({ acManager, auditManager } = {}) {
         description: String(payload.description || '').slice(0, 2000),
         discordId: normalizeDiscord(payload.discordId),
         discordName: payload.discordName || 'Unknown',
+        source: payload.source || 'web',
+        playerId: payload.playerId || null,
         channelId: payload.channelId || null,
         threadId: payload.threadId || null,
+        discordSyncPending: !(payload.channelId || payload.threadId),
+        discordSyncError: null,
         claimedBy: null,
         claimedByName: null,
         claimedAt: null,
@@ -169,9 +173,42 @@ export function createTicketManager({ acManager, auditManager } = {}) {
       if (!t) return null;
       if (channelId) t.channelId = channelId;
       if (threadId) t.threadId = threadId;
+      t.discordSyncPending = false;
+      t.discordSyncError = null;
       t.updatedAt = now();
       persist();
       return t;
+    },
+
+    markDiscordSynced(id, channelId, threadId) {
+      return this.updateTicketChannel(id, channelId, threadId || undefined);
+    },
+
+    markDiscordSyncFailed(id, error) {
+      const t = this.getTicket(id);
+      if (!t) return null;
+      t.discordSyncError = String(error || 'sync failed').slice(0, 200);
+      t.updatedAt = now();
+      persist();
+      return t;
+    },
+
+    listPendingDiscordSync(limit = 10) {
+      return state.tickets.filter(
+        (t) => t.status === 'open' && t.discordSyncPending && !t.channelId && !t.threadId,
+      ).slice(0, limit);
+    },
+
+    addUserMessage(ticketId, userId, userName, content) {
+      const t = this.getTicket(ticketId);
+      if (!t || t.status === 'closed') return null;
+      if (normalizeDiscord(t.discordId) !== normalizeDiscord(userId)) return null;
+      return this.appendMessage(ticketId, {
+        authorId: userId,
+        authorName: userName || 'User',
+        content,
+        source: 'web',
+      });
     },
 
     list({ status = 'all', limit = 50 } = {}) {
@@ -229,6 +266,7 @@ export function createTicketManager({ acManager, auditManager } = {}) {
         authorName: msg.authorName,
         content: String(msg.content || '').slice(0, 4000),
         at: msg.at || now(),
+        source: msg.source || 'discord',
       });
       if (t.messages.length > 500) t.messages.shift();
       t.updatedAt = now();
@@ -318,30 +356,63 @@ export function createTicketManager({ acManager, auditManager } = {}) {
       return { ...state.stats, open, total: state.tickets.length };
     },
 
-    unbanFromTicket(ticketId, requestedBy, acManagerRef, portalEnv) {
+    unbanFromTicket(ticketId, requestedBy, acManagerRef, portalEnv, portalUser) {
       const t = this.getTicket(ticketId);
-      if (!t?.profile?.activeBan?.banId) return { ok: false, error: 'No active ban on ticket' };
-      if (!canUnbanDiscordUser(requestedBy, portalEnv || process.env)) {
+      if (!t) return { ok: false, error: 'Ticket not found' };
+      const env = portalEnv || process.env;
+      if (!canUnbanPortalUser(portalUser || { id: String(requestedBy || '') }, env)) {
         return { ok: false, error: 'Insufficient permission to unban' };
       }
-      const banId = t.profile.activeBan.banId;
-      const ok = acManagerRef?.unbanBan?.({ banId });
-      if (ok) {
+      const query = t.profile?.activeBan?.banId
+        || t.discordId
+        || t.profile?.discordId
+        || t.profile?.activeBan?.identifiers?.discord;
+      if (!query) return { ok: false, error: 'No ban ID or Discord on ticket — use /ac unban manually' };
+      const result = acManagerRef?.queueUnban?.({
+        banId: query,
+        requestedBy: String(requestedBy || 'ticket'),
+      }) || { ok: false };
+      if (result.ok) {
         t.profile.activeBan = null;
         t.profile.banCount = Math.max(0, (t.profile.banCount || 1) - 1);
         t.unbannedAt = now();
         t.unbannedBy = requestedBy;
         persist();
       }
-      return { ok: !!ok, banId };
+      return { ok: !!result.ok, banId: query, serverQueued: result.serverQueued, note: result.note };
     },
   };
 }
 
-export function registerTicketRoutes(app, { ticketManager, acManager, portalEnv, requireRole, auditManager }) {
+export function registerTicketRoutes(app, { ticketManager, acManager, portalEnv, requireRole, auditManager, syncTicketToDiscord, mirrorTicketMessageToDiscord }) {
   if (!ticketManager) return;
 
-  app.post('/api/tickets/open', (req, res) => {
+  function ticketApiKeyValid(req) {
+    const key = req.headers['x-ac-key'] || req.headers['x-queue-key'];
+    const expected = portalEnv.AC_API_KEY || portalEnv.QUEUE_API_KEY;
+    return !!(expected && key && key === expected);
+  }
+
+  app.post('/api/tickets/ingame/open', async (req, res) => {
+    if (!ticketApiKeyValid(req)) return res.status(401).json({ error: 'Invalid API key' });
+    const { discordId, discordName, category, subject, description, playerId } = req.body || {};
+    if (!discordId) return res.status(400).json({ error: 'discordId required' });
+    const existing = ticketManager.list({ status: 'open' }).find((t) => t.discordId === normalizeDiscord(discordId));
+    if (existing) return res.status(409).json({ error: 'Open ticket exists', ticketId: existing.id, ticket: existing });
+    const ticket = ticketManager.createTicket({
+      category: category || 'general',
+      subject: subject || 'In-game support',
+      description: description || '',
+      discordId,
+      discordName: discordName || 'Player',
+      playerId,
+      source: 'ingame',
+    });
+    if (syncTicketToDiscord) await syncTicketToDiscord(ticket);
+    res.json({ ok: true, ticket: ticketManager.getTicket(ticket.id) || ticket });
+  });
+
+  app.post('/api/tickets/open', async (req, res) => {
     const user = req.session?.user;
     if (!user?.id) return res.status(401).json({ error: 'Login required' });
     const { category, subject, description } = req.body || {};
@@ -362,7 +433,46 @@ export function registerTicketRoutes(app, { ticketManager, acManager, portalEnv,
       source: 'web',
       meta: { category: ticket.category },
     });
-    res.json({ ok: true, ticket });
+    if (syncTicketToDiscord) await syncTicketToDiscord(ticket);
+    res.json({ ok: true, ticket: ticketManager.getTicket(ticket.id) || ticket });
+  });
+
+  app.post('/api/tickets/:id/message', async (req, res) => {
+    const user = req.session?.user;
+    if (!user?.id) return res.status(401).json({ error: 'Login required' });
+    const t = ticketManager.getTicket(req.params.id);
+    if (!t) return res.status(404).json({ error: 'Not found' });
+    const isStaff = hasMinRole(user.appRole, 'staff');
+    if (!isStaff && t.discordId !== user.id) return res.status(403).json({ error: 'Forbidden' });
+    const { content } = req.body || {};
+    if (!content?.trim()) return res.status(400).json({ error: 'content required' });
+    const updated = isStaff
+      ? ticketManager.appendMessage(t.id, {
+          authorId: user.id,
+          authorName: user.globalName || user.username,
+          content,
+          source: 'web-staff',
+        })
+      : ticketManager.addUserMessage(t.id, user.id, user.globalName || user.username, content);
+    if (!updated) return res.status(400).json({ error: 'Cannot post message' });
+    if (mirrorTicketMessageToDiscord) {
+      await mirrorTicketMessageToDiscord(updated, updated.messages[updated.messages.length - 1]);
+    }
+    res.json({ ok: true, ticket: updated });
+  });
+
+  app.post('/api/tickets/:id/rate', (req, res) => {
+    const user = req.session?.user;
+    if (!user?.id) return res.status(401).json({ error: 'Login required' });
+    const t = ticketManager.getTicket(req.params.id);
+    if (!t) return res.status(404).json({ error: 'Not found' });
+    if (t.discordId !== user.id && !hasMinRole(user.appRole, 'staff')) {
+      return res.status(403).json({ error: 'Forbidden' });
+    }
+    const { stars, comment } = req.body || {};
+    const rated = ticketManager.rateTicket(req.params.id, stars, comment || `Rated by ${user.username}`);
+    if (!rated) return res.status(400).json({ error: 'Cannot rate' });
+    res.json({ ok: true, ticket: rated });
   });
 
   app.get('/api/tickets/mine', (req, res) => {
@@ -452,10 +562,10 @@ export function registerTicketRoutes(app, { ticketManager, acManager, portalEnv,
 
   app.post('/api/tickets/admin/:id/unban', requireRole('staff'), (req, res) => {
     const user = req.session?.user;
-    if (!canUnbanDiscordUser(user?.id, portalEnv)) {
-      return res.status(403).json({ error: 'Unban permission required (AC_UNBAN_DISCORD_IDS)' });
+    if (!canUnbanPortalUser(user, portalEnv)) {
+      return res.status(403).json({ error: 'Unban permission required (owner or configured unban list)' });
     }
-    const result = ticketManager.unbanFromTicket(req.params.id, user?.id, acManager, portalEnv);
+    const result = ticketManager.unbanFromTicket(req.params.id, user?.id, acManager, portalEnv, user);
     if (!result.ok) return res.status(400).json(result);
     res.json(result);
   });

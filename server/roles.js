@@ -28,6 +28,7 @@ export const PANEL_ACCESS = {
   commands: 4,
   staff: 3,
   anticheat: 3,
+  bans: 2,
   tickets: 3,
   support: 1,
   audit: 3,

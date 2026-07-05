@@ -41,6 +41,7 @@ const NAV = [
   { section: 'Staff' },
   { id: 'hub', label: 'Command Center', min: 'staff', highlight: true },
   { id: 'analytics', label: 'Analytics', min: 'staff' },
+  { id: 'bans', label: 'Ban Manager', min: 'moderator', highlight: true },
   { id: 'anticheat', label: 'Anti-Cheat', min: 'staff', highlight: true },
   { id: 'tickets', label: 'Tickets', min: 'staff' },
   { id: 'discord', label: 'Discord Hub', min: 'staff' },
@@ -66,10 +67,115 @@ function getUpdatePasses() {
   return Array.isArray(u) ? u : [u];
 }
 
-function discordAvatarUrl(discordId) {
+function discordAvatarUrl(discordId, avatarUrl) {
+  if (avatarUrl) return avatarUrl;
   if (!discordId) return '';
   const idx = Number(BigInt(discordId) >> 22n) % 6;
   return `https://cdn.discordapp.com/embed/avatars/${idx}.png`;
+}
+
+function memberAvatarUrl(m) {
+  if (m?.avatar) return m.avatar;
+  return discordAvatarUrl(m?.discordId || m?.id);
+}
+
+async function loadTeamData(force = false) {
+  if (!force && TEAM?.credits) return TEAM;
+  const res = await fetch('/api/team');
+  TEAM = await res.json();
+  return TEAM;
+}
+
+function teamLeadershipCard(c, featured = false) {
+  const avatar = memberAvatarUrl(c);
+  const name = c.displayName || c.globalName || c.username || 'Team member';
+  const handle = c.username ? `@${c.username}` : '';
+  const cls = featured ? 'team-card team-card-featured reveal' : 'team-card team-card-lead reveal';
+  return `<article class="${cls}">
+    <div class="team-card-glow" aria-hidden="true"></div>
+    <div class="team-card-inner">
+      <div class="team-card-avatar-wrap">
+        <img class="team-card-avatar" src="${esc(avatar)}" alt="${esc(name)}" loading="lazy" width="96" height="96" />
+        ${c.inGuild === false ? '<span class="team-offline-badge" title="Not in Discord">Offline</span>' : ''}
+      </div>
+      <div class="team-card-body">
+        <span class="team-role-badge">${esc(c.role || 'Team')}</span>
+        <h3 class="team-card-name">${esc(name)}</h3>
+        ${handle ? `<p class="team-card-handle">${esc(handle)}</p>` : ''}
+        ${c.note ? `<p class="team-card-bio">${esc(c.note)}</p>` : ''}
+        ${(c.discordRoles || []).length ? `<div class="team-discord-roles">${c.discordRoles.map((r) => `<span class="team-discord-pill">${esc(r.name)}</span>`).join('')}</div>` : ''}
+        ${c.discordId ? `<a class="team-discord-link" href="https://discord.com/users/${esc(c.discordId)}" target="_blank" rel="noopener">View on Discord</a>` : ''}
+      </div>
+    </div>
+  </article>`;
+}
+
+function teamStaffCard(m) {
+  const avatar = memberAvatarUrl(m);
+  const name = m.displayName || m.globalName || m.username || 'Staff';
+  const handle = m.username ? `@${m.username}` : '';
+  return `<article class="team-staff-card reveal">
+    <img class="team-staff-avatar" src="${esc(avatar)}" alt="${esc(name)}" loading="lazy" width="64" height="64" />
+    <div class="team-staff-info">
+      <strong class="team-staff-name">${esc(name)}</strong>
+      ${handle ? `<span class="team-staff-handle">${esc(handle)}</span>` : ''}
+      <span class="role-badge role-${esc(m.appRole || 'member')}">${esc(m.appRole || 'staff')}</span>
+      ${(m.discordRoles || []).length ? `<div class="team-discord-roles compact">${m.discordRoles.map((r) => `<span class="team-discord-pill">${esc(r.name)}</span>`).join('')}</div>` : ''}
+    </div>
+    <a class="team-staff-dm" href="https://discord.com/users/${esc(m.id)}" target="_blank" rel="noopener" title="Discord profile">↗</a>
+  </article>`;
+}
+
+function renderTeamTierSection(tier, members, meta) {
+  if (!members?.length) return '';
+  const m = meta?.[tier] || { label: tier, icon: '•', desc: '' };
+  return `<section class="team-tier-section reveal">
+    <header class="team-tier-header">
+      <span class="team-tier-icon">${m.icon}</span>
+      <div>
+        <h3>${esc(m.label)}</h3>
+        <p class="hint">${esc(m.desc || '')} · ${members.length} member${members.length === 1 ? '' : 's'}</p>
+      </div>
+    </header>
+    <div class="team-staff-grid">${members.map((mem) => teamStaffCard(mem)).join('')}</div>
+  </section>`;
+}
+
+async function renderCredits() {
+  const root = el('credits-root');
+  if (!root) return;
+  root.innerHTML = '<p class="hint">Loading team…</p>';
+  try {
+    await loadTeamData();
+    const credits = TEAM?.credits?.length ? TEAM.credits : (DATA?.credits || []);
+    const invite = TEAM?.invite || ME?.discordInvite || '#';
+    root.innerHTML = `
+      ${renderPageHeader('Our Team', 'The people behind ShadeRP — leadership, development, and community.', [{ id: 'home', label: 'Home' }, { id: 'credits', label: 'Team' }])}
+      <div class="team-page-hero reveal">
+        <div class="team-page-hero-text">
+          <p class="team-eyebrow">ShadeRP</p>
+          <h2>Built for serious roleplay</h2>
+          <p>Custom ESX Legacy city, curated content, and a team that actually plays here. Join us on Discord to meet the community.</p>
+          <div class="hero-actions">
+            <a href="${esc(invite)}" class="btn primary" target="_blank" rel="noopener">Join Discord</a>
+            ${hasRole('member') ? '<button type="button" class="btn ghost" data-panel="team">Team &amp; Roles</button>' : ''}
+          </div>
+        </div>
+        <div class="team-page-hero-stats">
+          <div class="team-stat"><strong>${credits.length}</strong><span>Leadership</span></div>
+          <div class="team-stat"><strong>${(TEAM?.staff || []).length || '—'}</strong><span>Staff roster</span></div>
+        </div>
+      </div>
+      <h3 class="team-section-title reveal">Leadership</h3>
+      <div class="team-leadership-grid">${credits.length
+    ? credits.map((c) => teamLeadershipCard(c, true)).join('')
+    : '<p class="hint">Team credits in shade-config/config/credits.lua</p>'}</div>`;
+    bindBreadcrumbs(root);
+    root.querySelector('[data-panel="team"]')?.addEventListener('click', () => showPanel('team'));
+    initRevealAnimations(root);
+  } catch {
+    root.innerHTML = '<p class="hint">Could not load team page.</p>';
+  }
 }
 
 function toast(msg = 'Copied', isError = false) {
@@ -211,6 +317,7 @@ function showPanel(id) {
   track('panel_view', { panel: id });
   if (id === 'hub' && hasRole('staff')) renderHub();
   if (id === 'analytics' && hasRole('staff')) loadAnalytics();
+  if (id === 'bans' && hasRole('moderator')) loadBanManagerPanel();
   if (id === 'anticheat' && hasRole('staff')) {
     loadAcPanel();
     startAcAutoRefresh();
@@ -236,6 +343,7 @@ function renderHub() {
   const u = ME?.user;
   const q = QUEUE?.config || {};
   const actions = [
+    { id: 'bans', icon: '⛔', title: 'Ban Manager', desc: 'Moderator, AC, hardware bans, IP & platform flags', min: 'moderator' },
     { id: 'anticheat', icon: '🛡️', title: 'Anti-Cheat', desc: 'Players, bans, economy alerts, evidence' },
     { id: 'tickets', icon: '🎫', title: 'Tickets', desc: 'Support threads linked to Discord' },
     { id: 'discord', icon: '🌐', title: 'Discord Hub', desc: 'All 5 servers — status, setup, bots' },
@@ -452,36 +560,63 @@ function renderFaq() {
 }
 
 function teamMemberCard(c, tier = 'staff') {
-  const roleColors = {
-    owner: 'var(--role-owner)', admin: 'var(--role-admin)', manager: 'var(--role-manager)',
-    developer: 'var(--role-developer)', staff: 'var(--role-staff)', moderator: 'var(--role-moderator)',
-  };
-  const accent = roleColors[tier] || 'var(--accent)';
-  return `<article class="team-member-card reveal" style="--role-accent:${accent}">
-    <span class="role-pill">${esc(c.role || tier)}</span>
-    <img class="team-avatar" src="${esc(discordAvatarUrl(c.discordId))}" alt="" loading="lazy" />
-    <h4>${esc(c.displayName || c.username || 'Team member')}</h4>
-    ${c.username ? `<p class="accent-text">@${esc(c.username)}</p>` : ''}
-    <p class="hint">${esc(c.note || '')}</p>
-    ${c.discordId ? `<a class="pill mono" href="https://discord.com/users/${esc(c.discordId)}" target="_blank" rel="noopener">Discord</a>` : ''}
-  </article>`;
+  return teamLeadershipCard(c, tier === 'owner');
 }
 
-function renderCredits() {
-  const root = el('credits-root');
+async function renderTeam() {
+  const root = el('team-root');
   if (!root) return;
-  const credits = DATA?.credits || TEAM?.credits || [];
-  root.innerHTML = `
-    ${renderPageHeader('Our Team', 'Leadership and credits — the people behind ShadeRP.', [{ id: 'home', label: 'Home' }, { id: 'credits', label: 'Team' }])}
-    <div class="team-hero reveal">
-      <h2>Built for serious roleplay</h2>
-      <p class="hint">Meet the team keeping ShadeRP running. Members can see live Discord roles on <button type="button" class="crumb-link" data-panel="team">Team & Roles</button>.</p>
-    </div>
-    <div class="team-leadership-grid">${credits.length
-    ? credits.map((c) => teamMemberCard(c, 'owner')).join('')
-    : '<p class="hint">Team credits in shade-config/config/credits.lua</p>'}</div>`;
-  bindBreadcrumbs(root);
-  initRevealAnimations(root);
+  root.innerHTML = '<p class="hint">Loading roster…</p>';
+  try {
+    await loadTeamData(true);
+    const credits = TEAM.credits?.length ? TEAM.credits : (DATA?.credits || []);
+    const creditIds = new Set(credits.map((c) => c.discordId).filter(Boolean));
+    const tiers = ['owner', 'admin', 'manager', 'developer', 'staff', 'moderator'];
+    const staffSections = tiers.map((tier) => {
+      const members = (TEAM.grouped?.[tier] || []).filter((m) => !creditIds.has(m.id));
+      return renderTeamTierSection(tier, members, TEAM.tierMeta);
+    }).filter(Boolean).join('');
+    const roleLegend = (TEAM.roleDefs || []).length
+      ? `<details class="team-role-legend reveal">
+          <summary>Discord role mapping</summary>
+          <div class="team-role-legend-grid">${TEAM.roleDefs.map((r) => `
+            <div class="team-role-legend-item">
+              <span class="role-badge role-${esc(r.appRole)}">${esc(r.appRole)}</span>
+              <span>${esc(r.discordName)}</span>
+            </div>`).join('')}</div>
+        </details>`
+      : '';
+
+    root.innerHTML = `
+      ${renderPageHeader('Team & Roles', 'Live Discord roster synced from your community server.', [{ id: 'home', label: 'Home' }, { id: 'team', label: 'Team' }])}
+      <div class="team-page-hero reveal team-page-hero-compact">
+        <div class="team-page-hero-text">
+          <p class="team-eyebrow">Staff roster</p>
+          <h2>ShadeRP team</h2>
+          <p>Real names and avatars from Discord. Portal access follows your Discord roles — need help? Open <button type="button" class="crumb-link" data-panel="support">Support</button>.</p>
+        </div>
+        ${TEAM.membersPartial ? `<p class="team-roster-note warn-banner">${esc(TEAM.membersError || 'Partial roster — enable Server Members intent on the bot for full staff list.')}</p>` : ''}
+      </div>
+      <h3 class="team-section-title reveal">Leadership</h3>
+      <div class="team-leadership-grid">${credits.length
+      ? credits.map((c) => teamLeadershipCard(c, true)).join('')
+      : '<p class="hint">No leadership credits synced</p>'}</div>
+      <h3 class="team-section-title reveal" style="margin-top:2rem">Staff by tier</h3>
+      ${staffSections || '<p class="hint">No staff with portal roles found in Discord yet.</p>'}
+      ${roleLegend}
+      ${ME?.user ? `<div class="team-your-access reveal">
+        <img class="team-your-access-avatar" src="${esc(ME.user.avatar || memberAvatarUrl({ id: ME.user.id }))}" alt="" width="56" height="56" />
+        <div>
+          <p class="team-your-access-label">Your access</p>
+          <p><strong>${esc(ME.user.globalName)}</strong> <span class="role-badge role-${esc(ME.user.appRole)}">${esc(ME.user.appRole)}</span></p>
+          <p class="hint">${ME.user.inGuild ? 'Linked Discord member — roles refresh each login' : 'Join the Discord server to unlock full portal access'}</p>
+        </div>
+      </div>` : `<div class="team-your-access reveal hint"><a href="/auth/discord?returnTo=/team">Login with Discord</a> to see your portal tier.</div>`}`;
+    bindBreadcrumbs(root);
+    initRevealAnimations(root);
+  } catch {
+    root.innerHTML = '<p class="hint">Could not load team data.</p>';
+  }
 }
 
 function renderKeybinds() {
@@ -802,54 +937,6 @@ function renderJobs() {
   }).join('');
 }
 
-async function renderTeam() {
-  const root = el('team-root');
-  if (!root) return;
-  try {
-    if (!TEAM) {
-      const res = await fetch('/api/team');
-      TEAM = await res.json();
-    }
-    const credits = TEAM.credits?.length ? TEAM.credits : (DATA?.credits || []);
-    const tiers = ['owner', 'admin', 'manager', 'developer', 'staff', 'moderator', 'member'];
-    root.innerHTML = `
-      ${renderPageHeader('Team & Roles', 'Live Discord roster and your portal access level.', [{ id: 'home', label: 'Home' }, { id: 'team', label: 'Team' }])}
-      <div class="team-hero reveal">
-        <h2>ShadeRP staff roster</h2>
-        <p class="hint">Roles sync from Discord every login. Need help? Open a ticket on <button type="button" class="crumb-link" data-panel="support">Support</button>.</p>
-      </div>
-      <h3 class="section-sub reveal">Leadership</h3>
-      <div class="team-leadership-grid">${credits.length
-      ? credits.map((c) => teamMemberCard(c, 'owner')).join('')
-      : '<p class="hint">No leadership credits synced</p>'}</div>
-      <h3 class="section-sub reveal" style="margin-top:1.5rem">Portal tiers</h3>
-      <div class="stack">${tiers.map((tier) => {
-        const meta = TEAM.tierMeta?.[tier] || { label: tier, icon: '•', desc: '' };
-        const roles = TEAM.grouped?.[tier] || [];
-        if (!roles.length) return '';
-        return `<details class="tier-accordion reveal">
-          <summary><span class="tier-icon">${meta.icon}</span>
-            <span class="role-badge role-${esc(tier)}">${esc(meta.label)}</span>
-            <span class="hint">${roles.length} member(s)</span></summary>
-          <div class="role-grid">${roles.map((r) => `
-            <div class="role-card">
-              <div class="app role-${esc(r.appRole)}">${esc(r.appRole)}</div>
-              <div class="discord-name">${esc(r.discordName)}</div>
-            </div>`).join('')}</div>
-        </details>`;
-      }).join('') || '<p class="hint">Configure PORTAL_ROLE_MAP on Render</p>'}</div>
-      ${ME?.user ? `<div class="card your-access-card reveal" style="margin-top:1rem">
-        <h3>Your access</h3>
-        <p><strong>${esc(ME.user.globalName)}</strong> <span class="role-badge role-${esc(ME.user.appRole)}">${esc(ME.user.appRole)}</span></p>
-        <p class="hint">${ME.user.inGuild ? 'Discord guild member' : 'Join Discord to unlock full access'}</p>
-      </div>` : ''}`;
-    bindBreadcrumbs(root);
-    initRevealAnimations(root);
-  } catch {
-    root.innerHTML = '<p class="hint">Could not load team data.</p>';
-  }
-}
-
 async function renderSupport() {
   const root = el('support-root');
   if (!root) return;
@@ -886,9 +973,19 @@ async function renderSupport() {
       <div class="card reveal">
         <h3>Your tickets</h3>
         ${mine.length ? `<ul class="ac-ban-list">${mine.map((t) => `
-          <li><code>${esc(t.id)}</code> · ${esc(t.category)} · <strong>${esc(t.status)}</strong>
+          <li><button type="button" class="crumb-link support-ticket-open" data-id="${esc(t.id)}"><code>${esc(t.id)}</code></button>
+            · ${esc(t.category)} · <strong>${esc(t.status)}</strong>
+            ${t.channelId ? ' · Discord linked' : t.discordSyncPending ? ' · syncing Discord…' : ''}
             <br><span class="hint">${esc(t.subject)}</span></li>`).join('')}</ul>`
         : '<p class="hint">No tickets yet.</p>'}
+      </div>
+      <div class="card reveal" id="support-ticket-detail" hidden>
+        <h3 id="support-ticket-title">Ticket</h3>
+        <div id="support-ticket-thread" class="ticket-detail"></div>
+        <form id="support-reply-form" class="support-form" style="margin-top:0.75rem">
+          <textarea id="support-reply-text" class="admin-search" placeholder="Reply to staff…" maxlength="4000"></textarea>
+          <button type="submit" class="btn primary">Send reply</button>
+        </form>
       </div>
     </div>`;
   bindBreadcrumbs(root);
@@ -907,8 +1004,56 @@ async function renderSupport() {
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || 'Failed');
-      toast(`Ticket ${data.ticket.id} opened`);
+      toast(`Ticket ${data.ticket.id} opened — Discord channel syncing`);
       renderSupport();
+    } catch (err) {
+      toast(err.message, true);
+    }
+  });
+
+  async function openSupportTicket(id) {
+    const detail = el('support-ticket-detail');
+    const thread = el('support-ticket-thread');
+    const title = el('support-ticket-title');
+    if (!detail || !thread) return;
+    try {
+      const res = await fetch(`/api/tickets/${encodeURIComponent(id)}`);
+      const t = await res.json();
+      if (!res.ok) throw new Error(t.error || 'Failed');
+      detail.hidden = false;
+      title.textContent = `${t.id} · ${t.category} · ${t.status}`;
+      const msgs = t.messages || [];
+      thread.innerHTML = `
+        <p class="hint">${esc(t.description || '')}</p>
+        ${msgs.length ? msgs.map((m) => `<div class="ticket-msg"><strong>${esc(m.authorName)}</strong>
+          <span class="hint">${m.at ? new Date(m.at).toLocaleString() : ''} · ${esc(m.source || '')}</span><br>${esc(m.content)}</div>`).join('')
+        : '<p class="hint">No messages yet — staff will reply here and in Discord.</p>'}`;
+      detail.dataset.ticketId = id;
+      el('support-reply-form')?.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    } catch (err) {
+      toast(err.message, true);
+    }
+  }
+
+  root.querySelectorAll('.support-ticket-open').forEach((btn) => {
+    btn.addEventListener('click', () => openSupportTicket(btn.dataset.id));
+  });
+
+  el('support-reply-form')?.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const id = el('support-ticket-detail')?.dataset.ticketId;
+    const text = el('support-reply-text')?.value?.trim();
+    if (!id || !text) return;
+    try {
+      const res = await fetch(`/api/tickets/${encodeURIComponent(id)}/message`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ content: text }),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || 'Failed');
+      el('support-reply-text').value = '';
+      openSupportTicket(id);
     } catch (err) {
       toast(err.message, true);
     }
@@ -1429,9 +1574,10 @@ async function loadTicketsPanel() {
       el('tickets-wrap').innerHTML = '<p class="hint">No tickets yet. Run <code>/ticket setup</code> in Discord or use the Support panel.</p>';
       return;
     }
-    el('tickets-wrap').innerHTML = `<table><thead><tr><th>ID</th><th>User</th><th>Category</th><th>Subject</th><th>Ban</th><th>Status</th><th>Staff</th><th>Actions</th></tr></thead><tbody>${
+    el('tickets-wrap').innerHTML = `<table><thead><tr><th>ID</th><th>Source</th><th>User</th><th>Category</th><th>Subject</th><th>Ban</th><th>Status</th><th>Staff</th><th>Actions</th></tr></thead><tbody>${
       tickets.map((t) => `<tr>
         <td><code>${esc(t.id)}</code></td>
+        <td>${esc(t.source || 'discord')}</td>
         <td>${esc(t.discordName)}</td>
         <td>${esc(t.category)}</td>
         <td>${esc(t.subject)}</td>
@@ -2367,25 +2513,68 @@ function acBindUnbanActions() {
   if (!canUnban()) return;
   el('ac-bans-wrap')?.querySelectorAll('.ac-unban-btn').forEach((btn) => {
     btn.addEventListener('click', async () => {
-      if (!confirm(`Unban ${btn.dataset.banid}?`)) return;
+      const q = btn.dataset.banid || btn.dataset.discord || '';
+      if (!confirm(`Unban ${q}?`)) return;
       try {
         const res = await fetch('/api/ac/admin/unban', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ banId: btn.dataset.banid }),
+          body: JSON.stringify({ banId: q }),
         });
-        if (!res.ok) {
-          const err = await res.json().catch(() => ({}));
-          throw new Error(err.error || 'Unban failed');
-        }
-        toast('Unban complete');
+        const data = await res.json().catch(() => ({}));
+        if (!res.ok) throw new Error(data.error || 'Unban failed');
+        toast(data.note || 'Unban queued on portal + FXServer');
         loadAcPanel(true);
       } catch (err) {
-        toast(err.message?.includes('owner') ? 'Only the server owner can unban' : 'Unban failed');
+        toast(err.message?.includes('permission') ? err.message : (err.message || 'Unban failed'));
         console.error(err);
       }
     });
   });
+
+  const runBtn = el('ac-unban-run');
+  if (runBtn && !runBtn.dataset.bound) {
+    runBtn.dataset.bound = '1';
+    runBtn.addEventListener('click', async () => {
+      const q = el('ac-unban-query')?.value?.trim();
+      if (!q) { toast('Enter ban ID, discord, license, or all'); return; }
+      try {
+        const res = await fetch('/api/ac/admin/unban', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ banId: q }),
+        });
+        const data = await res.json().catch(() => ({}));
+        if (!res.ok) throw new Error(data.error || 'Unban failed');
+        el('ac-unban-result').textContent = data.note || 'Queued';
+        toast(data.note || 'Unban queued');
+        loadAcPanel(true);
+      } catch (err) {
+        toast(err.message || 'Unban failed');
+      }
+    });
+  }
+
+  const searchBtn = el('ac-unban-search-btn');
+  if (searchBtn && !searchBtn.dataset.bound) {
+    searchBtn.dataset.bound = '1';
+    searchBtn.addEventListener('click', async () => {
+      const q = el('ac-unban-query')?.value?.trim();
+      if (!q) return;
+      const res = await fetch(`/api/ac/admin/unban-search?q=${encodeURIComponent(q)}`);
+      const data = await res.json().catch(() => ({}));
+      const box = el('ac-unban-result');
+      if (!data.ok || !data.matches?.length) {
+        box.textContent = data.hint || (data.matches?.length === 0
+          ? `No portal ban for "${q}" — you can still unban (FXServer-only bans)`
+          : (data.error || 'No matches'));
+        return;
+      }
+      box.innerHTML = data.matches.map((m) =>
+        `<div><strong>${esc(m.playerName || '?')}</strong> <code>${esc(m.banId)}</code> — ${esc(m.reason || '')}</div>`,
+      ).join('');
+    });
+  }
 }
 
 function acRenderPlayers(players) {
@@ -2729,11 +2918,23 @@ async function loadAcPanel(silent = false) {
     acRenderDetections(dets);
 
     el('ac-bans-wrap').innerHTML = (bansData.bans || []).length
-      ? `<ul class="ac-ban-list">${bansData.bans.map((b) =>
-          `<li><strong>${esc(b.playerName || '?')}</strong> — ${esc(b.reason || 'banned')} <small>${b.at ? new Date(b.at).toLocaleString() : ''}</small>
-            ${canUnban() ? `<button type="button" class="btn ghost btn-sm ac-unban-btn" data-banid="${esc(String(b.banId || b.id || ''))}">Unban</button>` : ''}</li>`
-        ).join('')}</ul>`
-      : '<p class="hint">No bans synced yet.</p>';
+      ? `<ul class="ac-ban-list">${bansData.bans.map((b) => {
+          const bid = String(b.banId || b.id || '');
+          const disc = b.identifiers?.discord?.replace(/^discord:/i, '') || '';
+          return `<li><strong>${esc(b.playerName || '?')}</strong> <code>${esc(bid)}</code> — ${esc(b.reason || 'banned')} <small>${b.at ? new Date(b.at).toLocaleString() : ''}</small>
+            ${canUnban() ? `<button type="button" class="btn ghost btn-sm ac-unban-btn" data-banid="${esc(bid)}"${disc ? ` data-discord="${esc(disc)}"` : ''}>Unban</button>` : ''}</li>`;
+        }).join('')}</ul>`
+      : '<p class="hint">No bans on portal — bans may exist only on FXServer until next sync.</p>';
+    if (canUnban() && el('ac-unban-tool') && !el('ac-unban-tool').dataset.init) {
+      el('ac-unban-tool').dataset.init = '1';
+      el('ac-unban-tool').innerHTML = `
+        <div class="ac-unban-bar">
+          <input id="ac-unban-query" type="text" placeholder="SHADE-000001, discord id, license, name, or all" />
+          <button type="button" class="btn ghost btn-sm" id="ac-unban-search-btn">Search</button>
+          <button type="button" class="btn primary btn-sm" id="ac-unban-run">Unban</button>
+        </div>
+        <div id="ac-unban-result" class="hint" style="margin-top:0.5rem"></div>`;
+    }
     acBindUnbanActions();
 
     el('ac-join-wrap').innerHTML = (denialsData.denials || []).filter((d) => !d.allowed).length
@@ -2795,6 +2996,315 @@ async function loadAcPanel(silent = false) {
     console.error(err);
     if (!silent) el('ac-players-wrap').innerHTML = '<p class="hint">Failed to load anti-cheat data.</p>';
   }
+}
+
+}
+
+const banMgrState = { data: null, tab: 'all' };
+
+function banCategoryLabel(cat) {
+  const map = { ac: 'AC', moderator: 'Moderator', hardware: 'Hardware' };
+  return map[cat] || cat;
+}
+
+function banCategoryClass(cat) {
+  if (cat === 'hardware') return 'ac-trust-low';
+  if (cat === 'ac') return 'ac-trust-mid';
+  return 'ac-trust-high';
+}
+
+function banMgrFilter(text, row) {
+  const q = String(text || '').trim().toLowerCase();
+  if (!q) return true;
+  const hay = [
+    row.banId, row.playerName, row.name, row.reason, row.admin, row.category,
+    row.license, row.discord, row.steam, row.ip,
+    ...(row.tokensPreview || []),
+  ].filter(Boolean).join(' ').toLowerCase();
+  return hay.includes(q);
+}
+
+function renderBanMgrStats(stats) {
+  const s = stats || {};
+  el('ban-mgr-stats').innerHTML = [
+    ['Total bans', s.totalBans],
+    ['AC bans', s.acBans],
+    ['Moderator', s.moderatorBans],
+    ['Hardware', s.hardwareBans],
+    ['Flagged IPs', s.flaggedIps],
+    ['Platform flags', s.platformFlags],
+  ].map(([label, val]) => `
+    <div class="stat-card reveal">
+      <span class="stat-label">${esc(label)}</span>
+      <strong class="stat-value">${esc(String(val ?? 0))}</strong>
+    </div>`).join('');
+}
+
+function renderBanMgrTable(bans) {
+  if (!bans?.length) return '<p class="hint">No bans in this view.</p>';
+  const rows = bans.map((b) => {
+    const bid = b.banId || b.id || '?';
+    const hw = b.hasHardware ? `<span class="ac-trust ac-trust-low" title="${esc((b.tokensPreview || []).join(', '))}">HW ×${b.tokenCount || 0}</span>` : '';
+    return `<tr>
+      <td><code>${esc(bid)}</code></td>
+      <td><span class="ac-trust ${banCategoryClass(b.category)}">${esc(banCategoryLabel(b.category))}</span> ${hw}</td>
+      <td>${esc(b.playerName || b.name || '—')}</td>
+      <td>${esc(b.reason || '—')}</td>
+      <td>${esc(b.admin || '—')}</td>
+      <td><small>${esc([b.discord, b.license, b.steam, b.ip].filter(Boolean).join(' · ') || '—')}</small></td>
+      <td>${canUnban() ? `<button type="button" class="btn ghost btn-sm ban-mgr-unban" data-banid="${esc(bid)}">Unban</button>` : ''}</td>
+    </tr>`;
+  }).join('');
+  return `<div class="table-wrap"><table class="data-table"><thead><tr>
+    <th>ID</th><th>Type</th><th>Player</th><th>Reason</th><th>By</th><th>Identifiers</th><th></th>
+  </tr></thead><tbody>${rows}</tbody></table></div>`;
+}
+
+function renderBanMgrIpFlags(ips) {
+  if (!ips?.length) return '<p class="hint">No flagged IPs.</p>';
+  return `<ul class="ac-ban-list">${ips.map((ip) => `
+    <li><code>${esc(ip)}</code>
+      ${canUnban() ? `<button type="button" class="btn ghost btn-sm ban-mgr-unflag-ip" data-ip="${esc(ip)}">Unflag</button>` : ''}
+    </li>`).join('')}</ul>`;
+}
+
+function renderBanMgrPlatform(flags) {
+  if (!flags?.length) return '<p class="hint">No platform flags.</p>';
+  return `<div class="table-wrap"><table class="data-table"><thead><tr>
+    <th>Type</th><th>ID</th><th>Reason</th><th>Added</th>
+  </tr></thead><tbody>${flags.map((f) => `
+    <tr>
+      <td>${esc(f.type || '—')}</td>
+      <td><code>${esc(f.id || '—')}</code></td>
+      <td>${esc(f.reason || '—')}</td>
+      <td><small>${esc(f.addedBy || '—')} · ${esc(f.at || '')}</small></td>
+    </tr>`).join('')}</tbody></table></div>`;
+}
+
+function renderBanMgrDenials(denials) {
+  if (!denials?.length) return '<p class="hint">No recent join denials.</p>';
+  return `<div class="table-wrap"><table class="data-table"><thead><tr>
+    <th>When</th><th>Code</th><th>Reason</th><th>Player</th>
+  </tr></thead><tbody>${denials.map((d) => `
+    <tr>
+      <td><small>${esc(d.at || d.time || '—')}</small></td>
+      <td><code>${esc(d.code || '—')}</code></td>
+      <td>${esc(d.reason || '—')}</td>
+      <td><small>${esc(d.name || d.playerName || d.discord || '—')}</small></td>
+    </tr>`).join('')}</tbody></table></div>`;
+}
+
+function renderBanMgrOps() {
+  if (!canUnban()) {
+    return '<p class="hint">Mass unban and heal-flags require unban permission on your account.</p>';
+  }
+  return `
+    <p class="hint" style="margin-bottom:1rem">Heal stale IP/Discord flags after unbans, or queue a full portal + FXServer mass unban.</p>
+    <div class="ac-unban-bar" style="margin-bottom:0.75rem">
+      <input id="ban-mgr-unban-query" type="text" placeholder="SHADE ID, discord, license, name, or all" />
+      <button type="button" class="btn ghost btn-sm" id="ban-mgr-unban-search">Search</button>
+      <button type="button" class="btn primary btn-sm" id="ban-mgr-unban-run">Unban</button>
+    </div>
+    <div id="ban-mgr-unban-result" class="hint" style="margin-bottom:1rem"></div>
+    <div class="ac-toolbar">
+      <button type="button" class="btn ghost btn-sm" id="ban-mgr-heal-flags">Heal stale flags</button>
+      <button type="button" class="btn ghost btn-sm" id="ban-mgr-unban-all">Mass unban all</button>
+    </div>
+    <div id="ban-mgr-ops-result" class="hint" style="margin-top:0.75rem"></div>`;
+}
+
+function renderBanMgrBody() {
+  const root = el('ban-mgr-body');
+  const data = banMgrState.data;
+  if (!root || !data) return;
+
+  const q = el('ban-mgr-search')?.value || '';
+  const tab = banMgrState.tab;
+
+  if (tab === 'ip') {
+    const flagged = data.flagged || {};
+    const ips = [...(flagged.ipAddresses || []), ...(flagged.discordIds || []).map((d) => `discord:${d}`), ...(flagged.steamIds || []).map((s) => `steam:${s}`)];
+    root.innerHTML = `<h3>Flagged identifiers</h3><p class="hint">IPs and linked IDs still blocked at join screen.</p>${renderBanMgrIpFlags(ips.filter((v) => !q || String(v).toLowerCase().includes(q.toLowerCase())))}`;
+    bindBanMgrActions();
+    return;
+  }
+
+  if (tab === 'platform') {
+    const flags = (data.flaggedPlatforms || []).filter((f) => {
+      if (!q) return true;
+      const hay = `${f.type} ${f.id} ${f.reason}`.toLowerCase();
+      return hay.includes(q.toLowerCase());
+    });
+    root.innerHTML = `<h3>Platform flags</h3>${renderBanMgrPlatform(flags)}`;
+    return;
+  }
+
+  if (tab === 'denials') {
+    root.innerHTML = `<h3>Recent join denials</h3>${renderBanMgrDenials(data.joinDenials || [])}`;
+    return;
+  }
+
+  if (tab === 'ops') {
+    root.innerHTML = `<h3>Operations</h3>${renderBanMgrOps()}`;
+    bindBanMgrActions();
+    return;
+  }
+
+  let list = data.bans || [];
+  if (tab === 'ac') list = data.acBans || [];
+  else if (tab === 'moderator') list = data.moderatorBans || [];
+  else if (tab === 'hardware') list = data.hardwareBans || [];
+  list = list.filter((b) => banMgrFilter(q, b));
+
+  root.innerHTML = `<h3>${esc(tab === 'all' ? 'All bans' : `${banCategoryLabel(tab)} bans`)}</h3>${renderBanMgrTable(list)}`;
+  bindBanMgrActions();
+}
+
+function bindBanMgrActions() {
+  el('ban-mgr-body')?.querySelectorAll('.ban-mgr-unban').forEach((btn) => {
+    if (btn.dataset.bound) return;
+    btn.dataset.bound = '1';
+    btn.addEventListener('click', async () => {
+      const q = btn.dataset.banid;
+      if (!confirm(`Unban ${q}?`)) return;
+      try {
+        const res = await fetch('/api/ac/admin/unban', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ banId: q }),
+        });
+        const data = await res.json().catch(() => ({}));
+        if (!res.ok) throw new Error(data.error || 'Unban failed');
+        showToast(data.note || 'Unban queued');
+        loadBanManagerPanel(true);
+      } catch (err) {
+        showToast(err.message || 'Unban failed');
+      }
+    });
+  });
+
+  el('ban-mgr-body')?.querySelectorAll('.ban-mgr-unflag-ip').forEach((btn) => {
+    if (btn.dataset.bound) return;
+    btn.dataset.bound = '1';
+    btn.addEventListener('click', async () => {
+      const ip = btn.dataset.ip;
+      if (!confirm(`Unflag ${ip}?`)) return;
+      try {
+        const res = await fetch('/api/ac/admin/unflag-ip', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ ip }),
+        });
+        const data = await res.json().catch(() => ({}));
+        if (!res.ok) throw new Error(data.error || 'Unflag failed');
+        showToast('IP unflag queued');
+        loadBanManagerPanel(true);
+      } catch (err) {
+        showToast(err.message || 'Unflag failed');
+      }
+    });
+  });
+
+  const healBtn = el('ban-mgr-heal-flags');
+  if (healBtn && !healBtn.dataset.bound) {
+    healBtn.dataset.bound = '1';
+    healBtn.addEventListener('click', async () => {
+      try {
+        const res = await fetch('/api/ac/admin/heal-flags', { method: 'POST' });
+        const data = await res.json().catch(() => ({}));
+        if (!res.ok) throw new Error(data.error || 'Heal failed');
+        el('ban-mgr-ops-result').textContent = JSON.stringify(data, null, 2);
+        showToast('Stale flags healed');
+        loadBanManagerPanel(true);
+      } catch (err) {
+        showToast(err.message || 'Heal failed');
+      }
+    });
+  }
+
+  const allBtn = el('ban-mgr-unban-all');
+  if (allBtn && !allBtn.dataset.bound) {
+    allBtn.dataset.bound = '1';
+    allBtn.addEventListener('click', async () => {
+      if (!confirm('Mass unban ALL portal bans and queue FXServer sync?')) return;
+      try {
+        const res = await fetch('/api/ac/admin/unban-all', { method: 'POST' });
+        const data = await res.json().catch(() => ({}));
+        if (!res.ok) throw new Error(data.error || 'Mass unban failed');
+        el('ban-mgr-ops-result').textContent = data.note || 'Queued';
+        showToast(data.note || 'Mass unban queued');
+        loadBanManagerPanel(true);
+      } catch (err) {
+        showToast(err.message || 'Mass unban failed');
+      }
+    });
+  }
+
+  const runBtn = el('ban-mgr-unban-run');
+  if (runBtn && !runBtn.dataset.bound) {
+    runBtn.dataset.bound = '1';
+    runBtn.addEventListener('click', async () => {
+      const q = el('ban-mgr-unban-query')?.value?.trim();
+      if (!q) { showToast('Enter ban ID, discord, license, or all'); return; }
+      try {
+        const res = await fetch('/api/ac/admin/unban', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ banId: q }),
+        });
+        const data = await res.json().catch(() => ({}));
+        if (!res.ok) throw new Error(data.error || 'Unban failed');
+        el('ban-mgr-unban-result').textContent = data.note || 'Queued';
+        showToast(data.note || 'Unban queued');
+        loadBanManagerPanel(true);
+      } catch (err) {
+        showToast(err.message || 'Unban failed');
+      }
+    });
+  }
+
+  const searchBtn = el('ban-mgr-unban-search');
+  if (searchBtn && !searchBtn.dataset.bound) {
+    searchBtn.dataset.bound = '1';
+    searchBtn.addEventListener('click', async () => {
+      const q = el('ban-mgr-unban-query')?.value?.trim();
+      if (!q) return;
+      const res = await fetch(`/api/ac/admin/unban-search?q=${encodeURIComponent(q)}`);
+      const data = await res.json().catch(() => ({}));
+      el('ban-mgr-unban-result').textContent = (data.matches || []).length
+        ? (data.matches || []).map((m) => `${m.banId || m.id}: ${m.playerName || m.name || '?'} — ${m.reason || ''}`).join('\n')
+        : 'No matches';
+    });
+  }
+}
+
+async function loadBanManagerPanel(silent = false) {
+  if (!hasRole('moderator')) return;
+  const root = el('ban-mgr-body');
+  if (!root) return;
+  if (!silent) root.innerHTML = '<p class="hint">Loading ban data…</p>';
+  try {
+    const res = await fetch('/api/ac/admin/ban-manager?limit=300');
+    if (!res.ok) throw new Error('Failed to load');
+    banMgrState.data = await res.json();
+    renderBanMgrStats(banMgrState.data.stats);
+    renderBanMgrBody();
+  } catch (err) {
+    console.error(err);
+    root.innerHTML = '<p class="hint">Failed to load ban manager — check login role and portal deploy.</p>';
+  }
+}
+
+function setupBanManagerPanel() {
+  el('ban-mgr-refresh')?.addEventListener('click', () => loadBanManagerPanel());
+  el('ban-mgr-search')?.addEventListener('input', () => renderBanMgrBody());
+  el('ban-mgr-tabs')?.querySelectorAll('[data-ban-tab]').forEach((btn) => {
+    btn.addEventListener('click', () => {
+      el('ban-mgr-tabs')?.querySelectorAll('[data-ban-tab]').forEach((b) => b.classList.toggle('active', b === btn));
+      banMgrState.tab = btn.dataset.banTab || 'all';
+      renderBanMgrBody();
+    });
+  });
 }
 
 function startAcAutoRefresh() {
@@ -3025,6 +3535,7 @@ async function init() {
 
   setupLogsPanel();
   setupAcPanel();
+  setupBanManagerPanel();
   bindServerControlEvents();
   bindTicketsPanel();
 

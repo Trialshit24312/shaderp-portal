@@ -968,7 +968,8 @@ async function renderSupport() {
           <textarea id="support-desc" class="admin-search" placeholder="Describe your issue…"></textarea>
           <button type="submit" class="btn primary">Submit ticket</button>
         </form>
-        <p class="hint" style="margin-top:0.75rem">Or use Discord #open-a-ticket after staff runs <code>/ticket setup</code>.</p>
+        <p class="hint" style="margin-top:0.75rem">Or use Discord #open-a-ticket. Stuck on "already have a ticket"? Use <strong>/ticket close-mine</strong> in Discord or the button below.</p>
+        <button type="button" class="btn ghost btn-sm" id="support-close-mine" style="margin-top:0.5rem">Clear stuck tickets</button>
       </div>
       <div class="card reveal">
         <h3>Your tickets</h3>
@@ -1003,8 +1004,25 @@ async function renderSupport() {
         }),
       });
       const data = await res.json();
-      if (!res.ok) throw new Error(data.error || 'Failed');
+      if (!res.ok) {
+        if (res.status === 409) {
+          throw new Error(`${data.error || 'Open ticket exists'} (${data.ticketId || ''}). Click "Clear stuck tickets" below.`);
+        }
+        throw new Error(data.error || 'Failed');
+      }
       toast(`Ticket ${data.ticket.id} opened — Discord channel syncing`);
+      renderSupport();
+    } catch (err) {
+      toast(err.message, true);
+    }
+  });
+
+  el('support-close-mine')?.addEventListener('click', async () => {
+    try {
+      const res = await fetch('/api/tickets/close-mine', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: '{}' });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || 'Failed');
+      toast(data.closed?.length ? `Cleared ${data.closed.length} stuck ticket(s)` : 'No stuck tickets');
       renderSupport();
     } catch (err) {
       toast(err.message, true);
@@ -1582,7 +1600,7 @@ async function loadTicketsPanel() {
         <td>${esc(t.category)}</td>
         <td>${esc(t.subject)}</td>
         <td>${t.profile?.activeBan ? `<span class="ac-trust-low">ACTIVE</span>` : '—'}</td>
-        <td>${esc(t.status)}</td>
+        <td>${esc(t.status)}${t.status === 'open' && !t.channelId && !t.threadId ? ' <span class="ac-trust-low">ghost</span>' : ''}</td>
         <td>${esc(t.claimedByName || '—')}</td>
         <td class="ac-actions">
           <button type="button" class="btn ghost btn-sm tk-view" data-id="${esc(t.id)}">View</button>
@@ -1617,6 +1635,17 @@ async function loadTicketsPanel() {
 function bindTicketsPanel() {
   el('ticket-refresh')?.addEventListener('click', () => loadTicketsPanel());
   el('ticket-filter')?.addEventListener('change', () => loadTicketsPanel());
+  el('ticket-heal-stale')?.addEventListener('click', async () => {
+    try {
+      const res = await fetch('/api/tickets/admin/heal-stale', { method: 'POST' });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || 'Heal failed');
+      toast(data.count ? `Healed ${data.count} stale ticket(s)` : 'No stale tickets');
+      loadTicketsPanel();
+    } catch (e) {
+      toast(e.message, true);
+    }
+  });
   el('ticket-detail-close')?.addEventListener('click', () => { el('ticket-detail').hidden = true; });
   el('ticket-delete')?.addEventListener('click', async () => {
     const id = el('ticket-detail')?.dataset.ticketId;

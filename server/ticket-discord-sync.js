@@ -90,6 +90,7 @@ export function startTicketDiscordSyncLoop({ ticketManager, portalEnv, roleMap, 
   if (syncTimer) clearInterval(syncTimer);
   syncTimer = setInterval(async () => {
     if (!discordClient || !ticketManager?.listPendingDiscordSync) return;
+    await ticketManager.healStaleTickets?.({ discordClient }).catch(() => {});
     const pending = ticketManager.listPendingDiscordSync(5);
     for (const ticket of pending) {
       await syncTicketToDiscord(ticket, { ticketManager, portalEnv, roleMap });

@@ -107,6 +107,10 @@ function buildAllCommands() {
     .addSubcommand((sub) =>
       sub.setName('setup').setDescription('Auto-create ticket category, channels, and panel (admin)'))
     .addSubcommand((sub) =>
+      sub.setName('close-mine').setDescription('Close your ghost/stuck open ticket record'))
+    .addSubcommand((sub) =>
+      sub.setName('heal').setDescription('Clear stale ticket records without Discord channels (staff)'))
+    .addSubcommand((sub) =>
       sub.setName('delete').setDescription('Permanently delete ticket record (owner only)')
         .addStringOption((o) => o.setName('ticket_id').setDescription('Ticket ID e.g. TKT-...').setRequired(true)));
 
@@ -168,51 +172,76 @@ function panelRow() {
   );
 }
 
-async function createTicketChannel(guild, user, category, subject, description, ticketManager, portalEnv, roleMap) {
-  const existing = ticketManager.list({ status: 'open' }).find(
-    (t) => t.discordId === user.id,
-  );
-  if (existing) return { error: 'You already have an open ticket.', ticket: existing };
-
-  const ticket = ticketManager.createTicket({
-    category,
-    subject,
-    description: description || '',
-    discordId: user.id,
-    discordName: user.globalName || user.username,
-    source: 'discord',
-    channelId: null,
-    threadId: null,
-  });
-
+async function createDiscordChannelForTicket(guild, user, ticket, ticketManager, portalEnv, roleMap) {
   const categoryId = process.env.DISCORD_TICKET_CATEGORY_ID || portalEnv.DISCORD_TICKET_CATEGORY_ID || ticketManager.getSetup()?.categoryId;
   const parentId = process.env.DISCORD_TICKET_CHANNEL_ID || portalEnv.DISCORD_TICKET_CHANNEL_ID || ticketManager.getSetup()?.panelChannelId;
   let channel;
 
+  if (categoryId) {
+    channel = await guild.channels.create({
+      name: `ticket-${user.username}`.slice(0, 90).replace(/[^a-z0-9-]/gi, '-'),
+      type: ChannelType.GuildText,
+      parent: categoryId,
+      permissionOverwrites: buildStaffOverwrites(guild, user.id, roleMap),
+      topic: `${ticket.id} · ${ticket.category}`,
+    });
+    ticketManager.updateTicketChannel(ticket.id, channel.id, null);
+    ticketManager.markDiscordSynced?.(ticket.id, channel.id, null);
+  } else if (parentId) {
+    const parent = await guild.channels.fetch(parentId);
+    channel = await parent.threads.create({
+      name: `ticket-${user.username}-${ticket.id.slice(-4)}`.slice(0, 100),
+      type: ChannelType.PrivateThread,
+      invitable: false,
+      reason: `Ticket ${ticket.id}`,
+    });
+    await channel.members.add(user.id).catch(() => {});
+    ticketManager.updateTicketChannel(ticket.id, parentId, channel.id);
+    ticketManager.markDiscordSynced?.(ticket.id, parentId, channel.id);
+  }
+
+  return channel;
+}
+
+async function createTicketChannel(guild, user, category, subject, description, ticketManager, portalEnv, roleMap, discordClient) {
+  await ticketManager.healStaleTickets({ discordClient, discordId: user.id });
+
+  const active = await ticketManager.getActiveOpenTicket(user.id, { discordClient, autoHeal: false });
+  if (active?.channel) {
+    return {
+      error: `You already have an open ticket **${active.ticket.id}** → <#${active.channel.id}>`,
+      ticket: active.ticket,
+      channel: active.channel,
+    };
+  }
+
+  let ticket = null;
+  const orphan = ticketManager.list({ status: 'open' }).find((t) => t.discordId === user.id);
+  if (orphan && !orphan.channelId && !orphan.threadId) {
+    ticket = ticketManager.updateTicketMeta(orphan.id, {
+      subject: subject || orphan.subject,
+      category: category || orphan.category,
+      description: description ? String(description).slice(0, 2000) : orphan.description,
+    }) || orphan;
+  } else {
+    ticket = ticketManager.createTicket({
+      category,
+      subject,
+      description: description || '',
+      discordId: user.id,
+      discordName: user.globalName || user.username,
+      source: 'discord',
+      channelId: null,
+      threadId: null,
+    });
+  }
+
+  let channel;
   try {
-    if (categoryId) {
-      channel = await guild.channels.create({
-        name: `ticket-${user.username}`.slice(0, 90).replace(/[^a-z0-9-]/gi, '-'),
-        type: ChannelType.GuildText,
-        parent: categoryId,
-        permissionOverwrites: buildStaffOverwrites(guild, user.id, roleMap),
-      });
-      ticketManager.updateTicketChannel(ticket.id, channel.id, null);
-      ticketManager.markDiscordSynced?.(ticket.id, channel.id, null);
-    } else if (parentId) {
-      const parent = await guild.channels.fetch(parentId);
-      channel = await parent.threads.create({
-        name: `ticket-${user.username}-${ticket.id.slice(-4)}`.slice(0, 100),
-        type: ChannelType.PrivateThread,
-        invitable: false,
-        reason: `Ticket ${ticket.id}`,
-      });
-      await channel.members.add(user.id);
-      ticketManager.updateTicketChannel(ticket.id, parentId, channel.id);
-      ticketManager.markDiscordSynced?.(ticket.id, parentId, channel.id);
-    }
+    channel = await createDiscordChannelForTicket(guild, user, ticket, ticketManager, portalEnv, roleMap);
   } catch (err) {
     console.error('Create ticket channel failed:', err.message);
+    ticketManager.markDiscordSyncFailed?.(ticket.id, err.message);
     return { error: 'Could not create ticket channel. Check bot permissions and DISCORD_TICKET_CHANNEL_ID.' };
   }
 
@@ -220,6 +249,7 @@ async function createTicketChannel(guild, user, category, subject, description, 
     return { error: 'Set DISCORD_TICKET_CHANNEL_ID or DISCORD_TICKET_CATEGORY_ID on Render.' };
   }
 
+  ticket = ticketManager.getTicket(ticket.id) || ticket;
   const embed = buildTicketProfileEmbed(ticket.profile, ticket);
   await channel.send({
     content: `<@${user.id}> · Staff will assist you shortly.`,
@@ -281,6 +311,36 @@ export async function startShadeDiscordBot({ acManager, ticketManager, portalEnv
         const parts = interaction.customId.split(':');
         if (parts[0] !== 'shade' || parts[1] !== 'ticket') return;
 
+        if (parts[2] === 'replace') {
+          const category = parts[3] || 'general';
+          await deferEphemeral(interaction);
+          ticketManager.closeOpenTicketsForUser(
+            interaction.user.id,
+            interaction.user.id,
+            interaction.user.username,
+            'Replaced ghost ticket from Discord panel',
+          );
+          const result = await createTicketChannel(
+            interaction.guild,
+            interaction.user,
+            category,
+            `${category} support`,
+            '',
+            ticketManager,
+            portalEnv,
+            roleMap,
+            client,
+          );
+          if (result.error) {
+            await replyEphemeral(interaction, { content: `❌ ${result.error}` });
+            return;
+          }
+          await replyEphemeral(interaction, {
+            content: `✅ New ticket **${result.ticket.id}** → <#${result.channel.id}>`,
+          });
+          return;
+        }
+
         if (parts[2] === 'open') {
           const category = parts[3] || 'general';
           await deferEphemeral(interaction);
@@ -294,9 +354,13 @@ export async function startShadeDiscordBot({ acManager, ticketManager, portalEnv
             ticketManager,
             portalEnv,
             roleMap,
+            client,
           );
           if (result.error) {
-            await replyEphemeral(interaction, { content: `❌ ${result.error}` });
+            const isExisting = result.channel && result.ticket;
+            await replyEphemeral(interaction, {
+              content: isExisting ? `ℹ️ ${result.error}` : `❌ ${result.error}`,
+            });
             return;
           }
           await replyEphemeral(interaction, {
@@ -571,9 +635,13 @@ export async function startShadeDiscordBot({ acManager, ticketManager, portalEnv
             ticketManager,
             portalEnv,
             roleMap,
+            client,
           );
           if (result.error) {
-            await replyEphemeral(interaction, { content: `❌ ${result.error}` });
+            const isExisting = result.channel && result.ticket;
+            await replyEphemeral(interaction, {
+              content: isExisting ? `ℹ️ ${result.error}` : `❌ ${result.error}`,
+            });
             return;
           }
           await replyEphemeral(interaction, {
@@ -582,9 +650,37 @@ export async function startShadeDiscordBot({ acManager, ticketManager, portalEnv
           return;
         }
 
+        if (sub === 'close-mine') {
+          await deferEphemeral(interaction);
+          const healed = await ticketManager.healStaleTickets({ discordClient: client, discordId: interaction.user.id });
+          const closed = ticketManager.closeOpenTicketsForUser(
+            interaction.user.id,
+            interaction.user.id,
+            interaction.user.username,
+            'Closed via /ticket close-mine',
+          );
+          const ids = [...new Set([...healed.healed.map((h) => h.id), ...closed.map((t) => t.id)])];
+          await replyEphemeral(interaction, {
+            content: ids.length
+              ? `✅ Cleared **${ids.length}** stuck ticket(s): ${ids.join(', ')}\nYou can open a new ticket now.`
+              : 'No open tickets on your account.',
+          });
+          return;
+        }
+
         await deferEphemeral(interaction);
         if (!staffRoleOk(member, roleMap, ownerIds, interaction.user.id)) {
           await replyEphemeral(interaction, { content: '⛔ Staff only.' });
+          return;
+        }
+
+        if (sub === 'heal') {
+          const result = await ticketManager.healStaleTickets({ discordClient: client });
+          await replyEphemeral(interaction, {
+            content: result.count
+              ? `🧹 Healed **${result.count}** stale ticket(s):\n${result.healed.map((h) => `• \`${h.id}\` (${h.reason})`).join('\n')}`
+              : '✅ No stale tickets — all open records have live Discord channels.',
+          });
           return;
         }
 
@@ -676,6 +772,17 @@ export async function startShadeDiscordBot({ acManager, ticketManager, portalEnv
     } catch (err) {
       console.error('Discord interaction error:', err);
       await safeInteractionReply(interaction, { content: 'Command failed.' });
+    }
+  });
+
+  client.on('ready', async () => {
+    try {
+      const result = await ticketManager.healStaleTickets({ discordClient: client });
+      if (result.count) {
+        console.log(`[Tickets] Healed ${result.count} stale ticket(s) on bot startup`);
+      }
+    } catch (e) {
+      console.warn('[Tickets] Startup heal failed:', e.message);
     }
   });
 

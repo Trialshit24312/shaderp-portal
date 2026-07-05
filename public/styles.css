@@ -1,23 +1,23 @@
 :root {
-  --bg: #05070b;
-  --bg-elevated: #0a0e16;
-  --bg-card: #0e1420;
-  --surface: #0e1420;
-  --border: rgba(0, 212, 200, 0.12);
-  --text: #eef3f8;
-  --text-muted: #8fa3bc;
-  --muted: #8fa3bc;
-  --accent: #00d4c8;
-  --accent-dim: rgba(0, 212, 200, 0.14);
-  --accent-glow: rgba(0, 212, 200, 0.4);
-  --warn: #f0a030;
-  --danger: #e85d5d;
+  --bg: #060608;
+  --bg-elevated: #0c0c10;
+  --bg-card: #111118;
+  --surface: #14141c;
+  --border: rgba(225, 29, 72, 0.14);
+  --text: #f4f4f5;
+  --text-muted: #9ca3af;
+  --muted: #9ca3af;
+  --accent: #e11d48;
+  --accent-dim: rgba(225, 29, 72, 0.12);
+  --accent-glow: rgba(225, 29, 72, 0.35);
+  --warn: #fbbf24;
+  --danger: #f87171;
   --radius: 14px;
   --font: 'Outfit', system-ui, sans-serif;
   --mono: 'JetBrains Mono', monospace;
   --sidebar-w: 268px;
   --ease-out: cubic-bezier(0.22, 1, 0.36, 1);
-  --shadow-lg: 0 24px 48px rgba(0, 0, 0, 0.45);
+  --shadow-lg: 0 24px 48px rgba(0, 0, 0, 0.55);
 }
 
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
@@ -1129,12 +1129,16 @@ kbd {
   position: relative;
   width: 100%;
   min-height: 240px;
-  background: #000;
+  background: var(--bg-card, #12121a);
   border-radius: 8px;
   overflow: hidden;
   display: flex;
+  flex-direction: column;
   align-items: center;
   justify-content: center;
+}
+.ac-frame-wrap[hidden] {
+  display: none !important;
 }
 .ac-frame-wrap img {
   width: 100%;
@@ -1142,11 +1146,24 @@ kbd {
   object-fit: contain;
   display: block;
 }
+.ac-frame-wrap img[hidden] {
+  display: none !important;
+}
 .ac-frame-loading {
   color: var(--muted);
   font-size: 0.9rem;
   padding: 2rem;
   text-align: center;
+}
+.ac-frame-empty {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1rem;
+  color: var(--muted);
+  font-size: 0.82rem;
+  text-align: center;
+  min-height: 100px;
 }
 
 .ac-row-danger td { background: rgba(232, 93, 93, 0.06); }
@@ -1530,6 +1547,7 @@ kbd {
   margin-top: 0.75rem;
 }
 .ac-watch-slot {
+  background: var(--bg-card, #12121a);
   position: relative;
   aspect-ratio: 16/10;
   border-radius: 10px;

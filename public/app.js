@@ -10,6 +10,7 @@ import {
   getLastPanel,
   setLastPanel,
 } from './ui.js';
+import { startLiveWatch } from './ac-webrtc.js';
 
 let ME = null;
 let DATA = null;
@@ -1669,7 +1670,7 @@ async function loadDiscordPanel() {
 }
 
 async function loadLogs(resetOffset = true) {
-  if (!hasRole('owner')) return;
+  if (!hasRole('staff')) return;
   if (resetOffset) logsState.offset = 0;
 
   const params = new URLSearchParams({
@@ -1710,7 +1711,7 @@ async function loadLogs(resetOffset = true) {
             <td>${esc(r.playerName || '—')}</td>
             <td class="log-summary">${esc(r.summary || '')}</td>
           </tr>`).join('')}</tbody></table>`
-      : '<p class="hint">No log entries yet — events appear when shade-crashlog syncs from the server.</p>';
+      : '<p class="hint">No log entries yet — events appear when shade-crashlog or shaderp-ac syncs to the portal.</p>';
 
     el('logs-table-wrap').querySelectorAll('.log-row').forEach((row) => {
       row.addEventListener('click', () => openLogDetail(row.dataset.logId));
@@ -1775,6 +1776,7 @@ function setupLogsPanel() {
 
 let acState = {
   watches: new Map(),
+  watchStoppers: new Map(),
   watchPollTimer: null,
   snapshotId: null,
   refreshTimer: null,
@@ -1785,8 +1787,76 @@ let acState = {
 };
 
 function acFrameSrc(src) {
-  if (!src) return '';
-  return src.startsWith('data:') ? src : `data:image/jpeg;base64,${src}`;
+  if (!src || typeof src !== 'string') return '';
+  const t = src.trim();
+  if (!t) return '';
+  if (t.startsWith('data:') || t.startsWith('http://') || t.startsWith('https://') || t.startsWith('blob:')) return t;
+  return `data:image/jpeg;base64,${t}`;
+}
+
+function acFrameSlotContent(src, waitingText = 'Waiting for frame…') {
+  const url = acFrameSrc(src);
+  if (!url) return `<span class="ac-frame-empty">${esc(waitingText)}</span>`;
+  return `<img class="ac-frame-img" src="${esc(url)}" alt="Live view" />`;
+}
+
+function acBindFrameImgErrors(root) {
+  root?.querySelectorAll('.ac-frame-img').forEach((img) => {
+    img.addEventListener('error', () => {
+      const span = document.createElement('span');
+      span.className = 'ac-frame-empty';
+      span.textContent = 'Frame unavailable';
+      img.replaceWith(span);
+    }, { once: true });
+  });
+}
+
+function acHideFrameExpanded() {
+  const wrap = el('ac-frame-wrap');
+  const img = el('ac-frame');
+  const placeholder = el('ac-frame-placeholder');
+  if (wrap) wrap.hidden = true;
+  if (img) {
+    img.hidden = true;
+    img.removeAttribute('src');
+    img.onerror = null;
+    img.onload = null;
+  }
+  if (placeholder) {
+    placeholder.hidden = false;
+    placeholder.textContent = 'Click a watch slot or use Watch on a player to expand a live frame.';
+  }
+}
+
+function acShowFrameExpanded(src, title) {
+  const wrap = el('ac-frame-wrap');
+  const img = el('ac-frame');
+  const placeholder = el('ac-frame-placeholder');
+  if (!wrap || !img) return;
+  if (title) el('ac-watch-hint').textContent = title;
+  wrap.hidden = false;
+  const url = acFrameSrc(src);
+  if (!url) {
+    img.hidden = true;
+    img.removeAttribute('src');
+    if (placeholder) {
+      placeholder.hidden = false;
+      placeholder.textContent = 'Waiting for frame…';
+    }
+    return;
+  }
+  if (placeholder) placeholder.hidden = true;
+  img.hidden = false;
+  img.onerror = () => {
+    img.hidden = true;
+    img.removeAttribute('src');
+    if (placeholder) {
+      placeholder.hidden = false;
+      placeholder.textContent = 'Could not load frame — ensure shaderp-ac and screenshot-basic are running on the server.';
+    }
+  };
+  img.onload = () => { if (placeholder) placeholder.hidden = true; };
+  img.src = url;
 }
 
 function acRenderWatchGrid() {
@@ -1799,8 +1869,8 @@ function acRenderWatchGrid() {
     if (entry) {
       const [sessionId, w] = entry;
       slots.push(`<div class="ac-watch-slot" data-session="${esc(sessionId)}">
-        ${w.lastImage ? `<img src="${acFrameSrc(w.lastImage)}" alt="" />` : '<span class="hint" style="padding:1rem">Waiting…</span>'}
-        <span class="ac-watch-slot-label">${esc(w.playerName)} #${w.playerId}</span>
+        ${acFrameSlotContent(w.lastImage)}
+        <span class="ac-watch-slot-label">${esc(w.playerName)} #${w.playerId}${w.mode === 'webrtc' ? ' · WebRTC' : ''}</span>
         <button type="button" class="ac-watch-slot-close" data-stop="${esc(sessionId)}">×</button>
       </div>`);
     } else {
@@ -1808,6 +1878,7 @@ function acRenderWatchGrid() {
     }
   }
   grid.innerHTML = slots.join('');
+  acBindFrameImgErrors(grid);
   const countEl = el('ac-watch-count');
   if (countEl) countEl.textContent = `${acState.watches.size}/4 watches`;
   grid.querySelectorAll('.ac-watch-slot[data-session]').forEach((slot) => {
@@ -1826,13 +1897,34 @@ function acRenderWatchGrid() {
   });
 }
 
-function acShowFrameExpanded(src, title) {
-  const wrap = el('ac-frame-wrap');
-  const img = el('ac-frame');
-  if (!wrap || !img) return;
-  img.src = acFrameSrc(src);
-  wrap.hidden = false;
-  if (title) el('ac-watch-hint').textContent = title;
+async function attachWatchStream(sessionId, w) {
+  if (acState.watchStoppers.has(sessionId)) return;
+  await new Promise((r) => setTimeout(r, 2500));
+  const stop = await startLiveWatch({
+    sessionId,
+    playerId: w.playerId,
+    onFrame: (image) => {
+      const cur = acState.watches.get(sessionId);
+      if (!cur) return;
+      cur.lastImage = image;
+      acState.watches.set(sessionId, cur);
+      acRenderWatchGrid();
+    },
+    onMode: (mode) => {
+      const cur = acState.watches.get(sessionId);
+      if (!cur) return;
+      cur.mode = mode;
+      acState.watches.set(sessionId, cur);
+      acRenderWatchGrid();
+    },
+  });
+  if (stop) acState.watchStoppers.set(sessionId, stop);
+}
+
+function detachWatchStream(sessionId) {
+  const stop = acState.watchStoppers.get(sessionId);
+  if (stop) stop();
+  acState.watchStoppers.delete(sessionId);
 }
 
 async function startAcWatch(playerId, playerName) {
@@ -1855,10 +1947,11 @@ async function startAcWatch(playerId, playerName) {
       playerId: Number(playerId),
       playerName,
       lastImage: null,
+      mode: null,
     });
     acRenderWatchGrid();
     toast(`Watch started: ${playerName}`);
-    scheduleWatchPoll();
+    attachWatchStream(data.sessionId, acState.watches.get(data.sessionId));
   } catch (err) {
     toast(err.message || 'Watch failed', true);
     console.error(err);
@@ -1874,24 +1967,20 @@ async function stopAcWatch(sessionId) {
         body: JSON.stringify({ sessionId }),
       });
     } catch (_) {}
+    detachWatchStream(sessionId);
     acState.watches.delete(sessionId);
   }
   acRenderWatchGrid();
-  if (acState.watches.size === 0 && acState.watchPollTimer) {
-    clearTimeout(acState.watchPollTimer);
-    acState.watchPollTimer = null;
-  }
 }
 
 async function stopAllAcWatches() {
   try {
     await fetch('/api/ac/admin/stop-all-watch', { method: 'POST' });
   } catch (_) {}
+  for (const sid of acState.watchStoppers.keys()) detachWatchStream(sid);
   acState.watches.clear();
   acRenderWatchGrid();
-  if (acState.watchPollTimer) clearTimeout(acState.watchPollTimer);
-  acState.watchPollTimer = null;
-  el('ac-frame-wrap').hidden = true;
+  acHideFrameExpanded();
 }
 
 async function watchSuspiciousPlayers() {
@@ -1941,17 +2030,53 @@ async function acRenderThreatSummary() {
     if (!res.ok) { bar.innerHTML = ''; return; }
     const data = await res.json();
     const chips = [];
+    for (const t of data.tamperAlerts || []) {
+      chips.push(`<span class="ac-threat-chip critical">🛑 ${esc(t.playerName || '?')} — ${esc(t.reason || 'tamper')}</span>`);
+    }
     for (const p of data.highRisk || []) {
-      chips.push(`<span class="ac-threat-chip danger">${esc(p.name)} trust ${p.trust ?? '?'}</span>`);
+      chips.push(`<span class="ac-threat-chip danger">${esc(p.name)} · trust ${p.trust ?? '?'}${p.combat?.risk >= 60 ? ` · combat ${p.combat.risk}` : ''}</span>`);
     }
     for (const t of data.topTypes || []) {
       chips.push(`<span class="ac-threat-chip warn">${esc(t.type)} ×${t.count}</span>`);
     }
-    if (data.activeWatches) chips.push(`<span class="ac-threat-chip">${data.activeWatches} active watches</span>`);
-    bar.innerHTML = chips.length ? chips.join('') : '<span class="hint">No elevated threats right now</span>';
+    if (data.activeWatches) chips.push(`<span class="ac-threat-chip">${data.activeWatches} live watches</span>`);
+    bar.innerHTML = chips.length ? chips.join('') : '<span class="hint">All clear — no elevated threats</span>';
+    acRenderTamperBanner(data.recentTamper);
   } catch {
     bar.innerHTML = '';
   }
+}
+
+function acRenderTamperBanner(alert) {
+  const banner = el('ac-tamper-banner');
+  if (!banner) return;
+  if (!alert) {
+    banner.classList.add('hidden');
+    banner.innerHTML = '';
+    return;
+  }
+  const ago = alert.at ? new Date(alert.at).toLocaleTimeString() : 'just now';
+  banner.classList.remove('hidden');
+  banner.innerHTML = `<span>🛑</span><div><strong>AC tamper detected</strong> — ${esc(alert.playerName || 'Player')} (#${alert.playerId ?? '?'}) · ${esc(alert.reason || 'unknown')} · ${ago}${alert.evidenceId ? ` · <button type="button" class="btn ghost btn-sm ac-evidence-btn" data-evidence="${esc(alert.evidenceId)}">View evidence</button>` : ''}</div>`;
+  banner.querySelectorAll('.ac-evidence-btn').forEach((btn) => {
+    btn.addEventListener('click', () => showEvidenceReplay(btn.dataset.evidence));
+  });
+}
+
+function initAcTabs() {
+  const tabs = document.querySelectorAll('#ac-tabs .ac-tab');
+  const panels = document.querySelectorAll('[data-ac-panel]');
+  tabs.forEach((tab) => {
+    tab.addEventListener('click', () => {
+      const id = tab.dataset.acTab;
+      tabs.forEach((t) => t.classList.toggle('active', t === tab));
+      panels.forEach((p) => p.classList.toggle('active', p.dataset.acPanel === id));
+      if (id === 'intelligence') {
+        loadAcIntelligence();
+        loadAcThreatMl();
+      }
+    });
+  });
 }
 
 async function loadHubStreamStatus(root) {
@@ -2048,10 +2173,15 @@ async function syncAcWatchSessions() {
       });
     }
     for (const sid of [...acState.watches.keys()]) {
-      if (!serverIds.has(sid)) acState.watches.delete(sid);
+      if (!serverIds.has(sid)) {
+        detachWatchStream(sid);
+        acState.watches.delete(sid);
+      }
     }
     acRenderWatchGrid();
-    if (acState.watches.size > 0) scheduleWatchPoll();
+    for (const [sid, w] of acState.watches) {
+      if (!acState.watchStoppers.has(sid)) attachWatchStream(sid, w);
+    }
   } catch (_) {}
 }
 
@@ -2267,12 +2397,18 @@ function acRenderPlayers(players) {
 
   const rows = filtered.map((p) => {
     const trust = p.trust ?? 100;
-    const rowClass = trust < 40 ? ' class="ac-row-danger"' : '';
+    const combat = p.combat || {};
+    const combatLabel = combat.hits
+      ? `${combat.headshotPct ?? 0}% HS · ${combat.avgDist ?? 0}m`
+      : '—';
+    const combatClass = (combat.risk ?? 0) >= 60 ? 'ac-trust-low' : (combat.risk ?? 0) >= 35 ? 'ac-trust-mid' : 'ac-trust-good';
+    const rowClass = trust < 40 || (combat.risk ?? 0) >= 70 ? ' class="ac-row-danger"' : '';
     return `<tr${rowClass}>
       <td>${esc(p.name)}</td>
       <td>#${p.id}</td>
       <td><span class="ac-trust ${acTrustClass(trust)}">${trust}</span></td>
       <td>${p.strikes ?? 0}</td>
+      <td><span class="ac-trust ${combatClass}" title="Risk ${combat.risk ?? 0} · ${combat.hits ?? 0} hits">${esc(combatLabel)}</span></td>
       <td><code class="ac-fp">${esc(p.fingerprint || '—')}</code></td>
       <td>${p.ping ?? 0}ms</td>
       <td class="ac-actions">
@@ -2288,7 +2424,7 @@ function acRenderPlayers(players) {
   }).join('');
 
   el('ac-players-wrap').innerHTML = rows
-    ? `<table><thead><tr><th>Name</th><th>ID</th><th>Trust</th><th>Strikes</th><th>FP</th><th>Ping</th><th>Actions</th></tr></thead><tbody>${rows}</tbody></table>`
+    ? `<table><thead><tr><th>Player</th><th>Server ID</th><th>Trust score</th><th>Strikes</th><th>Combat stats</th><th>Fingerprint</th><th>Ping</th><th>Quick actions</th></tr></thead><tbody>${rows}</tbody></table>`
     : `<p class="hint">${players.length ? 'No players match your search.' : 'No players synced — restart shaderp-ac and verify shade:acApiKey matches AC_API_KEY on Render.'}</p>`;
   acBindPlayerActions();
 }
@@ -2486,6 +2622,67 @@ function acRenderEconomy(alerts) {
   });
 }
 
+async function loadAcIntelligence() {
+  const statsEl = el('ac-intel-stats');
+  const fragEl = el('ac-fragment-wrap');
+  if (!statsEl) return;
+  try {
+    const res = await fetch('/api/ac/admin/intelligence');
+    if (!res.ok) {
+      statsEl.innerHTML = '<p class="hint">Intelligence sync unavailable</p>';
+      return;
+    }
+    const { intelligence: i } = await res.json();
+    statsEl.innerHTML = [
+      stat('Ghost peds', i.ghostsActive ?? 0),
+      stat('Ghost hits', i.ghostHits ?? 0),
+      stat('PVS culled', i.pvsCulledPairs ?? 0),
+      stat('Rollbacks', i.movementRollbacks ?? 0),
+      stat('Physics flags', i.physicsFlags ?? 0),
+      stat('Tar-pits', i.tarpitSessions ?? 0),
+      stat('Biometrics', i.biometricsSamples ?? 0),
+    ].join('');
+    const hosts = Object.entries(i.fragmentHosts || {});
+    if (fragEl) {
+      fragEl.innerHTML = hosts.length
+        ? `<div class="ac-fragment-grid">${hosts.map(([n, on]) =>
+            `<span class="pill ${on ? 'ok' : ''}">${esc(n)} ${on ? '● live' : '○ idle'}</span>`
+          ).join('')}</div>`
+        : '<p class="hint">Fragment hosts appear when core resources load — ox_inventory, pma-voice, oxmysql, es_extended, ox_lib, etc.</p>';
+    }
+  } catch (err) {
+    console.error(err);
+    statsEl.innerHTML = '<p class="hint">Could not load intelligence stats</p>';
+  }
+}
+
+async function loadAcThreatMl() {
+  const wrap = el('ac-ml-wrap');
+  if (!wrap) return;
+  try {
+    const res = await fetch('/api/ac/admin/threat-ml');
+    if (!res.ok) {
+      wrap.innerHTML = '<p class="hint">Threat ML unavailable</p>';
+      return;
+    }
+    const data = await res.json();
+    const rows = data.flagged || [];
+    wrap.innerHTML = rows.length
+      ? `<table class="logs-table"><thead><tr><th>Player</th><th>Score</th><th>Reasons</th><th>Narrative</th></tr></thead><tbody>
+        ${rows.map((r) => `<tr>
+          <td>${esc(r.playerName || r.playerId)}</td>
+          <td><span class="pill ${r.score >= 80 ? 'danger' : 'warn'}">${r.score}</span></td>
+          <td class="log-summary">${esc((r.reasons || []).join('; '))}</td>
+          <td class="hint">${esc(r.narrative || '—')}</td>
+        </tr>`).join('')}
+        </tbody></table>`
+      : `<p class="hint">No ML anomalies yet (${data.playerCount ?? 0} players in model)</p>`;
+  } catch (err) {
+    console.error(err);
+    wrap.innerHTML = '<p class="hint">ML load failed</p>';
+  }
+}
+
 async function loadAcPanel(silent = false) {
   if (!hasRole('staff')) return;
   try {
@@ -2519,10 +2716,10 @@ async function loadAcPanel(silent = false) {
     acSetServerStatus(statusData);
     const stats = playersData.stats || statusData.stats || {};
     el('ac-stats').innerHTML = [
-      stat('Online', stats.online ?? playersData.players?.length ?? 0),
-      stat('Max slots', stats.maxSlots ?? '—'),
-      stat('Active watches', statusData.activeSessions ?? 0),
-      stat('Last sync', playersData.lastSync ? new Date(playersData.lastSync).toLocaleTimeString() : '—'),
+      stat('Players online', stats.online ?? playersData.players?.length ?? 0),
+      stat('Server capacity', stats.maxSlots ?? '—'),
+      stat('Live watches', statusData.activeSessions ?? 0),
+      stat('Last AC sync', playersData.lastSync ? new Date(playersData.lastSync).toLocaleTimeString() : '—'),
     ].join('');
 
     acRenderPlayers(playersData.players || []);
@@ -2588,6 +2785,8 @@ async function loadAcPanel(silent = false) {
 
     acRenderThreatSummary();
     syncAcWatchSessions();
+    loadAcIntelligence();
+    loadAcThreatMl();
     loadAcSignatures();
     loadAcToggles();
     loadAcSignaturePresets();
@@ -2616,9 +2815,23 @@ function setupAcPanel() {
   closeAcBanModal();
   closeEvidenceReplay();
   el('ac-refresh')?.addEventListener('click', () => loadAcPanel());
+  el('ac-ml-refresh')?.addEventListener('click', () => { loadAcThreatMl(); loadAcIntelligence(); });
+  el('ac-ml-autoban')?.addEventListener('click', async () => {
+    if (!hasRole('admin')) return toast('Admin only', true);
+    if (!confirm('Queue ban commands for top 5 ML anomalies?')) return;
+    try {
+      const res = await fetch('/api/ac/admin/threat-ml/auto-ban', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: '{}' });
+      if (!res.ok) throw new Error(await res.text());
+      const data = await res.json();
+      toast(`Queued ${(data.queued || []).length} ban(s)`);
+    } catch (e) {
+      toast('Auto-ban failed', true);
+    }
+  });
   el('ac-watch-suspicious')?.addEventListener('click', () => watchSuspiciousPlayers());
   el('ac-stop-all-watch')?.addEventListener('click', () => stopAllAcWatches());
-  el('ac-frame-close')?.addEventListener('click', () => { el('ac-frame-wrap').hidden = true; });
+  el('ac-frame-close')?.addEventListener('click', acHideFrameExpanded);
+  acHideFrameExpanded();
   el('ac-auto-refresh')?.addEventListener('change', () => {
     if (document.querySelector('#panel-anticheat.active')) startAcAutoRefresh();
     else stopAcAutoRefresh();
@@ -2786,6 +2999,7 @@ async function init() {
   setInterval(queueHeartbeat, 45000);
   updateStatusBar();
   initLoadingScreen();
+  initAcTabs();
 
   document.body.addEventListener('click', (e) => {
     const join = e.target.closest('[data-queue-action="join"]');

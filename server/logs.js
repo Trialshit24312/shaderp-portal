@@ -16,6 +16,9 @@ const HIGH_TYPES = new Set([
   'player_disconnect',
   'client_error',
   'server_error',
+  'ac_detection',
+  'ac_tamper',
+  'ac_ban',
 ]);
 
 function defaultState() {
@@ -137,6 +140,9 @@ export function createLogManager(options = {}) {
           rows = rows.filter((e) => ['server_hitch', 'client_lag_spike', 'client_lag_warn', 'lag_spike'].includes(e.type));
         } else if (type === 'errors') {
           rows = rows.filter((e) => ['client_error', 'server_error'].includes(e.type));
+        } else if (type === 'anticheat') {
+          rows = rows.filter((e) => ['ac_detection', 'ac_tamper', 'ac_ban', 'ac_system'].includes(e.type)
+            || (e.classification || '').startsWith('ac_'));
         } else {
           rows = rows.filter((e) => e.type === type);
         }
@@ -194,7 +200,7 @@ export function createLogManager(options = {}) {
 }
 
 export function logsApiKeyValid(req, env) {
-  const key = req.headers['x-logs-key'] || req.headers['x-queue-key'] || req.headers['x-api-key'] || req.query.key;
-  const expected = env.LOGS_API_KEY || env.QUEUE_API_KEY || env.SYNC_API_KEY;
+  const key = req.headers['x-logs-key'] || req.headers['x-queue-key'] || req.headers['x-api-key'] || req.headers['x-ac-key'] || req.query.key;
+  const expected = env.LOGS_API_KEY || env.QUEUE_API_KEY || env.SYNC_API_KEY || env.AC_API_KEY;
   return expected && key === expected;
 }

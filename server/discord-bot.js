@@ -25,7 +25,7 @@ import {
   runTicketSetup,
   closeTicketWithTranscript,
 } from './discord-ticket-helpers.js';
-import { applyGuildTemplate, applyAllTemplates } from './discord-guild-setup.js';
+import { applyGuildTemplate, applyAllTemplates, auditGuildTemplate } from './discord-guild-setup.js';
 import { GUILD_KEYS, GUILD_TEMPLATES } from './discord-guild-templates.js';
 
 function staffRoleOk(member, roleMap, ownerIds, userId, minRole = 'staff') {
@@ -107,7 +107,10 @@ function buildAllCommands() {
       sub.setName('setup').setDescription('Apply channel/role template to a guild (owner)')
         .addStringOption((o) => o.setName('template').setDescription('Which server template').setRequired(true).addChoices(...guildChoices)))
     .addSubcommand((sub) =>
-      sub.setName('setup-all').setDescription('Setup ALL configured guilds from env (owner)'));
+      sub.setName('setup-all').setDescription('Setup ALL configured guilds from env (owner)'))
+    .addSubcommand((sub) =>
+      sub.setName('audit').setDescription('Audit guild vs template — shows missing roles/channels (owner)')
+        .addStringOption((o) => o.setName('template').setDescription('Which server template').setRequired(true).addChoices(...guildChoices)));
 
   return [ac.toJSON(), ticket.toJSON(), security.toJSON(), discordSetup.toJSON()];
 }
@@ -375,6 +378,18 @@ export async function startShadeDiscordBot({ acManager, ticketManager, portalEnv
           });
           return;
         }
+        if (sub === 'audit') {
+          const templateKey = interaction.options.getString('template');
+          await interaction.deferReply({ ephemeral: true });
+          const audit = await auditGuildTemplate(interaction.guild, templateKey);
+          await interaction.editReply({
+            content: `📋 **${templateKey}** audit — **${interaction.guild.name}**\n`
+              + `Missing roles (${audit.roles.missing.length}): ${audit.roles.missing.slice(0, 8).join(', ') || 'none'}\n`
+              + `Missing categories (${audit.categories.missing.length}): ${audit.categories.missing.slice(0, 4).join(', ') || 'none'}\n`
+              + `Legacy to remove: ${audit.categories.legacy.slice(0, 4).join(', ') || 'none'}`,
+          });
+          return;
+        }
         if (sub === 'setup') {
           const templateKey = interaction.options.getString('template');
           await interaction.deferReply({ ephemeral: true });
@@ -382,7 +397,8 @@ export async function startShadeDiscordBot({ acManager, ticketManager, portalEnv
           guildMonitor?.recordSetup(templateKey, report);
           await interaction.editReply({
             content: `✅ **${templateKey}** setup on **${interaction.guild.name}**\n`
-              + `Roles +${report.rolesCreated} · Categories +${report.categoriesCreated} · Channels +${report.channelsCreated}`
+              + `Roles +${report.rolesCreated} (~${report.rolesUpdated} synced) · Categories +${report.categoriesCreated} · Channels +${report.channelsCreated}\n`
+              + `Permissions synced: ${report.permissionsSynced} · Legacy removed: ${report.legacyRemoved}`
               + (report.errors.length ? `\n⚠️ ${report.errors.slice(0, 3).join('; ')}` : ''),
           });
           return;
@@ -396,7 +412,7 @@ export async function startShadeDiscordBot({ acManager, ticketManager, portalEnv
           }
           await interaction.editReply({
             content: results.map((r) => r.ok
-              ? `✅ **${r.key}** — +${r.report.channelsCreated} channels`
+              ? `✅ **${r.key}** — +${r.report.channelsCreated} ch · ${r.report.permissionsSynced} perm syncs · -${r.report.legacyRemoved} legacy`
               : `❌ **${r.key}** — ${r.error}`).join('\n'),
           });
           return;

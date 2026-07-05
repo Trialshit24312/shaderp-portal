@@ -19,6 +19,12 @@ import { loadDashboardData, normalizeUpdatePasses, extractPassHighlights } from 
 import { createQueueManager, queueApiKeyValid } from './queue.js';
 import { createLogManager, logsApiKeyValid } from './logs.js';
 import { createAcManager, registerAcRoutes } from './ac.js';
+import { initDb, loadAcState, saveAcState, getDbMode } from './db.js';
+import { initRedis, getRedisMode } from './redis.js';
+import { bootstrapTrustCache } from './trust-cache.js';
+import { registerThreatMlRoutes } from './threat-ml.js';
+import { registerEconomyForensicsRoutes } from './economy-forensics.js';
+import { registerWebrtcRoutes, cleanupWebrtcSessions, registerIceConfigRoute } from './webrtc-signaling.js';
 import { createTicketManager, registerTicketRoutes } from './tickets.js';
 import { createAuditManager, registerAuditRoutes } from './audit.js';
 import { createGuildMonitor, registerGuildMonitorRoutes } from './discord-guild-monitor.js';
@@ -46,7 +52,16 @@ const serverLogs = createLogManager({
 });
 const auditManager = createAuditManager({ logManager: serverLogs });
 const guildMonitor = createGuildMonitor({ portalEnv });
-const acManager = createAcManager({ enabled: portalEnv.AC_ENABLED, auditManager });
+const dbInfo = await initDb();
+const redisInfo = await initRedis();
+await bootstrapTrustCache();
+const acManager = createAcManager({
+  enabled: portalEnv.AC_ENABLED,
+  auditManager,
+  logManager: serverLogs,
+  initialState: await loadAcState(),
+  persistAsync: saveAcState,
+});
 const ticketManager = createTicketManager({ acManager, auditManager });
 
 const app = express();
@@ -385,6 +400,11 @@ app.get('/api/logs/:id', requireRole('staff'), (req, res) => {
 });
 
 registerAcRoutes(app, { acManager, portalEnv, requireRole });
+registerThreatMlRoutes(app, { requireRole, acManager, portalEnv });
+registerEconomyForensicsRoutes(app, { requireRole, portalEnv });
+registerWebrtcRoutes(app, { requireRole });
+registerIceConfigRoute(app, { requireRole, portalEnv });
+setInterval(() => cleanupWebrtcSessions(), 120000);
 registerTicketRoutes(app, { ticketManager, acManager, portalEnv, requireRole, auditManager });
 registerAuditRoutes(app, { auditManager, requireRole });
 registerGuildMonitorRoutes(app, { guildMonitor, requireRole, portalEnv });
@@ -392,11 +412,33 @@ registerGuildMonitorRoutes(app, { guildMonitor, requireRole, portalEnv });
 app.get('/api/portal/version', (_req, res) => {
   res.setHeader('Cache-Control', 'no-cache, must-revalidate');
   res.json({
-    version: '4.1.0',
+    version: '4.8.1',
     acEnabled: acManager.isEnabled(),
-    features: ['anticheat', 'multi-watch', 'evidence-replay', 'tickets-web', 'discord-hub', 'multi-guild-setup', 'guild-monitors', 'v4-theme', 'persistent-auth', 'command-center'],
+    dbMode: getDbMode(),
+    redisMode: getRedisMode(),
+    features: ['anticheat', 'multi-watch', 'webrtc-live', 'trust-redis', 'threat-ml', 'economy-forensics', 'evidence-replay', 'tickets-web', 'discord-hub', 'multi-guild-setup', 'guild-monitors', 'v4-theme', 'persistent-auth', 'command-center', 'webrtc-signaling', 'postgres-optional', 'turn-ice', 'ollama-optional', 'pvs-culling', 'ghost-honeypot', 'movement-sim', 'physics-validator', 'event-tarpit', 'fragment-bridge', 'unified-ac-logs', 'dom-poison'],
   });
 });
+
+if (portalEnv.AC_ENABLED && process.env.AC_ML_AUTO_BAN !== '0') {
+  const mlInterval = Number(process.env.AC_ML_AUTO_BAN_MS) || 300000;
+  setInterval(async () => {
+    try {
+      const { scoreAllPlayers } = await import('./threat-ml.js');
+      const threshold = Number(process.env.AC_ML_THRESHOLD) || 72;
+      const flagged = scoreAllPlayers(threshold);
+      for (const f of flagged.slice(0, 3)) {
+        acManager.queueBanCommand?.({
+          playerId: Number(f.playerId),
+          reason: `ML isolation anomaly ${f.score}: ${f.reasons[0] || 'behavior drift'}`,
+          requestedBy: 'threat-ml-auto',
+        });
+      }
+    } catch (err) {
+      console.error('[threat-ml] auto-ban tick failed:', err.message);
+    }
+  }, mlInterval);
+}
 
 app.use((req, res, next) => {
   if (/\.(js|css|html)$/.test(req.path)) {
@@ -425,6 +467,8 @@ app.listen(PORT, '0.0.0.0', () => {
   console.log(`Web queue: ${webQueue.isEnabled() ? 'enabled' : 'disabled'}${portalEnv.QUEUE_API_KEY ? '' : ' (set QUEUE_API_KEY on Render)'}`);
   console.log(`Server logs: ${serverLogs.isEnabled() ? 'enabled' : 'disabled'} (owner panel)`);
   console.log(`Anti-cheat API: ${acManager.isEnabled() ? 'enabled' : 'disabled'}${portalEnv.AC_API_KEY ? '' : ' (set AC_API_KEY on Render)'}`);
+  console.log(`AC storage: ${getDbMode()}${dbInfo.mode === 'postgres' ? '' : ' (set DATABASE_URL for PostgreSQL)'}`);
+  console.log(`Trust cache: ${getRedisMode()}${redisInfo.mode === 'redis' ? '' : ' (set REDIS_URL for Redis)'}`);
   startShadeDiscordBot({ acManager, ticketManager, portalEnv, roleMap, logManager: serverLogs, guildMonitor }).catch((err) => {
     console.error('Discord bot failed to start:', err.message);
   });

@@ -16,6 +16,16 @@ services:
         value: "1520316047146746006"
       - key: DISCORD_GUILD_ID
         value: "1357838976299565087"
+      - key: DISCORD_GUILD_EMS_ID
+        value: "1474128332407705805"
+      - key: DISCORD_GUILD_DOJ_ID
+        value: "1482426392132980738"
+      - key: DISCORD_GUILD_JOBS_ID
+        value: "1505960227466641608"
+      - key: DISCORD_GUILD_APPEALS_ID
+        value: "1523085526758985878"
+      - key: DISCORD_GUILDS
+        value: "1357838976299565087,1474128332407705805,1482426392132980738,1505960227466641608,1523085526758985878"
       - key: DISCORD_CALLBACK_URL
         value: https://shaderp-website.onrender.com/auth/discord/callback
       - key: DISCORD_INVITE_URL

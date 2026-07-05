@@ -7,6 +7,8 @@ import path from 'path';
 import { fileURLToPath } from 'url';
 import { canUnbanDiscordUser } from './unban.js';
 import { hasMinRole } from './roles.js';
+import { updateTrustFromSync, updateTrustOnDetection } from './trust-cache.js';
+import { ingestPlayerSync } from './threat-ml.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const DATA_DIR = path.join(__dirname, '..', 'data');
@@ -19,6 +21,7 @@ const MAX_ECONOMY_ALERTS = 150;
 const FRAME_TTL_MS = 120_000;
 const MAX_ACTIVE_WATCHES = 4;
 const MAX_EVIDENCE_CLIPS = 8;
+const MAX_TAMPER_ALERTS = 100;
 
 export const SIGNATURE_PRESETS = {
   'ShadeRP 2026 Menus': {
@@ -60,6 +63,7 @@ function defaultState() {
     commandLog: [],
     economyAlerts: [],
     evidence: {},
+    tamperAlerts: [],
   };
 }
 
@@ -313,12 +317,47 @@ function acApiKeyValid(req, portalEnv) {
   return !!expected && key === expected;
 }
 
-export function createAcManager({ enabled = true, auditManager } = {}) {
-  let state = loadState();
+function acLogIngest(logManager, type, entry) {
+  if (!logManager?.ingest) return;
+  const severity = entry.priority === 'critical' ? 'critical' : (type === 'ac_detection' ? 'high' : 'medium');
+  logManager.ingest({
+    type,
+    iso: new Date().toISOString(),
+    timestamp: Math.floor(Date.now() / 1000),
+    data: {
+      severity,
+      classification: type,
+      reason: entry.detection || entry.reason || entry.message,
+      message: entry.detection || entry.message,
+      player: entry.playerId ? {
+        name: entry.playerName,
+        serverId: entry.playerId,
+      } : undefined,
+      trust: entry.trust,
+      detail: entry.details || entry.detail,
+      resource: 'shaderp-ac',
+    },
+    labels: { source: 'shaderp-ac' },
+  });
+}
+
+export function createAcManager({ enabled = true, auditManager, logManager, initialState = null, persistAsync = null } = {}) {
+  let state = initialState ? { ...defaultState(), ...initialState } : loadState();
+  let persistTimer = null;
 
   function persist() {
     pruneFrames(state);
-    saveState(state);
+    if (persistAsync) {
+      if (persistTimer) clearTimeout(persistTimer);
+      persistTimer = setTimeout(() => {
+        persistAsync(state).catch((err) => {
+          console.error('[ac] async persist failed, falling back to JSON:', err.message);
+          saveState(state);
+        });
+      }, 200);
+    } else {
+      saveState(state);
+    }
   }
 
   function createSession(playerId, playerName, requestedBy) {
@@ -364,6 +403,8 @@ export function createAcManager({ enabled = true, auditManager } = {}) {
       state.server.players = payload.players || [];
       state.server.stats = payload.stats || {};
       state.server.lastSync = now();
+      updateTrustFromSync(state.server.players).catch(() => {});
+      ingestPlayerSync(state.server.players);
       persist();
     },
 
@@ -403,22 +444,69 @@ export function createAcManager({ enabled = true, auditManager } = {}) {
         state.detections.length = MAX_DETECTIONS;
       }
       const hook = process.env.AC_DISCORD_WEBHOOK;
+      const isCritical = entry.priority === 'critical' || String(entry.detection || '').includes('Tamper');
       if (hook) {
         fetch(hook, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
             username: 'ShadeRP Anti-Cheat',
+            content: isCritical ? '@here AC tamper / critical detection' : undefined,
             embeds: [{
-              title: '🚨 Detection',
+              title: isCritical ? '🛑 AC Tamper / Critical' : '🚨 Detection',
               description: `**${entry.playerName || '?'}** — \`${entry.detection || 'unknown'}\`${entry.trust != null ? ` · trust **${entry.trust}**` : ''}`,
-              color: 15158332,
+              color: isCritical ? 0xff1744 : 15158332,
               timestamp: new Date().toISOString(),
             }],
           }),
         }).catch(() => {});
       }
       persist();
+      updateTrustOnDetection({
+        playerId: entry.playerId,
+        playerName: entry.playerName,
+        trust: entry.trust,
+      }).catch(() => {});
+      acLogIngest(logManager, 'ac_detection', entry);
+    },
+
+    pushTamperAlert(entry) {
+      const row = {
+        ...entry,
+        at: entry.at || now(),
+        id: entry.id || `tamper_${now()}_${Math.random().toString(36).slice(2, 8)}`,
+      };
+      state.tamperAlerts = state.tamperAlerts || [];
+      state.tamperAlerts.unshift(row);
+      if (state.tamperAlerts.length > MAX_TAMPER_ALERTS) {
+        state.tamperAlerts.length = MAX_TAMPER_ALERTS;
+      }
+      this.pushDetection({
+        playerId: row.playerId,
+        playerName: row.playerName,
+        detection: 'AC Tamper',
+        trust: row.trust,
+        evidenceId: row.evidenceId,
+        priority: 'critical',
+        details: { reason: row.reason },
+      });
+      acLogIngest(logManager, 'ac_tamper', {
+        playerId: row.playerId,
+        playerName: row.playerName,
+        detection: 'AC Tamper',
+        reason: row.reason,
+        trust: row.trust,
+        priority: 'critical',
+      });
+      persist();
+    },
+
+    getIntelligence() {
+      return state.server?.stats?.intelligence || {};
+    },
+
+    getTamperAlerts(limit = 20) {
+      return (state.tamperAlerts || []).slice(0, limit);
     },
 
     pushBan(entry) {
@@ -755,6 +843,10 @@ export function createAcManager({ enabled = true, auditManager } = {}) {
       persist();
     },
 
+    queueBanCommand({ playerId, reason, requestedBy }) {
+      this.banPlayer(playerId, reason, requestedBy || 'threat-ml');
+    },
+
     snapshotPlayer(playerId, requestedBy) {
       const requestId = `snap_${now()}_${playerId}`;
       state.commands.push({
@@ -972,7 +1064,7 @@ export function createAcManager({ enabled = true, auditManager } = {}) {
     getThreatSummary() {
       const players = state.server.players || [];
       const highRisk = players
-        .filter((p) => (p.trust ?? 100) < 55)
+        .filter((p) => (p.trust ?? 100) < 55 || (p.combat?.risk ?? 0) >= 60)
         .sort((a, b) => (a.trust ?? 100) - (b.trust ?? 100))
         .slice(0, 8);
       const detectionsByType = {};
@@ -990,6 +1082,8 @@ export function createAcManager({ enabled = true, auditManager } = {}) {
         detectionTotal: (state.detections || []).length,
         economyAlerts: (state.economyAlerts || []).length,
         activeWatches: Object.values(state.sessions || {}).filter((s) => s.active).length,
+        tamperAlerts: (state.tamperAlerts || []).slice(0, 5),
+        recentTamper: (state.tamperAlerts || [])[0] || null,
       };
     },
 
@@ -1080,6 +1174,12 @@ export function registerAcRoutes(app, { acManager, portalEnv, requireRole }) {
     res.json({ ok: true });
   });
 
+  app.post('/api/ac/server/tamper-alert', (req, res) => {
+    if (!acApiKeyValid(req, portalEnv)) return res.status(401).json({ error: 'Invalid AC key' });
+    acManager.pushTamperAlert(req.body || {});
+    res.json({ ok: true });
+  });
+
   app.post('/api/ac/server/ban', (req, res) => {
     if (!acApiKeyValid(req, portalEnv)) return res.status(401).json({ error: 'Invalid AC key' });
     acManager.pushBan(req.body || {});
@@ -1098,7 +1198,16 @@ export function registerAcRoutes(app, { acManager, portalEnv, requireRole }) {
       const result = await acManager.screenJoin(req.body || {}, portalEnv);
       res.json(result);
     } catch (err) {
-      res.status(500).json({ allowed: true, warning: 'join-screen error, fail-open' });
+      const failClosed = portalEnv.AC_JOIN_FAIL_CLOSED === '1';
+      res.status(failClosed ? 503 : 500).json({
+        allowed: !failClosed,
+        failClosed,
+        reason: failClosed
+          ? 'ShadeRP security screening is temporarily unavailable'
+          : undefined,
+        code: failClosed ? 'PORTAL_DOWN' : undefined,
+        warning: failClosed ? undefined : 'join-screen error, fail-open',
+      });
     }
   });
 
@@ -1145,6 +1254,10 @@ export function registerAcRoutes(app, { acManager, portalEnv, requireRole }) {
 
   app.get('/api/ac/admin/status', requireRole('staff'), (_req, res) => {
     res.json(acManager.getStatus());
+  });
+
+  app.get('/api/ac/admin/intelligence', requireRole('staff'), (_req, res) => {
+    res.json({ intelligence: acManager.getIntelligence() });
   });
 
   app.get('/api/ac/admin/detections', requireRole('staff'), (req, res) => {
@@ -1384,6 +1497,10 @@ export function registerAcRoutes(app, { acManager, portalEnv, requireRole }) {
 
   app.get('/api/ac/admin/threat-summary', requireRole('staff'), (_req, res) => {
     res.json(acManager.getThreatSummary());
+  });
+
+  app.get('/api/ac/admin/tamper-alerts', requireRole('staff'), (req, res) => {
+    res.json({ alerts: acManager.getTamperAlerts(parseInt(req.query.limit, 10) || 25) });
   });
 
   app.get('/api/ac/admin/signature-presets', requireRole('staff'), (_req, res) => {

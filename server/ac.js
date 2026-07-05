@@ -705,6 +705,16 @@ export function createAcManager({ enabled = true, auditManager, logManager, init
 
     async screenJoin(payload, portalEnv) {
       const { identifiers, playerName } = payload || {};
+      const fastJoin = portalEnv.AC_JOIN_FAST_SCREEN === '1'
+        || portalEnv.AC_JOIN_FAST_SCREEN === 'true';
+
+      if (healStaleFlags(state)) {
+        rebuildFlagged(state);
+        persist();
+      } else {
+        rebuildFlagged(state);
+      }
+
       const global = this.checkGlobalBan(identifiers);
       if (global.banned) {
         return {
@@ -714,11 +724,8 @@ export function createAcManager({ enabled = true, auditManager, logManager, init
         };
       }
 
-      if (healStaleFlags(state)) {
-        rebuildFlagged(state);
-        persist();
-      } else {
-        rebuildFlagged(state);
+      if (fastJoin) {
+        return { allowed: true, playerName: playerName || null, fastJoin: true };
       }
 
       const flagged = state.flagged || { discordIds: [], steamIds: [], ipAddresses: [] };
@@ -765,7 +772,7 @@ export function createAcManager({ enabled = true, auditManager, logManager, init
 
       const botToken = portalEnv.AC_DISCORD_BOT_TOKEN;
       const communityGuild = portalEnv.AC_DISCORD_GUILD_ID;
-      const discordTimeout = Number(portalEnv.AC_JOIN_DISCORD_TIMEOUT_MS) || 4000;
+      const discordTimeout = Number(portalEnv.AC_JOIN_DISCORD_TIMEOUT_MS) || 2000;
 
       if (botToken && discordId && communityGuild) {
         const banned = await withTimeout(

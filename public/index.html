@@ -4,15 +4,18 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <meta name="description" content="ShadeRP — QBCore serious roleplay portal, queue, staff tools, and live anti-cheat dashboard." />
-  <meta name="theme-color" content="#060608" />
+  <meta name="theme-color" content="#040406" />
   <title>ShadeRP Portal</title>
   <link rel="icon" href="/assets/shaderp-logo.png" type="image/png" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="/styles.css?v=6.0.0" />
-  <link rel="stylesheet" href="/v4-theme.css?v=6.0.0" />
-  <link rel="stylesheet" href="/ac-command.css?v=6.0.0" />
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&family=Plus+Jakarta+Sans:wght@500;600;700;800&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="/styles.css?v=7.0.0" />
+  <link rel="stylesheet" href="/v4-theme.css?v=7.0.0" />
+  <link rel="stylesheet" href="/portal-v6.css?v=7.0.0" />
+  <link rel="stylesheet" href="/ac-command.css?v=7.0.0" />
+  <link rel="stylesheet" href="/team-theme.css?v=7.0.0" />
+  <link rel="stylesheet" href="/shade-unified.css?v=7.0.0" />
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js" defer></script>
 </head>
 <body>
@@ -44,6 +47,7 @@
   <main class="content">
     <header class="topbar">
       <button type="button" class="menu-toggle" id="menu-toggle" aria-label="Menu">☰</button>
+      <span class="topbar-page" id="topbar-page" aria-live="polite">Home</span>
       <div class="search-wrap">
         <input type="search" id="global-search" placeholder="Search…" autocomplete="off" />
       </div>
@@ -54,50 +58,71 @@
 
     <!-- PUBLIC -->
     <section id="panel-home" class="panel active" data-min-role="guest">
-      <div class="server-strip" id="server-strip"></div>
-      <div class="hero">
-        <div class="hero-text">
-          <span class="pill">QBCore · Serious RP</span>
-          <h2>Welcome to <span class="accent" id="hero-name">ShadeRP</span></h2>
-          <p id="hero-desc">Your hub for joining the server, reading rules, browsing jobs, and managing staff tools — including live anti-cheat monitoring.</p>
-          <div class="hero-actions">
-            <button type="button" class="btn primary" data-panel="queue" id="hero-queue-btn">Join Queue</button>
-            <a id="hero-connect" href="#" class="btn ghost" data-panel="connect">How to connect</a>
-            <a id="hero-discord" href="#" class="btn ghost" target="_blank">Join Discord</a>
-            <a href="/auth/discord?returnTo=/queue" class="btn ghost" id="hero-login">Login</a>
+      <div class="vx-page vx-home">
+        <div class="server-strip" id="server-strip"></div>
+        <header class="vx-hero vx-home-hero reveal">
+          <div class="vx-hero-grid">
+            <div>
+              <p class="vx-kicker">QBCore · Serious RP</p>
+              <h1 class="vx-title">Welcome to <em id="hero-name">ShadeRP</em></h1>
+              <p class="vx-desc" id="hero-desc">Your hub for joining the server, reading rules, browsing jobs, and managing staff tools — including live anti-cheat monitoring.</p>
+              <div class="vx-hero-actions">
+                <button type="button" class="btn primary" data-panel="queue" id="hero-queue-btn">Join Queue</button>
+                <a id="hero-connect" href="#" class="btn ghost" data-panel="connect">How to connect</a>
+                <a id="hero-discord" href="#" class="btn ghost" target="_blank">Join Discord</a>
+                <a href="/auth/discord?returnTo=/queue" class="btn ghost" id="hero-login">Login</a>
+              </div>
+            </div>
+            <div class="vx-home-stats" id="hero-stats"></div>
+          </div>
+        </header>
+        <div id="home-queue-slot" class="queue-widget-host" data-queue-widget="hero"></div>
+        <div id="home-bridge" class="bridge-widget-host"></div>
+        <section class="vx-section reveal">
+          <header class="vx-section-head"><div><h2>Explore the portal</h2><p>Jump to rules, jobs, economy, and more</p></div></header>
+          <div class="vx-body"><div class="card-grid" id="feature-cards"></div></div>
+        </section>
+        <div class="vx-split reveal">
+          <div class="card whats-new-card">
+            <div class="card-head-row">
+              <h3>What's new</h3>
+              <span class="pill accent">Latest features</span>
+            </div>
+            <div id="whats-new-list" class="whats-new-grid"></div>
+          </div>
+          <div class="card latest-update-card">
+            <div class="card-head-row">
+              <h3>Latest update</h3>
+              <span class="pill accent" id="home-latest-ver">—</span>
+            </div>
+            <p class="latest-update-title" id="home-latest-title">—</p>
+            <p id="home-latest" class="latest-update-body">—</p>
+            <button type="button" class="btn ghost btn-sm" data-panel="updates">View all updates</button>
           </div>
         </div>
-        <div class="hero-stats" id="hero-stats"></div>
-      </div>
-      <div id="home-queue-slot" class="queue-widget-host" data-queue-widget="hero"></div>
-      <div class="card-grid" id="feature-cards"></div>
-      <div class="card whats-new-card" style="margin-top:1.25rem">
-        <div class="card-head-row">
-          <h3>What's new</h3>
-          <span class="pill accent">Latest features</span>
-        </div>
-        <div id="whats-new-list" class="whats-new-grid"></div>
-      </div>
-      <div class="card latest-update-card">
-        <div class="card-head-row">
-          <h3>Latest update</h3>
-          <span class="pill accent" id="home-latest-ver">—</span>
-        </div>
-        <p class="latest-update-title" id="home-latest-title">—</p>
-        <p id="home-latest" class="latest-update-body">—</p>
-        <button type="button" class="btn ghost btn-sm" data-panel="updates">View all updates</button>
       </div>
     </section>
 
     <section id="panel-rules" class="panel" data-min-role="guest">
-      <h2>Server rules</h2>
-      <p class="hint">Read before joining — full rules also posted in Discord.</p>
-      <div id="rules-list" class="stack"></div>
+      <div class="vx-page">
+        <header class="vx-hero compact reveal">
+          <p class="vx-kicker">Before you play</p>
+          <h1 class="vx-title">Server rules</h1>
+          <p class="vx-desc">Read before joining — full rules also posted in Discord.</p>
+        </header>
+        <div id="rules-list" class="stack"></div>
+      </div>
     </section>
 
     <section id="panel-faq" class="panel" data-min-role="guest">
-      <h2>FAQ</h2>
-      <div id="faq-list" class="stack"></div>
+      <div class="vx-page">
+        <header class="vx-hero compact reveal">
+          <p class="vx-kicker">Help center</p>
+          <h1 class="vx-title">FAQ</h1>
+          <p class="vx-desc">Common questions about joining, queue, and roleplay on ShadeRP.</p>
+        </header>
+        <div id="faq-list" class="stack"></div>
+      </div>
     </section>
 
     <section id="panel-credits" class="panel" data-min-role="guest">
@@ -105,75 +130,109 @@
     </section>
 
     <section id="panel-keybinds" class="panel" data-min-role="guest">
-      <h2>Keybinds</h2>
-      <div id="keybinds-table" class="table-wrap"></div>
+      <div class="vx-page">
+        <header class="vx-hero compact reveal">
+          <p class="vx-kicker">Controls</p>
+          <h1 class="vx-title">Keybinds</h1>
+          <p class="vx-desc">Default controls for inventory, phone, and core interactions.</p>
+        </header>
+        <div id="keybinds-table" class="table-wrap"></div>
+      </div>
     </section>
 
     <section id="panel-locations" class="panel" data-min-role="guest">
-      <h2>Locations</h2>
-      <p class="hint">Major businesses and job hubs across ShadeRP.</p>
-      <div id="locations-grid" class="card-grid three"></div>
+      <div class="vx-page">
+        <header class="vx-hero compact reveal">
+          <p class="vx-kicker">City map</p>
+          <h1 class="vx-title">Locations</h1>
+          <p class="vx-desc">Major businesses and job hubs across ShadeRP.</p>
+        </header>
+        <div id="locations-grid" class="card-grid three"></div>
+      </div>
     </section>
 
     <section id="panel-about" class="panel" data-min-role="guest">
-      <h2>About ShadeRP</h2>
-      <div class="card prose" id="about-content"></div>
+      <div class="vx-page">
+        <header class="vx-hero compact reveal">
+          <p class="vx-kicker">Our server</p>
+          <h1 class="vx-title">About ShadeRP</h1>
+        </header>
+        <div class="card prose" id="about-content"></div>
+      </div>
     </section>
 
     <section id="panel-jobs" class="panel" data-min-role="guest">
-      <h2>Jobs & activities</h2>
-      <p class="hint">Legal work, side hustles, and whitelisted departments.</p>
-      <div id="jobs-grid" class="card-grid three"></div>
-      <h3 class="section-sub">Whitelisted businesses</h3>
-      <p class="hint">Player-owned shops and departments managed in-city via pls_jobsystem.</p>
-      <div id="jobs-whitelist" class="chip-grid"></div>
+      <div class="vx-page">
+        <header class="vx-hero compact reveal">
+          <p class="vx-kicker">Careers</p>
+          <h1 class="vx-title">Jobs &amp; activities</h1>
+          <p class="vx-desc">Legal work, side hustles, and whitelisted departments.</p>
+        </header>
+        <div id="jobs-grid" class="card-grid three"></div>
+        <section class="vx-section">
+          <header class="vx-section-head"><div><h2>Whitelisted businesses</h2><p>Player-owned shops managed in-city via pls_jobsystem</p></div></header>
+          <div class="vx-body"><div id="jobs-whitelist" class="chip-grid"></div></div>
+        </section>
+      </div>
     </section>
 
     <section id="panel-queue" class="panel" data-min-role="guest">
-      <h2>Join the server</h2>
-      <p class="hint">Login with Discord, join the queue, then connect to FiveM when your slot is ready — same flow as LiquidRP.</p>
-      <div id="queue-page-slot" class="queue-widget-host" data-queue-widget="page"></div>
-      <div class="card" style="margin-top:1.25rem">
-        <h3>How it works</h3>
-        <ol class="queue-steps">
-          <li><strong>Login</strong> — Use Discord so we can match your FiveM account.</li>
-          <li><strong>Join queue</strong> — Click Join Queue and keep this tab open (or check back).</li>
-          <li><strong>Wait for ready</strong> — You'll see your position and get a sound when it's your turn.</li>
-          <li><strong>Connect</strong> — Click Connect to FiveM or use the cfx.re link on the Connect page.</li>
-        </ol>
-        <p class="hint">Discord must be linked in FiveM (Settings → Linked accounts). Staff can use Priority Queue.</p>
+      <div class="vx-page">
+        <header class="vx-hero compact reveal">
+          <p class="vx-kicker">Get in-game</p>
+          <h1 class="vx-title">Join the server</h1>
+          <p class="vx-desc">Login with Discord, join the queue, then connect to FiveM when your slot is ready.</p>
+        </header>
+        <div id="queue-page-slot" class="queue-widget-host" data-queue-widget="page"></div>
+        <div class="card reveal" style="margin-top:1.25rem">
+          <h3>How it works</h3>
+          <ol class="queue-steps">
+            <li><strong>Login</strong> — Use Discord so we can match your FiveM account.</li>
+            <li><strong>Join queue</strong> — Click Join Queue and keep this tab open (or check back).</li>
+            <li><strong>Wait for ready</strong> — You'll see your position and get a sound when it's your turn.</li>
+            <li><strong>Connect</strong> — Click Connect to FiveM or use the cfx.re link on the Connect page.</li>
+          </ol>
+          <p class="hint">Discord must be linked in FiveM (Settings → Linked accounts). Staff can use Priority Queue.</p>
+        </div>
       </div>
     </section>
 
     <section id="panel-connect" class="panel" data-min-role="guest">
-      <h2>Connect</h2>
-      <div id="connect-meta"></div>
-      <div id="connect-queue-slot" class="queue-widget-host" data-queue-widget="full"></div>
-      <div class="connect-grid">
-        <div class="card">
-          <h3>FiveM Direct Connect</h3>
-          <p class="mono copy-block" data-copy="cfx.re/join/YOUR-CODE" id="connect-cfx">cfx.re/join/YOUR-CODE</p>
-          <p class="hint">Set in shade-config/config/portal.lua then sync.</p>
+      <div class="vx-page">
+        <header class="vx-hero compact reveal">
+          <p class="vx-kicker">FiveM</p>
+          <h1 class="vx-title">Connect</h1>
+          <p class="vx-desc">Direct connect links, requirements, and queue status.</p>
+        </header>
+        <div id="connect-meta"></div>
+        <div id="connect-bridge" class="bridge-widget-host"></div>
+        <div id="connect-queue-slot" class="queue-widget-host" data-queue-widget="full"></div>
+        <div class="connect-grid">
+          <div class="card">
+            <h3>FiveM Direct Connect</h3>
+            <p class="mono copy-block" data-copy="cfx.re/join/YOUR-CODE" id="connect-cfx">cfx.re/join/YOUR-CODE</p>
+            <p class="hint">Set in shade-config/config/portal.lua then sync.</p>
+          </div>
+          <div class="card">
+            <h3>Community Portal</h3>
+            <p><a id="connect-portal-link" href="#" target="_blank" rel="noopener">Open portal</a></p>
+            <p class="hint">Jobs, updates, staff tools — login with Discord.</p>
+          </div>
+          <div class="card">
+            <h3>Discord</h3>
+            <p><a id="connect-discord-link" href="https://discord.gg/sbnu98HYAZ" target="_blank" rel="noopener">Join Discord</a></p>
+          </div>
         </div>
-        <div class="card">
-          <h3>Community Portal</h3>
-          <p><a id="connect-portal-link" href="#" target="_blank" rel="noopener">Open portal</a></p>
-          <p class="hint">Jobs, updates, staff tools — login with Discord.</p>
+        <div class="card reveal" style="margin-top:1rem">
+          <h3>Requirements</h3>
+          <ul class="check-list">
+            <li>Join the web queue on this site (Queue page) before connecting</li>
+            <li>Licensed GTA V + FiveM with Discord linked</li>
+            <li>Discord account in our server</li>
+            <li>Microphone for serious RP</li>
+            <li>Read rules before playing</li>
+          </ul>
         </div>
-        <div class="card">
-          <h3>Discord</h3>
-          <p><a id="connect-discord-link" href="https://discord.gg/sbnu98HYAZ" target="_blank" rel="noopener">Join Discord</a></p>
-        </div>
-      </div>
-      <div class="card" style="margin-top:1rem">
-        <h3>Requirements</h3>
-        <ul class="check-list">
-          <li>Join the web queue on this site (Queue page) before connecting</li>
-          <li>Licensed GTA V + FiveM with Discord linked</li>
-          <li>Discord account in our server</li>
-          <li>Microphone for serious RP</li>
-          <li>Read rules before playing</li>
-        </ul>
       </div>
     </section>
 
@@ -187,52 +246,74 @@
 
     <!-- MEMBER+ -->
     <section id="panel-overview" class="panel" data-min-role="member">
-      <h2>Server overview</h2>
-      <div class="stat-grid" id="stat-grid"></div>
-      <div class="split-panels">
-        <div class="card">
-          <div class="card-head"><h3>Latest server update</h3><span id="overview-pass-version" class="pill"></span></div>
-          <p id="overview-pass-title" class="accent-text"></p>
-          <div id="overview-latest-body" class="update-body prose"></div>
-          <button type="button" class="btn ghost btn-sm" data-panel="updates">Full update history</button>
+      <div class="vx-page">
+        <header class="vx-hero compact reveal">
+          <p class="vx-kicker">Member area</p>
+          <h1 class="vx-title">Server overview</h1>
+          <p class="vx-desc">Live stats, latest changelog, and deployment highlights.</p>
+        </header>
+        <div class="stat-grid" id="stat-grid"></div>
+        <div class="split-panels">
+          <div class="card reveal">
+            <div class="card-head"><h3>Latest server update</h3><span id="overview-pass-version" class="pill"></span></div>
+            <p id="overview-pass-title" class="accent-text"></p>
+            <div id="overview-latest-body" class="update-body prose"></div>
+            <button type="button" class="btn ghost btn-sm" data-panel="updates">Full update history</button>
+          </div>
+          <div class="card reveal">
+            <h3>Deploy notes</h3>
+            <pre id="latest-notes" class="notes-block compact"></pre>
+            <h3 style="margin-top:1rem">Highlights</h3>
+            <ul id="overview-highlights" class="check-list"></ul>
+          </div>
         </div>
-        <div class="card">
-          <h3>Deploy notes</h3>
-          <pre id="latest-notes" class="notes-block compact"></pre>
-          <h3 style="margin-top:1rem">Highlights</h3>
-          <ul id="overview-highlights" class="check-list"></ul>
+        <div class="card reveal" style="margin-top:1rem">
+          <h3>Recent enhancement passes</h3>
+          <div id="overview-timeline" class="timeline"></div>
         </div>
-      </div>
-      <div class="card" style="margin-top:1rem">
-        <h3>Recent enhancement passes</h3>
-        <div id="overview-timeline" class="timeline"></div>
       </div>
     </section>
 
     <section id="panel-updates" class="panel" data-min-role="guest">
-      <div class="panel-head-row updates-head">
-        <div>
-          <h2>Update history</h2>
-          <p class="hint">Synced from <code>tools/UPDATE-LOG.md</code> — same changelog is posted to Discord #updates. <span id="updates-sync-time"></span></p>
-        </div>
-        <div class="updates-toolbar">
-          <input type="search" id="updates-filter" class="updates-search" placeholder="Filter by version or keyword…" autocomplete="off" />
-          <button type="button" class="btn ghost btn-sm" id="updates-expand-all">Expand all</button>
-        </div>
+      <div class="vx-page">
+        <header class="vx-hero compact reveal">
+          <div class="vx-hero-grid" style="align-items:flex-start">
+            <div>
+              <p class="vx-kicker">Changelog</p>
+              <h1 class="vx-title">Update history</h1>
+              <p class="vx-desc">Synced from <code>tools/UPDATE-LOG.md</code> — same changelog posted to Discord #updates. <span id="updates-sync-time"></span></p>
+            </div>
+            <div class="updates-toolbar">
+              <input type="search" id="updates-filter" class="updates-search" placeholder="Filter by version or keyword…" autocomplete="off" />
+              <button type="button" class="btn ghost btn-sm" id="updates-expand-all">Expand all</button>
+            </div>
+          </div>
+        </header>
+        <div id="updates-list" class="updates-timeline"></div>
       </div>
-      <div id="updates-list" class="updates-timeline"></div>
     </section>
 
     <section id="panel-economy" class="panel" data-min-role="member">
-      <h2>Economy</h2>
-      <div class="stat-grid" id="economy-stats"></div>
-      <div class="card"><h3>Job salaries</h3><div id="salary-table" class="table-wrap"></div></div>
+      <div class="vx-page">
+        <header class="vx-hero compact reveal">
+          <p class="vx-kicker">In-city economy</p>
+          <h1 class="vx-title">Economy</h1>
+          <p class="vx-desc">Starting balances, paychecks, and job salary reference.</p>
+        </header>
+        <div class="stat-grid" id="economy-stats"></div>
+        <div class="card reveal"><h3>Job salaries</h3><div id="salary-table" class="table-wrap"></div></div>
+      </div>
     </section>
 
     <section id="panel-map" class="panel" data-min-role="member">
-      <h2>Map & locations</h2>
-      <p class="hint">In-game: <code>/hwcblips</code> · Staff teleport: <code>/gotobiz [id]</code></p>
-      <div id="map-table" class="table-wrap"></div>
+      <div class="vx-page">
+        <header class="vx-hero compact reveal">
+          <p class="vx-kicker">World</p>
+          <h1 class="vx-title">Map &amp; locations</h1>
+          <p class="vx-desc">In-game: <code>/hwcblips</code> · Staff teleport: <code>/gotobiz [id]</code></p>
+        </header>
+        <div id="map-table" class="table-wrap"></div>
+      </div>
     </section>
 
     <!-- STAFF+ -->
@@ -241,51 +322,79 @@
     </section>
 
     <section id="panel-analytics" class="panel" data-min-role="staff">
-      <h2>Analytics</h2>
-      <div class="stat-grid" id="analytics-stats"></div>
-      <div class="chart-row">
-        <div class="card chart-card"><h3>Traffic (14 days)</h3><canvas id="chart-traffic"></canvas></div>
-        <div class="card chart-card"><h3>By role</h3><canvas id="chart-roles"></canvas></div>
-      </div>
-      <div class="split-panels">
-        <div class="card"><h3>Top panels</h3><div id="top-panels" class="table-wrap"></div></div>
-        <div class="card"><h3>Recent activity</h3><div id="recent-events" class="event-list"></div></div>
+      <div class="vx-page">
+        <header class="vx-hero compact reveal">
+          <p class="vx-kicker">Staff insights</p>
+          <h1 class="vx-title">Analytics</h1>
+          <p class="vx-desc">Portal traffic, role breakdown, and panel usage.</p>
+        </header>
+        <div class="stat-grid" id="analytics-stats"></div>
+        <div class="chart-row">
+          <div class="card chart-card reveal"><h3>Traffic (14 days)</h3><canvas id="chart-traffic"></canvas></div>
+          <div class="card chart-card reveal"><h3>By role</h3><canvas id="chart-roles"></canvas></div>
+        </div>
+        <div class="split-panels">
+          <div class="card reveal"><h3>Top panels</h3><div id="top-panels" class="table-wrap"></div></div>
+          <div class="card reveal"><h3>Recent activity</h3><div id="recent-events" class="event-list"></div></div>
+        </div>
       </div>
     </section>
 
     <section id="panel-staff" class="panel" data-min-role="staff">
-      <h2>Staff hub</h2>
-      <div class="stat-grid" id="staff-stats"></div>
-      <div class="card-grid three" id="staff-tools"></div>
-      <div class="split-panels">
-        <div class="card"><h3>Quick restarts</h3><div id="staff-commands" class="command-grid"></div></div>
-        <div class="card"><h3>Server docs</h3><ul id="staff-docs" class="doc-list"></ul></div>
+      <div class="vx-page">
+        <header class="vx-hero compact reveal">
+          <p class="vx-kicker">Quick tools</p>
+          <h1 class="vx-title">Staff hub</h1>
+          <p class="vx-desc">Restarts, docs, and synced server changelog.</p>
+        </header>
+        <div class="stat-grid" id="staff-stats"></div>
+        <div class="card-grid three" id="staff-tools"></div>
+        <div class="split-panels">
+          <div class="card reveal"><h3>Quick restarts</h3><div id="staff-commands" class="command-grid"></div></div>
+          <div class="card reveal"><h3>Server docs</h3><ul id="staff-docs" class="doc-list"></ul></div>
+        </div>
+        <div class="card reveal" style="margin-top:1rem"><h3>Latest changes (from server sync)</h3><div id="staff-latest-update" class="update-body"></div></div>
       </div>
-      <div class="card" style="margin-top:1rem"><h3>Latest changes (from server sync)</h3><div id="staff-latest-update" class="update-body"></div></div>
     </section>
 
     <!-- ADMIN+ -->
     <section id="panel-resources" class="panel" data-min-role="admin">
-      <h2>Resources</h2>
-      <div class="stat-grid" id="resource-stats"></div>
-      <input type="search" id="resource-search" class="admin-search" placeholder="Filter resources..." autocomplete="off" />
-      <div class="split-panels">
-        <div class="card"><h3>Enabled <span id="enabled-count" class="badge"></span></h3><div id="enabled-list" class="chip-grid"></div></div>
-        <div class="card"><h3>Disabled <span id="disabled-count" class="badge warn"></span></h3><div id="disabled-list" class="stack compact"></div></div>
+      <div class="vx-page">
+        <header class="vx-hero compact reveal">
+          <p class="vx-kicker">Admin</p>
+          <h1 class="vx-title">Resources</h1>
+          <p class="vx-desc">Enabled and disabled FXServer resources from last sync.</p>
+        </header>
+        <div class="stat-grid" id="resource-stats"></div>
+        <input type="search" id="resource-search" class="admin-search" placeholder="Filter resources..." autocomplete="off" />
+        <div class="split-panels">
+          <div class="card reveal"><h3>Enabled <span id="enabled-count" class="badge"></span></h3><div id="enabled-list" class="chip-grid"></div></div>
+          <div class="card reveal"><h3>Disabled <span id="disabled-count" class="badge warn"></span></h3><div id="disabled-list" class="stack compact"></div></div>
+        </div>
       </div>
     </section>
 
     <section id="panel-branding" class="panel" data-min-role="admin">
-      <h2>Branding registry</h2>
-      <div class="split-panels">
-        <div class="card"><h3>Resources</h3><div id="brand-resources" class="table-wrap"></div></div>
-        <div class="card"><h3>Locations</h3><div id="brand-locations" class="table-wrap"></div></div>
+      <div class="vx-page">
+        <header class="vx-hero compact reveal">
+          <p class="vx-kicker">Admin</p>
+          <h1 class="vx-title">Branding registry</h1>
+          <p class="vx-desc">Display names for resources and map locations.</p>
+        </header>
+        <div class="split-panels">
+          <div class="card reveal"><h3>Resources</h3><div id="brand-resources" class="table-wrap"></div></div>
+          <div class="card reveal"><h3>Locations</h3><div id="brand-locations" class="table-wrap"></div></div>
+        </div>
       </div>
     </section>
 
     <section id="panel-commands" class="panel" data-min-role="admin">
-      <h2>Server control</h2>
-      <p class="hint">Run whitelisted FXServer commands live — no txAdmin needed. Requires <code>shaderp-ac</code> connected with matching API key.</p>
+      <div class="vx-page">
+        <header class="vx-hero compact reveal">
+          <p class="vx-kicker">Live FXServer</p>
+          <h1 class="vx-title">Server control</h1>
+          <p class="vx-desc">Run whitelisted FXServer commands live — requires <code>shaderp-ac</code> connected with matching API key.</p>
+        </header>
       <div class="stat-grid" id="sc-status-stats"></div>
       <div class="split-panels" style="margin-top:1rem">
         <div class="card">
@@ -317,40 +426,55 @@
         <h3>Command log <button type="button" class="btn ghost btn-sm" id="sc-log-refresh">Refresh</button></h3>
         <div id="sc-command-log" class="table-wrap"></div>
       </div>
-      <details class="card" style="margin-top:1rem">
+      <details class="card reveal" style="margin-top:1rem">
         <summary>Copy-paste reference (txAdmin fallback)</summary>
         <div id="command-list" class="command-grid" style="margin-top:0.75rem"></div>
       </details>
+      </div>
     </section>
 
     <section id="panel-blocked" class="panel" data-min-role="admin">
-      <h2>Blocked mods</h2>
-      <div id="blocked-list" class="stack"></div>
+      <div class="vx-page">
+        <header class="vx-hero compact reveal">
+          <p class="vx-kicker">Admin</p>
+          <h1 class="vx-title">Blocked mods</h1>
+          <p class="vx-desc">Client-side mods and assets blocked by anti-cheat.</p>
+        </header>
+        <div id="blocked-list" class="stack"></div>
+      </div>
     </section>
 
     <section id="panel-settings" class="panel" data-min-role="admin">
-      <h2>Portal settings</h2>
-      <div class="stat-grid" id="settings-stats"></div>
-      <div class="split-panels">
-        <div class="card prose">
-          <h3>Deployment</h3>
-          <p>Hosted on Render · synced from your FiveM PC via <code>Sync-PortalToRender.ps1</code></p>
-          <div id="settings-env" class="env-grid"></div>
+      <div class="vx-page">
+        <header class="vx-hero compact reveal">
+          <p class="vx-kicker">Admin</p>
+          <h1 class="vx-title">Portal settings</h1>
+          <p class="vx-desc">Deployment info, environment, and sync paths.</p>
+        </header>
+        <div class="stat-grid" id="settings-stats"></div>
+        <div class="split-panels">
+          <div class="card prose reveal">
+            <h3>Deployment</h3>
+            <p>Hosted on Render · synced from your FiveM PC via <code>Sync-PortalToRender.ps1</code></p>
+            <div id="settings-env" class="env-grid"></div>
+          </div>
+          <div class="card prose reveal">
+            <h3>Your session</h3>
+            <pre id="session-debug" class="notes-block"></pre>
+          </div>
         </div>
-        <div class="card prose">
-          <h3>Your session</h3>
-          <pre id="session-debug" class="notes-block"></pre>
-        </div>
+        <div class="card reveal" style="margin-top:1rem"><h3>Server paths (sync source)</h3><div id="settings-paths" class="table-wrap"></div></div>
       </div>
-      <div class="card" style="margin-top:1rem"><h3>Server paths (sync source)</h3><div id="settings-paths" class="table-wrap"></div></div>
     </section>
 
     <section id="panel-bans" class="panel" data-min-role="moderator">
-      <header class="page-header">
-        <h2 class="page-title">Ban Manager</h2>
-        <p class="page-subtitle">Unified view of moderator bans, anti-cheat bans, hardware tokens, IP flags, and platform flags — synced from portal + FXServer.</p>
-      </header>
-      <div id="ban-manager-root">
+      <div class="vx-page">
+        <header class="vx-hero compact reveal">
+          <p class="vx-kicker">Moderation</p>
+          <h1 class="vx-title">Ban Manager</h1>
+          <p class="vx-desc">Unified view of moderator bans, anti-cheat bans, hardware tokens, IP flags, and platform flags — synced from portal + FXServer.</p>
+        </header>
+        <div id="ban-manager-root">
         <div class="ac-toolbar">
           <input type="search" id="ban-mgr-search" class="admin-search" placeholder="Search name, SHADE ID, discord, license, IP…" autocomplete="off" />
           <button type="button" class="btn ghost btn-sm" id="ban-mgr-refresh">Refresh</button>
@@ -366,8 +490,9 @@
           <button type="button" class="ac-tab" data-ban-tab="denials">Join denials</button>
           <button type="button" class="ac-tab" data-ban-tab="ops">Ops</button>
         </div>
-        <div id="ban-mgr-body" class="card" style="margin-top:1rem">
+        <div id="ban-mgr-body" class="card reveal" style="margin-top:1rem">
           <p class="hint">Loading ban data…</p>
+        </div>
         </div>
       </div>
     </section>
@@ -606,7 +731,13 @@
     </section>
 
     <section id="panel-tickets" class="panel" data-min-role="staff">
-      <div id="tickets-root">
+      <div class="vx-page">
+        <header class="vx-hero compact reveal">
+          <p class="vx-kicker">Support ops</p>
+          <h1 class="vx-title">Tickets</h1>
+          <p class="vx-desc">Web and Discord support threads — claim, close, and link to AC profiles.</p>
+        </header>
+        <div id="tickets-root">
         <div class="stat-grid" id="ticket-stats"></div>
         <div class="ac-toolbar" style="margin:0.75rem 0">
           <select id="ticket-filter" class="admin-search">
@@ -628,17 +759,24 @@
             </div>
           </div>
         </div>
+        </div>
       </div>
     </section>
 
     <section id="panel-discord" class="panel" data-min-role="staff">
-      <div id="discord-root"></div>
+      <div class="vx-page">
+        <div id="discord-root"></div>
+      </div>
     </section>
 
     <section id="panel-logs" class="panel" data-min-role="staff">
-      <h2>Server logs</h2>
-      <p class="hint">Crash, disconnect, lag, error, and <strong>shaderp-ac</strong> events (detections, tamper, system) — live sync.</p>
-      <div id="logs-panel-body">
+      <div class="vx-page">
+        <header class="vx-hero compact reveal">
+          <p class="vx-kicker">FXServer</p>
+          <h1 class="vx-title">Server logs</h1>
+          <p class="vx-desc">Crash, disconnect, lag, error, and <strong>shaderp-ac</strong> events — live sync.</p>
+        </header>
+        <div id="logs-panel-body">
         <div class="stat-grid" id="logs-stats"></div>
         <div class="logs-toolbar">
           <select id="logs-filter" class="admin-search" aria-label="Filter logs">
@@ -669,6 +807,7 @@
             <button type="button" class="btn ghost btn-sm" id="logs-copy-json">Copy JSON</button>
           </div>
         </div>
+        </div>
       </div>
     </section>
   </main>
@@ -683,6 +822,6 @@
   </div>
 
   <div id="toast" class="toast" hidden>Copied</div>
-  <script src="/app.js?v=6.0.0" type="module"></script>
+  <script src="/app.js?v=7.1.0" type="module"></script>
 </body>
 </html>

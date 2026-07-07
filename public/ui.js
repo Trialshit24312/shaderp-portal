@@ -89,7 +89,7 @@ const NAV_ICONS = {
   jobs: '💼',
   locations: '📍',
   faq: '❓',
-  credits: '👥',
+  credits: '✦',
   keybinds: '⌨️',
   about: 'ℹ️',
   updates: '📰',
@@ -117,7 +117,7 @@ export function navIcon(id) {
   return NAV_ICONS[id] || '•';
 }
 
-export function renderPageHeader(title, subtitle, crumbs = []) {
+export function vxShell({ kicker, title, titleHtml, desc, actions = '', crumbs = [], compact = false }) {
   const crumbHtml = crumbs.length
     ? `<nav class="breadcrumbs" aria-label="Breadcrumb">${crumbs.map((c, i) =>
       i < crumbs.length - 1
@@ -125,12 +125,36 @@ export function renderPageHeader(title, subtitle, crumbs = []) {
         : `<span class="crumb-current">${c.label}</span>`,
     ).join('')}</nav>`
     : '';
+  const heading = titleHtml || title || '';
   return `
-    <header class="page-header reveal">
+    <header class="vx-hero reveal${compact ? ' compact' : ''}">
       ${crumbHtml}
-      <h2 class="page-title">${title}</h2>
-      ${subtitle ? `<p class="page-subtitle">${subtitle}</p>` : ''}
+      ${kicker ? `<p class="vx-kicker">${kicker}</p>` : ''}
+      ${heading ? `<h1 class="vx-title">${heading}</h1>` : ''}
+      ${desc ? `<p class="vx-desc">${desc}</p>` : ''}
+      ${actions ? `<div class="vx-hero-actions">${actions}</div>` : ''}
     </header>`;
+}
+
+export function vxSection(title, desc, body, count = '') {
+  return `
+    <section class="vx-section reveal">
+      <header class="vx-section-head">
+        <div><h2>${title}</h2>${desc ? `<p>${desc}</p>` : ''}</div>
+        ${count ? `<span class="crew-section-count">${count}</span>` : ''}
+      </header>
+      <div class="vx-body">${body}</div>
+    </section>`;
+}
+
+export function renderPageHeader(title, subtitle, crumbs = []) {
+  return vxShell({
+    kicker: crumbs.length ? crumbs[crumbs.length - 1]?.label : 'ShadeRP',
+    title,
+    desc: subtitle || '',
+    crumbs,
+    compact: true,
+  });
 }
 
 export function bindBreadcrumbs(root = document) {

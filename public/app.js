@@ -5,6 +5,8 @@ import {
   animatePanelSwitch,
   showToast,
   navIcon,
+  vxShell,
+  vxSection,
   renderPageHeader,
   bindBreadcrumbs,
   getLastPanel,
@@ -28,7 +30,7 @@ const NAV = [
   { id: 'jobs', label: 'Jobs', min: 'guest' },
   { id: 'locations', label: 'Locations', min: 'guest' },
   { id: 'faq', label: 'FAQ', min: 'guest' },
-  { id: 'credits', label: 'Team', min: 'guest' },
+  { id: 'credits', label: 'Our Crew', min: 'guest' },
   { id: 'keybinds', label: 'Keybinds', min: 'guest' },
   { id: 'about', label: 'About', min: 'guest' },
   { id: 'updates', label: 'Updates', min: 'guest' },
@@ -86,59 +88,74 @@ async function loadTeamData(force = false) {
   return TEAM;
 }
 
-function teamLeadershipCard(c, featured = false) {
+function crewLeadCard(c, featured = false) {
   const avatar = memberAvatarUrl(c);
   const name = c.displayName || c.globalName || c.username || 'Team member';
   const handle = c.username ? `@${c.username}` : '';
-  const cls = featured ? 'team-card team-card-featured reveal' : 'team-card team-card-lead reveal';
-  return `<article class="${cls}">
-    <div class="team-card-glow" aria-hidden="true"></div>
-    <div class="team-card-inner">
-      <div class="team-card-avatar-wrap">
-        <img class="team-card-avatar" src="${esc(avatar)}" alt="${esc(name)}" loading="lazy" width="96" height="96" />
-        ${c.inGuild === false ? '<span class="team-offline-badge" title="Not in Discord">Offline</span>' : ''}
+  const tags = (c.discordRoles || []).slice(0, 4).map((r) =>
+    `<span class="crew-tag">${esc(r.name)}</span>`).join('');
+  return `<article class="crew-lead reveal">
+    <div class="crew-lead-bg" aria-hidden="true"></div>
+    <div class="crew-lead-inner">
+      <div class="crew-lead-portrait">
+        <span class="crew-lead-ring" aria-hidden="true"></span>
+        <img src="${esc(avatar)}" alt="${esc(name)}" loading="lazy" width="120" height="120" />
+        ${c.inGuild === false ? '<span class="crew-offline">Away</span>' : ''}
       </div>
-      <div class="team-card-body">
-        <span class="team-role-badge">${esc(c.role || 'Team')}</span>
-        <h3 class="team-card-name">${esc(name)}</h3>
-        ${handle ? `<p class="team-card-handle">${esc(handle)}</p>` : ''}
-        ${c.note ? `<p class="team-card-bio">${esc(c.note)}</p>` : ''}
-        ${(c.discordRoles || []).length ? `<div class="team-discord-roles">${c.discordRoles.map((r) => `<span class="team-discord-pill">${esc(r.name)}</span>`).join('')}</div>` : ''}
-        ${c.discordId ? `<a class="team-discord-link" href="https://discord.com/users/${esc(c.discordId)}" target="_blank" rel="noopener">View on Discord</a>` : ''}
+      <div class="crew-lead-body">
+        <span class="crew-lead-role">${esc(c.role || 'Leadership')}</span>
+        <h3>${esc(name)}</h3>
+        ${handle ? `<p class="crew-lead-handle">${esc(handle)}</p>` : ''}
+        ${c.note ? `<p class="crew-lead-bio">${esc(c.note)}</p>` : ''}
+        ${tags ? `<div class="crew-lead-tags">${tags}</div>` : ''}
       </div>
+      ${featured && c.discordId ? `<div class="crew-lead-cta">
+        <a class="crew-discord-btn" href="https://discord.com/users/${esc(c.discordId)}" target="_blank" rel="noopener">Discord profile</a>
+      </div>` : (c.discordId ? `<div class="crew-lead-cta">
+        <a class="crew-discord-btn" href="https://discord.com/users/${esc(c.discordId)}" target="_blank" rel="noopener">↗</a>
+      </div>` : '')}
     </div>
   </article>`;
 }
 
-function teamStaffCard(m) {
+function crewMemberCard(m, tier) {
   const avatar = memberAvatarUrl(m);
   const name = m.displayName || m.globalName || m.username || 'Staff';
   const handle = m.username ? `@${m.username}` : '';
-  return `<article class="team-staff-card reveal">
-    <img class="team-staff-avatar" src="${esc(avatar)}" alt="${esc(name)}" loading="lazy" width="64" height="64" />
-    <div class="team-staff-info">
-      <strong class="team-staff-name">${esc(name)}</strong>
-      ${handle ? `<span class="team-staff-handle">${esc(handle)}</span>` : ''}
-      <span class="role-badge role-${esc(m.appRole || 'member')}">${esc(m.appRole || 'staff')}</span>
-      ${(m.discordRoles || []).length ? `<div class="team-discord-roles compact">${m.discordRoles.map((r) => `<span class="team-discord-pill">${esc(r.name)}</span>`).join('')}</div>` : ''}
-    </div>
-    <a class="team-staff-dm" href="https://discord.com/users/${esc(m.id)}" target="_blank" rel="noopener" title="Discord profile">↗</a>
+  const role = m.appRole || tier || 'staff';
+  const tags = (m.discordRoles || []).slice(0, 2).map((r) =>
+    `<span class="crew-tag">${esc(r.name)}</span>`).join('');
+  return `<article class="crew-member reveal" data-tier="${esc(role)}">
+    <a class="crew-member-link" href="https://discord.com/users/${esc(m.id)}" target="_blank" rel="noopener" title="Open Discord">↗</a>
+    <img class="crew-member-avatar" src="${esc(avatar)}" alt="${esc(name)}" loading="lazy" width="72" height="72" />
+    <span class="crew-member-name">${esc(name)}</span>
+    ${handle ? `<span class="crew-member-handle">${esc(handle)}</span>` : ''}
+    <span class="crew-badge ${esc(role)}">${esc(role)}</span>
+    ${tags ? `<div class="crew-member-tags">${tags}</div>` : ''}
   </article>`;
 }
 
-function renderTeamTierSection(tier, members, meta) {
+function crewTierLane(tier, members, meta) {
   if (!members?.length) return '';
   const m = meta?.[tier] || { label: tier, icon: '•', desc: '' };
-  return `<section class="team-tier-section reveal">
-    <header class="team-tier-header">
-      <span class="team-tier-icon">${m.icon}</span>
+  return `<section class="crew-tier reveal">
+    <header class="crew-tier-head">
+      <span class="crew-tier-icon">${m.icon}</span>
       <div>
         <h3>${esc(m.label)}</h3>
-        <p class="hint">${esc(m.desc || '')} · ${members.length} member${members.length === 1 ? '' : 's'}</p>
+        <p class="hint">${esc(m.desc || '')}</p>
       </div>
+      <span class="crew-section-count" style="margin-left:auto">${members.length}</span>
     </header>
-    <div class="team-staff-grid">${members.map((mem) => teamStaffCard(mem)).join('')}</div>
+    <div class="crew-tier-lane">${members.map((mem) => crewMemberCard(mem, tier)).join('')}</div>
   </section>`;
+}
+
+function crewHeroStats(creditsCount, staffCount) {
+  return `<div class="crew-hero-stats">
+    <div class="crew-stat-pill gold"><strong>${creditsCount}</strong><span>Leadership</span></div>
+    <div class="crew-stat-pill accent"><strong>${staffCount}</strong><span>Staff roster</span></div>
+  </div>`;
 }
 
 async function renderCredits() {
@@ -148,29 +165,37 @@ async function renderCredits() {
   try {
     await loadTeamData();
     const credits = TEAM?.credits?.length ? TEAM.credits : (DATA?.credits || []);
+    const staffCount = (TEAM?.staff || []).length || '—';
     const invite = TEAM?.invite || ME?.discordInvite || '#';
     root.innerHTML = `
-      ${renderPageHeader('Our Team', 'The people behind ShadeRP — leadership, development, and community.', [{ id: 'home', label: 'Home' }, { id: 'credits', label: 'Team' }])}
-      <div class="team-page-hero reveal">
-        <div class="team-page-hero-text">
-          <p class="team-eyebrow">ShadeRP</p>
-          <h2>Built for serious roleplay</h2>
-          <p>Custom ESX Legacy city, curated content, and a team that actually plays here. Join us on Discord to meet the community.</p>
-          <div class="hero-actions">
-            <a href="${esc(invite)}" class="btn primary" target="_blank" rel="noopener">Join Discord</a>
-            ${hasRole('member') ? '<button type="button" class="btn ghost" data-panel="team">Team &amp; Roles</button>' : ''}
+      <div class="crew-page">
+        <header class="crew-hero reveal">
+          <div class="crew-hero-grid">
+            <div>
+              <p class="crew-kicker">ShadeRP Crew</p>
+              <h1>The people behind <em>ShadeRP</em></h1>
+              <p class="crew-hero-desc">Leadership, developers, and community builders running a custom ESX Legacy city built for serious roleplay.</p>
+              <div class="crew-hero-actions">
+                <a href="${esc(invite)}" class="btn primary" target="_blank" rel="noopener">Join Discord</a>
+                ${hasRole('member') ? '<button type="button" class="btn ghost" data-panel="team">View full roster</button>' : ''}
+              </div>
+            </div>
+            ${crewHeroStats(credits.length, staffCount)}
           </div>
-        </div>
-        <div class="team-page-hero-stats">
-          <div class="team-stat"><strong>${credits.length}</strong><span>Leadership</span></div>
-          <div class="team-stat"><strong>${(TEAM?.staff || []).length || '—'}</strong><span>Staff roster</span></div>
-        </div>
-      </div>
-      <h3 class="team-section-title reveal">Leadership</h3>
-      <div class="team-leadership-grid">${credits.length
-    ? credits.map((c) => teamLeadershipCard(c, true)).join('')
-    : '<p class="hint">Team credits in shade-config/config/credits.lua</p>'}</div>`;
-    bindBreadcrumbs(root);
+        </header>
+        <section class="crew-section">
+          <header class="crew-section-head">
+            <div>
+              <h2>Leadership</h2>
+              <p>Owners &amp; core team from credits.lua — live Discord avatars</p>
+            </div>
+            <span class="crew-section-count">${credits.length} members</span>
+          </header>
+          <div class="crew-bento">${credits.length
+    ? credits.map((c) => crewLeadCard(c, true)).join('')
+    : '<p class="hint">Configure team credits in shade-config/config/credits.lua</p>'}</div>
+        </section>
+      </div>`;
     root.querySelector('[data-panel="team"]')?.addEventListener('click', () => showPanel('team'));
     initRevealAnimations(root);
   } catch {
@@ -315,6 +340,9 @@ function showPanel(id) {
   animatePanelSwitch(panelEl);
   setLastPanel(id);
   track('panel_view', { panel: id });
+  const navItem = NAV.find((n) => n.id === id);
+  const topbarPage = el('topbar-page');
+  if (topbarPage) topbarPage.textContent = navItem?.label || id;
   if (id === 'hub' && hasRole('staff')) renderHub();
   if (id === 'analytics' && hasRole('staff')) loadAnalytics();
   if (id === 'bans' && hasRole('moderator')) loadBanManagerPanel();
@@ -332,6 +360,8 @@ function showPanel(id) {
   if (id === 'logs' && hasRole('staff')) loadLogs();
   if (id === 'team') renderTeam();
   if (id === 'queue' || id === 'connect' || id === 'home') renderQueueWidgets();
+  if (id === 'connect') renderConnect();
+  if (panelEl) initRevealAnimations(panelEl);
   el('sidebar')?.classList.remove('open');
 }
 
@@ -362,7 +392,8 @@ function renderHub() {
   ];
 
   root.innerHTML = `
-    ${renderPageHeader('Command Center', 'Everything staff needs in one place — pick a tool or check status below.', [{ id: 'home', label: 'Home' }, { id: 'hub', label: 'Command Center' }])}
+    <div class="vx-page">
+    ${vxShell({ kicker: 'Staff', title: 'Command Center', desc: 'Everything staff needs in one place — pick a tool or check status below.', crumbs: [{ id: 'home', label: 'Home' }, { id: 'hub', label: 'Command Center' }], compact: true })}
     <div class="hub-hero reveal">
       <div>
         <h2>Welcome back${u ? `, ${esc(u.globalName)}` : ''}</h2>
@@ -390,6 +421,7 @@ function renderHub() {
         <div class="hub-feed-item"><span class="hub-feed-dot info"></span><span>AC panel requires shaderp-ac connected with matching API key</span></div>
         <div class="hub-feed-item"><span class="hub-feed-dot warn"></span><span>Render free tier: ticket/log data resets on redeploy — FXServer re-syncs logs</span></div>
       </div>
+    </div>
     </div>`;
 
   root.querySelectorAll('[data-panel]').forEach((btn) => {
@@ -406,7 +438,7 @@ function renderHub() {
 }
 
 function stat(label, value) {
-  return `<div class="stat"><div class="stat-label">${esc(label)}</div><div class="stat-value">${esc(String(value))}</div></div>`;
+  return `<div class="stat stat-card"><div class="stat-label">${esc(label)}</div><div class="stat-value">${esc(String(value))}</div></div>`;
 }
 
 function acKpi(icon, label, value, tone = '') {
@@ -432,7 +464,7 @@ function renderHome() {
     ['Locations', DATA.businesses?.length ?? DATA.blips?.length ?? '—'],
     ['Starting bank', DATA.economy ? '$' + Number(DATA.economy.startingBank).toLocaleString() : '—'],
     ['Latest pass', getUpdatePasses()[0]?.version ?? '—'],
-  ].map(([lbl, val]) => `<div class="hero-stat"><div class="val">${esc(val)}</div><div class="lbl">${esc(lbl)}</div></div>`).join('');
+  ].map(([lbl, val]) => `<div class="vx-home-stat"><div class="val">${esc(val)}</div><div class="lbl">${esc(lbl)}</div></div>`).join('');
 
   const features = site.features?.length ? site.features : [
     { icon: '🎮', title: 'Web queue', desc: 'Login & join queue before FiveM' },
@@ -467,6 +499,7 @@ function renderHome() {
     if (latestTitle) latestTitle.textContent = meta?.subtitle || meta?.titleClean || 'No updates synced yet.';
     latest.textContent = meta?.overview?.slice(0, 280) || DATA.latestNotes?.slice(0, 280) || 'Run Build-DashboardData.ps1 on your server PC to pull the latest changelog.';
   }
+  renderBridgeWidget('home-bridge');
 }
 
 function renderServerStrip() {
@@ -568,7 +601,19 @@ function renderFaq() {
 }
 
 function teamMemberCard(c, tier = 'staff') {
-  return teamLeadershipCard(c, tier === 'owner');
+  return crewLeadCard(c, tier === 'owner');
+}
+
+function initCrewRosterTabs(root) {
+  const tabs = root.querySelectorAll('.crew-roster-tab');
+  const panels = root.querySelectorAll('.crew-roster-panel');
+  tabs.forEach((tab) => {
+    tab.addEventListener('click', () => {
+      const id = tab.dataset.crewTab;
+      tabs.forEach((t) => t.classList.toggle('active', t === tab));
+      panels.forEach((p) => p.classList.toggle('active', p.dataset.crewPanel === id));
+    });
+  });
 }
 
 async function renderTeam() {
@@ -582,45 +627,81 @@ async function renderTeam() {
     const tiers = ['owner', 'admin', 'manager', 'developer', 'staff', 'moderator'];
     const staffSections = tiers.map((tier) => {
       const members = (TEAM.grouped?.[tier] || []).filter((m) => !creditIds.has(m.id));
-      return renderTeamTierSection(tier, members, TEAM.tierMeta);
+      return crewTierLane(tier, members, TEAM.tierMeta);
     }).filter(Boolean).join('');
-    const roleLegend = (TEAM.roleDefs || []).length
-      ? `<details class="team-role-legend reveal">
-          <summary>Discord role mapping</summary>
-          <div class="team-role-legend-grid">${TEAM.roleDefs.map((r) => `
-            <div class="team-role-legend-item">
-              <span class="role-badge role-${esc(r.appRole)}">${esc(r.appRole)}</span>
+    const totalStaff = tiers.reduce((n, t) => n + ((TEAM.grouped?.[t] || []).filter((m) => !creditIds.has(m.id)).length), 0);
+    const roleMatrix = (TEAM.roleDefs || []).length
+      ? `<details class="crew-matrix reveal">
+          <summary>Discord role → portal access mapping</summary>
+          <div class="crew-matrix-grid">${TEAM.roleDefs.map((r) => `
+            <div class="crew-matrix-item">
+              <span class="crew-badge ${esc(r.appRole)}">${esc(r.appRole)}</span>
               <span>${esc(r.discordName)}</span>
             </div>`).join('')}</div>
         </details>`
       : '';
 
+    const profileBlock = ME?.user
+      ? `<div class="crew-profile reveal">
+          <img class="crew-profile-avatar" src="${esc(ME.user.avatar || memberAvatarUrl({ id: ME.user.id }))}" alt="" width="72" height="72" />
+          <div>
+            <p class="crew-profile-label">Your portal access</p>
+            <h3>${esc(ME.user.globalName)} <span class="crew-badge ${esc(ME.user.appRole)}">${esc(ME.user.appRole)}</span></h3>
+            <p class="hint">${ME.user.inGuild ? 'Roles refresh each Discord login — synced from your server roles' : 'Join the Discord server to unlock member panels'}</p>
+          </div>
+        </div>`
+      : `<div class="crew-profile guest reveal hint"><a href="/auth/discord?returnTo=/team" class="btn primary">Login with Discord</a> to see your portal tier and staff tools.</div>`;
+
     root.innerHTML = `
-      ${renderPageHeader('Team & Roles', 'Live Discord roster synced from your community server.', [{ id: 'home', label: 'Home' }, { id: 'team', label: 'Team' }])}
-      <div class="team-page-hero reveal team-page-hero-compact">
-        <div class="team-page-hero-text">
-          <p class="team-eyebrow">Staff roster</p>
-          <h2>ShadeRP team</h2>
-          <p>Real names and avatars from Discord. Portal access follows your Discord roles — need help? Open <button type="button" class="crumb-link" data-panel="support">Support</button>.</p>
-        </div>
-        ${TEAM.membersPartial ? `<p class="team-roster-note warn-banner">${esc(TEAM.membersError || 'Partial roster — enable Server Members intent on the bot for full staff list.')}</p>` : ''}
-      </div>
-      <h3 class="team-section-title reveal">Leadership</h3>
-      <div class="team-leadership-grid">${credits.length
-      ? credits.map((c) => teamLeadershipCard(c, true)).join('')
+      <div class="crew-page">
+        <header class="crew-hero reveal">
+          <div class="crew-hero-grid">
+            <div>
+              <p class="crew-kicker">Live roster</p>
+              <h1>Team <em>&amp; Roles</em></h1>
+              <p class="crew-hero-desc">Real names and avatars pulled from Discord. Portal permissions follow your server roles — need help? Open <button type="button" class="crumb-link" data-panel="support">Support</button>.</p>
+            </div>
+            ${crewHeroStats(credits.length, totalStaff)}
+          </div>
+          ${TEAM.membersPartial ? `<p class="crew-alert">${esc(TEAM.membersError || 'Partial roster — enable Server Members Intent on the Discord bot for the full staff list.')}</p>` : ''}
+        </header>
+
+        <nav class="crew-roster-tabs" aria-label="Roster views">
+          <button type="button" class="crew-roster-tab active" data-crew-tab="leadership">Leadership</button>
+          <button type="button" class="crew-roster-tab" data-crew-tab="staff">Staff tiers</button>
+          <button type="button" class="crew-roster-tab" data-crew-tab="access">Your access</button>
+        </nav>
+
+        <div class="crew-roster-panel active" data-crew-panel="leadership">
+          <section class="crew-section">
+            <header class="crew-section-head">
+              <div><h2>Leadership credits</h2><p>Featured team from portal config</p></div>
+              <span class="crew-section-count">${credits.length}</span>
+            </header>
+            <div class="crew-bento">${credits.length
+      ? credits.map((c) => crewLeadCard(c, true)).join('')
       : '<p class="hint">No leadership credits synced</p>'}</div>
-      <h3 class="team-section-title reveal" style="margin-top:2rem">Staff by tier</h3>
-      ${staffSections || '<p class="hint">No staff with portal roles found in Discord yet.</p>'}
-      ${roleLegend}
-      ${ME?.user ? `<div class="team-your-access reveal">
-        <img class="team-your-access-avatar" src="${esc(ME.user.avatar || memberAvatarUrl({ id: ME.user.id }))}" alt="" width="56" height="56" />
-        <div>
-          <p class="team-your-access-label">Your access</p>
-          <p><strong>${esc(ME.user.globalName)}</strong> <span class="role-badge role-${esc(ME.user.appRole)}">${esc(ME.user.appRole)}</span></p>
-          <p class="hint">${ME.user.inGuild ? 'Linked Discord member — roles refresh each login' : 'Join the Discord server to unlock full portal access'}</p>
+          </section>
         </div>
-      </div>` : `<div class="team-your-access reveal hint"><a href="/auth/discord?returnTo=/team">Login with Discord</a> to see your portal tier.</div>`}`;
-    bindBreadcrumbs(root);
+
+        <div class="crew-roster-panel" data-crew-panel="staff">
+          <section class="crew-section">
+            <header class="crew-section-head">
+              <div><h2>Staff by tier</h2><p>Scroll each lane — synced from Discord guild members</p></div>
+              <span class="crew-section-count">${totalStaff} staff</span>
+            </header>
+            ${staffSections || '<p class="hint">No staff with portal roles found in Discord yet.</p>'}
+            ${roleMatrix}
+          </section>
+        </div>
+
+        <div class="crew-roster-panel" data-crew-panel="access">
+          ${profileBlock}
+        </div>
+      </div>`;
+
+    root.querySelector('[data-panel="support"]')?.addEventListener('click', () => showPanel('support'));
+    initCrewRosterTabs(root);
     initRevealAnimations(root);
   } catch {
     root.innerHTML = '<p class="hint">Could not load team data.</p>';
@@ -676,6 +757,80 @@ function renderConnect() {
         <button type="button" class="btn ghost copy-block" data-copy="${esc(conn.hasCfx ? cfx : conn.directCmd)}">Copy ${conn.hasCfx ? 'cfx link' : 'connect command'}</button>
       </div>`;
     meta.querySelector('.copy-block')?.addEventListener('click', () => copyText(conn.hasCfx ? cfx : conn.directCmd));
+  }
+  renderBridgeWidget('connect-bridge');
+}
+
+function bridgeStatusPill(connected, label) {
+  return `<span class="pill ${connected ? 'accent' : 'warn'}">${connected ? '🟢' : '🔴'} ${esc(label)}</span>`;
+}
+
+async function renderBridgeWidget(targetId = 'connect-bridge') {
+  const root = el(targetId);
+  if (!root) return;
+  try {
+    const fetches = [fetch('/api/bridge/status')];
+    if (ME?.user) fetches.push(fetch('/api/bridge/me'));
+    const [statusRes, meRes] = await Promise.all(fetches);
+    const status = statusRes.ok ? await statusRes.json() : null;
+    const me = meRes?.ok ? await meRes.json() : null;
+    if (!status) {
+      root.innerHTML = '';
+      return;
+    }
+
+    const q = status.queue || {};
+    const ac = status.ac || {};
+    const discord = status.discordInvite || ME?.discordInvite || '#';
+
+    let personal = '';
+    if (me) {
+      const ban = me.profile?.activeBan;
+      personal = `
+        <div class="bridge-personal reveal">
+          <h4>Your linked account</h4>
+          <p class="hint">Discord ID <code>${esc(me.discordId)}</code> · same identity on portal, queue &amp; FXServer</p>
+          <div class="stat-grid" style="margin:0.75rem 0">
+            ${stat('Queue', me.queue?.inQueue ? (me.queue.ready ? 'Ready' : `#${me.queue.position}`) : 'Not in queue')}
+            ${stat('Bans', ban ? 'Active' : 'Clear')}
+            ${stat('Tickets', (me.tickets || []).filter((t) => t.status === 'open').length)}
+          </div>
+          ${ban ? `<p class="warn-banner">Active ban <code>${esc(ban.banId)}</code> — open a <button type="button" class="crumb-link" data-panel="support">ban appeal</button></p>` : ''}
+        </div>`;
+    } else {
+      personal = `<p class="hint"><a href="/auth/discord?returnTo=/connect">Login with Discord</a> to link your queue, tickets, and AC profile.</p>`;
+    }
+
+    root.innerHTML = `
+      <div class="card bridge-card reveal">
+        <div class="card-head-row">
+          <h3>◈ Portal · Discord · Server</h3>
+          <div style="display:flex;gap:0.35rem;flex-wrap:wrap">
+            ${bridgeStatusPill(status.botOnline, 'Discord bot')}
+            ${bridgeStatusPill(ac.connected, 'AC sync')}
+            ${bridgeStatusPill(q.serverOnline, 'FXServer')}
+          </div>
+        </div>
+        <div class="stat-grid">
+          ${stat('In queue', q.inQueue ?? 0)}
+          ${stat('Ready', q.ready ?? 0)}
+          ${stat('Online', q.playersOnline ?? ac.online ?? '—')}
+          ${stat('Slots free', q.slotsAvailable ?? '—')}
+        </div>
+        ${personal}
+        <div class="vx-hero-actions" style="margin-top:0.75rem">
+          <a href="${esc(discord)}" class="btn ghost btn-sm" target="_blank" rel="noopener">Discord</a>
+          <button type="button" class="btn ghost btn-sm" data-panel="queue">Web queue</button>
+          ${hasRole('staff') ? '<button type="button" class="btn ghost btn-sm" data-panel="discord">Discord Hub</button>' : ''}
+        </div>
+        <p class="hint" style="margin-top:0.65rem">In Discord use <code>/shade link</code> · <code>/shade queue</code> · <code>/shade server</code></p>
+      </div>`;
+    root.querySelectorAll('[data-panel]').forEach((btn) => {
+      btn.addEventListener('click', () => showPanel(btn.dataset.panel));
+    });
+    initRevealAnimations(root);
+  } catch (_) {
+    root.innerHTML = '';
   }
 }
 
@@ -888,7 +1043,11 @@ async function queueJoin(lane = 'normal') {
   });
   const data = await res.json();
   if (!res.ok) {
-    toast(data.error || 'Could not join queue');
+    if (data.code === 'not_in_discord_guild' && data.discordInvite) {
+      toast(`${data.error} Join Discord first.`, true);
+      return;
+    }
+    toast(data.error || 'Could not join queue', true);
     return;
   }
   toast('Joined queue');
@@ -949,8 +1108,10 @@ async function renderSupport() {
   const root = el('support-root');
   if (!root) return;
   if (!ME?.user) {
-    root.innerHTML = `${renderPageHeader('Support', 'Login with Discord to open a ticket.')}
-      <div class="card reveal"><p>Please <a href="/auth/discord">login with Discord</a> to contact staff.</p></div>`;
+    root.innerHTML = `<div class="vx-page">
+      ${vxShell({ kicker: 'Help', title: 'Support', desc: 'Login with Discord to open a ticket.', compact: true })}
+      <div class="card reveal"><p>Please <a href="/auth/discord">login with Discord</a> to contact staff.</p></div>
+    </div>`;
     return;
   }
   let mine = [];
@@ -960,8 +1121,9 @@ async function renderSupport() {
   } catch (_) {}
 
   root.innerHTML = `
-    ${renderPageHeader('Support', 'Open a ticket on the web — synced with Discord and AC profiles.', [{ id: 'home', label: 'Home' }, { id: 'support', label: 'Support' }])}
-    <div class="split-panels">
+    <div class="vx-page">
+    ${vxShell({ kicker: 'Help', title: 'Support', desc: 'Open a ticket on the web — synced with Discord and AC profiles.', crumbs: [{ id: 'home', label: 'Home' }, { id: 'support', label: 'Support' }], compact: true })}
+    <div class="split-panels vx-split">
       <div class="card reveal">
         <h3>Open a ticket</h3>
         <form class="support-form" id="support-form">
@@ -996,6 +1158,7 @@ async function renderSupport() {
           <button type="submit" class="btn primary">Send reply</button>
         </form>
       </div>
+    </div>
     </div>`;
   bindBreadcrumbs(root);
   initRevealAnimations(root);
@@ -1821,13 +1984,38 @@ async function loadDiscordPanel() {
   if (!root) return;
   root.innerHTML = '<p class="hint">Loading Discord network…</p>';
   try {
-    const res = await fetch('/api/discord/guilds');
-    if (!res.ok) throw new Error('Discord API unavailable');
-    const data = await res.json();
+    const [guildRes, bridgeRes] = await Promise.all([
+      fetch('/api/discord/guilds'),
+      fetch('/api/bridge/status'),
+    ]);
+    if (!guildRes.ok) throw new Error('Discord API unavailable');
+    const data = await guildRes.json();
+    const bridge = bridgeRes.ok ? await bridgeRes.json() : null;
     const guilds = data.guilds || [];
+    const q = bridge?.queue || {};
+    const ac = bridge?.ac || {};
     root.innerHTML = `
-      ${renderPageHeader('Discord Hub', 'Monitor all ShadeRP Discord servers — main, EMS, DOJ, Jobs, Appeals.', [{ id: 'hub', label: 'Command Center' }, { id: 'discord', label: 'Discord Hub' }])}
-      <div class="hint reveal" style="margin-bottom:1rem">Owner: run <code>/discord setup-all</code> after setting guild IDs on Render. Per-server: <code>/discord setup</code></div>
+      ${vxShell({ kicker: 'Community', title: 'Discord Hub', desc: 'Portal, Discord bot, and FXServer share one identity graph — queue, tickets, AC, and roles.', crumbs: [{ id: 'hub', label: 'Command Center' }, { id: 'discord', label: 'Discord Hub' }], compact: true })}
+      <div class="stat-grid reveal">
+        ${stat('Discord bot', bridge?.botOnline ? 'Online' : 'Offline')}
+        ${stat('Guilds linked', guilds.filter((g) => g.connected).length + '/' + guilds.length)}
+        ${stat('Web queue', q.inQueue ?? 0)}
+        ${stat('AC players', ac.online ?? '—')}
+      </div>
+      <div class="card reveal" style="margin-bottom:1rem">
+        <h3>Bot commands (overhauled)</h3>
+        <div class="chip-grid">
+          <span class="chip"><code>/shade link</code> — player bridge</span>
+          <span class="chip"><code>/shade queue</code> — web queue</span>
+          <span class="chip"><code>/shade server</code> — live status</span>
+          <span class="chip"><code>/shade player</code> — staff lookup</span>
+          <span class="chip"><code>/ticket</code> — support sync</span>
+          <span class="chip"><code>/ac</code> — remote AC</span>
+          <span class="chip"><code>/security status</code> — ops dashboard</span>
+        </div>
+        <p class="hint" style="margin-top:0.75rem">Set <code>DISCORD_STATUS_CHANNEL_ID</code> for auto-updating live status embed · <code>DISCORD_WELCOME_CHANNEL_ID</code> for join messages</p>
+      </div>
+      <div class="hint reveal" style="margin-bottom:1rem">Owner: <code>/discord setup-all</code> · Per-server: <code>/discord setup</code></div>
       <div class="hub-grid">${guilds.map((g) => `
         <div class="hub-action reveal" style="cursor:default;text-align:left">
           ${g.icon ? `<img src="${esc(g.icon)}" alt="" style="width:48px;height:48px;border-radius:12px;margin-bottom:0.5rem" />` : '<span class="hub-action-icon">🌐</span>'}
@@ -1836,13 +2024,13 @@ async function loadDiscordPanel() {
           ${g.configuredId ? `<span class="hint mono">ID: ${esc(g.configuredId)}</span>` : '<span class="hint">Set DISCORD_GUILD_*_ID on Render</span>'}
         </div>`).join('')}</div>
       <div class="card reveal" style="margin-top:1rem">
-        <h3>Setup checklist</h3>
+        <h3>Integration checklist</h3>
         <ul class="check-list">
-          <li>Add bot to all 5 servers with Administrator (first-time setup)</li>
-          <li>Set guild IDs in Render env (see .env.example)</li>
-          <li>Run <code>/discord setup-all</code> or <code>npm run setup:discord all</code></li>
-          <li>Invite LoggerBot, Carl-bot, Wick manually</li>
-          <li>Upload server icon/banner in Discord settings (manual)</li>
+          <li>Bot in main guild with <strong>Server Members Intent</strong> enabled</li>
+          <li>Same <code>QUEUE_API_KEY</code> + <code>AC_API_KEY</code> on Render and server.cfg</li>
+          <li><code>/ticket setup</code> or set DISCORD_TICKET_* channel IDs</li>
+          <li>Optional: <code>QUEUE_REQUIRE_GUILD_MEMBER=1</code> — must be in Discord to join web queue</li>
+          <li>Status channel: set DISCORD_STATUS_CHANNEL_ID — bot posts live FXServer + queue stats</li>
         </ul>
       </div>`;
     bindBreadcrumbs(root);

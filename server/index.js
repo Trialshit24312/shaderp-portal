@@ -33,6 +33,7 @@ import { setTicketDiscordClient, syncTicketToDiscord, startTicketDiscordSyncLoop
 import { createAuditManager, registerAuditRoutes } from './audit.js';
 import { createGuildMonitor, registerGuildMonitorRoutes } from './discord-guild-monitor.js';
 import { startShadeDiscordBot } from './discord-bot.js';
+import { buildBridgeStatus, buildPlayerBridge, verifyGuildMembership } from './discord-bridge.js';
 import { canUnbanDiscordUser, canUnbanPortalUser } from './unban.js';
 import {
   resolveUser,
@@ -333,10 +334,20 @@ app.get('/api/queue/me', (req, res) => {
   res.json(webQueue.getUserStatus(user.id));
 });
 
-app.post('/api/queue/join', (req, res) => {
+app.post('/api/queue/join', async (req, res) => {
   const user = getUser(req);
   if (!user) return res.status(401).json({ error: 'Login required' });
   if (!webQueue.isEnabled()) return res.status(503).json({ error: 'Queue disabled' });
+
+  const guildCheck = await verifyGuildMembership(user.id, portalEnv);
+  if (!guildCheck.ok) {
+    return res.status(403).json({
+      error: guildCheck.error,
+      discordInvite: guildCheck.discordInvite,
+      code: 'not_in_discord_guild',
+    });
+  }
+
   const lane = req.body?.lane === 'priority' ? 'priority' : 'normal';
   const result = webQueue.join(user, lane);
   if (result.error) return res.status(400).json(result);
@@ -395,6 +406,43 @@ app.post('/api/queue/server/release', (req, res) => {
   if (!discordId) return res.status(400).json({ error: 'discordId required' });
   webQueue.releaseConnecting(discordId);
   res.json({ ok: true });
+});
+
+// —— Bridge: portal ↔ Discord ↔ FXServer ——
+let discordBotOnline = false;
+
+app.get('/api/bridge/status', (_req, res) => {
+  res.json(buildBridgeStatus({
+    webQueue,
+    acManager,
+    portalEnv,
+    botOnline: discordBotOnline,
+  }));
+});
+
+app.get('/api/bridge/me', (req, res) => {
+  const user = getUser(req);
+  if (!user) return res.status(401).json({ error: 'Login required' });
+  res.json(buildPlayerBridge(user.id, {
+    ticketManager,
+    webQueue,
+    acManager,
+    portalEnv,
+    discordName: user.globalName,
+  }));
+});
+
+app.get('/api/bridge/player/:discordId', (req, res) => {
+  const user = getUser(req);
+  if (!user || !hasMinRole(user.appRole, 'staff')) {
+    return res.status(403).json({ error: 'Staff only' });
+  }
+  res.json(buildPlayerBridge(req.params.discordId, {
+    ticketManager,
+    webQueue,
+    acManager,
+    portalEnv,
+  }));
 });
 
 // —— Server logs (shade-crashlog → portal, owners only) ——
@@ -509,7 +557,8 @@ app.listen(PORT, '0.0.0.0', () => {
   console.log(`Anti-cheat API: ${acManager.isEnabled() ? 'enabled' : 'disabled'}${portalEnv.AC_API_KEY ? '' : ' (set AC_API_KEY on Render)'}`);
   console.log(`AC storage: ${getDbMode()}${dbInfo.mode === 'postgres' ? '' : ' (set DATABASE_URL for PostgreSQL)'}`);
   console.log(`Trust cache: ${getRedisMode()}${redisInfo.mode === 'redis' ? '' : ' (set REDIS_URL for Redis)'}`);
-  startShadeDiscordBot({ acManager, ticketManager, portalEnv, roleMap, logManager: serverLogs, guildMonitor }).then((client) => {
+  startShadeDiscordBot({ acManager, ticketManager, portalEnv, roleMap, logManager: serverLogs, guildMonitor, webQueue }).then((client) => {
+    discordBotOnline = !!client;
     if (client) {
       setTicketDiscordClient(client);
       startTicketDiscordSyncLoop({ ticketManager, portalEnv, roleMap });

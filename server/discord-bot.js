@@ -28,6 +28,17 @@ import {
 import { applyGuildTemplate, applyAllTemplates, auditGuildTemplate } from './discord-guild-setup.js';
 import { GUILD_KEYS, GUILD_TEMPLATES } from './discord-guild-templates.js';
 import { deferEphemeral, replyEphemeral, safeInteractionReply } from './discord-interactions.js';
+import {
+  ticketPanelEmbed,
+  portalLinkRow,
+  welcomeEmbed,
+  securityStatusEmbed,
+  networkStatusEmbed,
+  playerBridgeEmbed,
+  serverStatusEmbed,
+} from './discord-embeds.js';
+import { buildPlayerBridge, findPlayerByFivemId } from './discord-bridge.js';
+import { startDiscordStatusLoop } from './discord-status.js';
 
 function memberRoleIds(member) {
   if (!member) return [];
@@ -133,7 +144,18 @@ function buildAllCommands() {
       sub.setName('audit').setDescription('Audit guild vs template — shows missing roles/channels (owner)')
         .addStringOption((o) => o.setName('template').setDescription('Which server template').setRequired(true).addChoices(...guildChoices)));
 
-  return [ac.toJSON(), ticket.toJSON(), security.toJSON(), discordSetup.toJSON()];
+  const shade = new SlashCommandBuilder()
+    .setName('shade')
+    .setDescription('ShadeRP bridge — portal, queue & FXServer linked to your Discord')
+    .addSubcommand((sub) => sub.setName('link').setDescription('Your linked profile, queue position & tickets'))
+    .addSubcommand((sub) => sub.setName('queue').setDescription('Web queue status & portal join link'))
+    .addSubcommand((sub) => sub.setName('server').setDescription('Live FXServer, queue & portal status'))
+    .addSubcommand((sub) =>
+      sub.setName('player').setDescription('Staff: lookup player bridge by Discord or FiveM ID')
+        .addStringOption((o) => o.setName('discord_id').setDescription('Discord user ID'))
+        .addIntegerOption((o) => o.setName('fivem_id').setDescription('FiveM server ID')));
+
+  return [ac.toJSON(), ticket.toJSON(), security.toJSON(), discordSetup.toJSON(), shade.toJSON()];
 }
 
 function ticketActionRow(ticket, canUnban) {
@@ -164,12 +186,16 @@ function ratingRow(ticketId) {
   );
 }
 
-function panelRow() {
+function panelRow(portalEnv) {
   return new ActionRowBuilder().addComponents(
     new ButtonBuilder().setCustomId('shade:ticket:open:general').setLabel('Open ticket').setStyle(ButtonStyle.Primary).setEmoji('🎫'),
     new ButtonBuilder().setCustomId('shade:ticket:open:ban_appeal').setLabel('Ban appeal').setStyle(ButtonStyle.Danger).setEmoji('⚖️'),
     new ButtonBuilder().setCustomId('shade:ticket:open:report').setLabel('Report').setStyle(ButtonStyle.Secondary).setEmoji('🚨'),
   );
+}
+
+function panelComponents(portalEnv) {
+  return [panelRow(portalEnv), portalLinkRow(portalEnv)];
 }
 
 async function createDiscordChannelForTicket(guild, user, ticket, ticketManager, portalEnv, roleMap) {
@@ -260,7 +286,7 @@ async function createTicketChannel(guild, user, category, subject, description, 
   return { ticket, channel };
 }
 
-export async function startShadeDiscordBot({ acManager, ticketManager, portalEnv, roleMap, logManager, guildMonitor }) {
+export async function startShadeDiscordBot({ acManager, ticketManager, portalEnv, roleMap, logManager, guildMonitor, webQueue }) {
   if (process.env.DISCORD_BOT_ENABLED === '0') {
     console.log('Discord bot disabled (DISCORD_BOT_ENABLED=0)');
     return null;
@@ -283,13 +309,14 @@ export async function startShadeDiscordBot({ acManager, ticketManager, portalEnv
     await rest.put(Routes.applicationGuildCommands(clientId, gid), { body: buildAllCommands() });
     console.log(`Registered ShadeRP commands on guild ${gid}`);
   }
-  console.log('Commands: /ac · /ticket · /security');
+  console.log('Commands: /ac · /ticket · /security · /shade · /discord');
 
   const client = new Client({
     intents: [
       GatewayIntentBits.Guilds,
       GatewayIntentBits.GuildMessages,
       GatewayIntentBits.MessageContent,
+      GatewayIntentBits.GuildMembers,
     ],
   });
 
@@ -302,6 +329,7 @@ export async function startShadeDiscordBot({ acManager, ticketManager, portalEnv
       authorName: message.author.globalName || message.author.username,
       content: message.content,
       at: message.createdTimestamp,
+      source: 'discord',
     });
   });
 
@@ -541,17 +569,9 @@ export async function startShadeDiscordBot({ acManager, ticketManager, portalEnv
         if (sub === 'status') {
           await deferEphemeral(interaction);
           const data = guildMonitor ? await guildMonitor.checkAll(token) : { guilds: [] };
-          const lines = (data.guilds || []).map((g) => {
-            const status = g.connected
-              ? `✅ ${g.name} (${g.memberCount ?? '?'} members)`
-              : `❌ ${g.error || 'not configured'}`;
-            return `**${g.label}** — ${status}`;
-          });
           await replyEphemeral(interaction, {
-            embeds: [new EmbedBuilder()
-              .setTitle('🌐 ShadeRP Discord Network')
-              .setDescription(lines.join('\n') || 'No guilds configured — set DISCORD_GUILD_*_ID on Render')
-              .setColor(0x7c5cff)],
+            embeds: [networkStatusEmbed(data.guilds || [])],
+            components: [portalLinkRow(portalEnv)],
           });
           return;
         }
@@ -605,18 +625,16 @@ export async function startShadeDiscordBot({ acManager, ticketManager, portalEnv
         const acStatus = acManager?.getStatus?.() || {};
         const logStats = logManager?.stats?.() || {};
         const ticketStats = ticketManager?.getStats?.() || {};
+        const queueStats = webQueue?.getPublicStats?.() || {};
         await replyEphemeral(interaction, {
-          embeds: [
-            new EmbedBuilder()
-              .setTitle('🛡 ShadeRP Security Status')
-              .setColor(acStatus.connected ? 0x57f287 : 0xed4245)
-              .addFields(
-                { name: 'FXServer AC', value: acStatus.connected ? `Online (${acStatus.online} players)` : 'Offline/stale', inline: true },
-                { name: 'Open tickets', value: String(ticketStats.open ?? 0), inline: true },
-                { name: 'Portal logs', value: String(logStats.total ?? 0), inline: true },
-                { name: 'Portal', value: portalEnv.PORTAL_URL || 'shaderp-website.onrender.com', inline: false },
-              ),
-          ],
+          embeds: [securityStatusEmbed({
+            ac: acStatus,
+            logs: logStats,
+            tickets: ticketStats,
+            queue: queueStats,
+            portalEnv,
+          })],
+          components: [portalLinkRow(portalEnv)],
         });
         return;
       }
@@ -685,19 +703,10 @@ export async function startShadeDiscordBot({ acManager, ticketManager, portalEnv
         }
 
         if (sub === 'panel') {
-          const embed = new EmbedBuilder()
-            .setTitle('🎫 ShadeRP Support')
-            .setDescription(
-              'Open a ticket for ban appeals, reports, bugs, or general help.\n\n'
-              + 'Your Discord is linked to our **Anti-Cheat profile** — staff see ban history and evidence automatically.\n'
-              + 'Transcripts are saved on close (manager+) to Discord and the portal.',
-            )
-            .setColor(0x7c5cff)
-            .setFooter({ text: 'ShadeRP · Portal + Discord tickets stay in sync' });
-
-          const msg = await interaction.channel.send({ embeds: [embed], components: [panelRow()] });
+          const embed = ticketPanelEmbed(portalEnv);
+          const msg = await interaction.channel.send({ embeds: [embed], components: panelComponents(portalEnv) });
           ticketManager.setPanel(interaction.channelId, msg.id);
-          await replyEphemeral(interaction, { content: '✅ Ticket panel posted.' });
+          await replyEphemeral(interaction, { content: '✅ Ticket panel posted with portal links.' });
           return;
         }
 
@@ -707,11 +716,8 @@ export async function startShadeDiscordBot({ acManager, ticketManager, portalEnv
             return;
           }
           const result = await runTicketSetup(interaction.guild, ticketManager, roleMap);
-          const panelEmbed = new EmbedBuilder()
-            .setTitle('🎫 ShadeRP Support')
-            .setDescription('Click a button below to open a ticket. Staff respond in a private channel.')
-            .setColor(0x7c5cff);
-          const panelMsg = await result.panel.send({ embeds: [panelEmbed], components: [panelRow()] });
+          const panelEmbed = ticketPanelEmbed(portalEnv);
+          const panelMsg = await result.panel.send({ embeds: [panelEmbed], components: panelComponents(portalEnv) });
           ticketManager.setPanel(result.panel.id, panelMsg.id);
           await replyEphemeral(interaction, {
             content: `✅ Ticket system configured:\n`
@@ -769,9 +775,103 @@ export async function startShadeDiscordBot({ acManager, ticketManager, portalEnv
         }
         return;
       }
+
+      if (interaction.commandName === 'shade') {
+        const sub = interaction.options.getSubcommand();
+
+        if (sub === 'player') {
+          await deferEphemeral(interaction);
+          if (!staffRoleOk(member, roleMap, ownerIds, interaction.user.id)) {
+            await replyEphemeral(interaction, { content: '⛔ Staff only.' });
+            return;
+          }
+          let targetId = interaction.options.getString('discord_id');
+          const fivemId = interaction.options.getInteger('fivem_id');
+          if (!targetId && fivemId != null) {
+            const match = findPlayerByFivemId(acManager, fivemId);
+            targetId = match?.discord?.replace(/\D/g, '') || null;
+            if (!targetId) {
+              await replyEphemeral(interaction, { content: `No Discord linked for FiveM ID **${fivemId}**.` });
+              return;
+            }
+          }
+          if (!targetId) {
+            await replyEphemeral(interaction, { content: 'Provide `discord_id` or `fivem_id`.' });
+            return;
+          }
+          const bridge = buildPlayerBridge(targetId, { ticketManager, webQueue, acManager, portalEnv });
+          await replyEphemeral(interaction, {
+            embeds: [playerBridgeEmbed(bridge, { staffView: true })],
+            components: [portalLinkRow(portalEnv)],
+          });
+          return;
+        }
+
+        if (sub === 'server') {
+          await deferEphemeral(interaction);
+          const queueStats = webQueue?.getPublicStats?.() || {};
+          const acStatus = acManager?.getStatus?.() || {};
+          await replyEphemeral(interaction, {
+            embeds: [serverStatusEmbed({ queue: queueStats, ac: acStatus, portalEnv, botOnline: true })],
+            components: [portalLinkRow(portalEnv)],
+          });
+          return;
+        }
+
+        if (sub === 'queue') {
+          await deferEphemeral(interaction);
+          const status = webQueue?.getUserStatus?.(interaction.user.id) || { inQueue: false };
+          const stats = webQueue?.getPublicStats?.() || {};
+          const links = buildPlayerBridge(interaction.user.id, { ticketManager, webQueue, acManager, portalEnv }).links;
+          let body = `**${stats.inQueue ?? 0}** players in queue · **${stats.ready ?? 0}** ready to connect\n`;
+          body += stats.serverOnline ? `🟢 FXServer linked · ${stats.playersOnline ?? 0} online\n` : '🔴 FXServer sync offline — queue in offline mode\n';
+          if (status.inQueue) {
+            body += status.ready
+              ? `\n✅ **You're ready!** [Connect now](${links.connect})`
+              : `\n⏳ Your position: **#${status.position}** of ${status.total} (~${status.etaMinutes || '?'} min)`;
+          } else {
+            body += `\n[Join the web queue](${links.queue}) — login with this Discord account on the portal.`;
+          }
+          await replyEphemeral(interaction, { content: body, components: [portalLinkRow(portalEnv)] });
+          return;
+        }
+
+        if (sub === 'link') {
+          await deferEphemeral(interaction);
+          const bridge = buildPlayerBridge(interaction.user.id, {
+            ticketManager,
+            webQueue,
+            acManager,
+            portalEnv,
+            discordName: interaction.user.globalName || interaction.user.username,
+          });
+          await replyEphemeral(interaction, {
+            embeds: [playerBridgeEmbed(bridge)],
+            components: [portalLinkRow(portalEnv)],
+          });
+          return;
+        }
+      }
     } catch (err) {
       console.error('Discord interaction error:', err);
       await safeInteractionReply(interaction, { content: 'Command failed.' });
+    }
+  });
+
+  client.on('guildMemberAdd', async (member) => {
+    if (member.guild?.id !== guildId) return;
+    const welcomeChannelId = process.env.DISCORD_WELCOME_CHANNEL_ID || portalEnv.DISCORD_WELCOME_CHANNEL_ID;
+    if (!welcomeChannelId) return;
+    try {
+      const channel = await client.channels.fetch(welcomeChannelId);
+      if (!channel?.isTextBased?.()) return;
+      await channel.send({
+        content: `<@${member.id}>`,
+        embeds: [welcomeEmbed(member, portalEnv)],
+        components: [portalLinkRow(portalEnv)],
+      });
+    } catch (err) {
+      console.warn('[Welcome]', err.message);
     }
   });
 
@@ -784,10 +884,11 @@ export async function startShadeDiscordBot({ acManager, ticketManager, portalEnv
     } catch (e) {
       console.warn('[Tickets] Startup heal failed:', e.message);
     }
+    startDiscordStatusLoop(client, { portalEnv, webQueue, acManager });
   });
 
   await client.login(token);
-  console.log('ShadeRP Discord bot online (/ac · /ticket · /security)');
+  console.log('ShadeRP Discord bot online (/ac · /ticket · /security · /shade · /discord)');
   return client;
 }
 

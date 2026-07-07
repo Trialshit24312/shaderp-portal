@@ -1,5 +1,5 @@
 /**
-
+ * @deprecated Superseded by discord-bot.js — do not use or import.
  * ShadeRP AC Discord slash commands — /ac ban, watch, kick, snapshot, status
 
  * Requires DISCORD_BOT_TOKEN + DISCORD_CLIENT_ID + DISCORD_GUILD_ID.

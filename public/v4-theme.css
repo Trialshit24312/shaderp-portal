@@ -493,5 +493,76 @@ html, body {
 
 @media (max-width: 900px) {
   .hero { grid-template-columns: 1fr; }
-  .ac-watch-grid { grid-template-columns: 1fr; }
+}
+
+/* ── v6 site-wide polish ── */
+.hero {
+  background: linear-gradient(145deg, rgba(17, 17, 24, 0.6) 0%, transparent 60%);
+  border: 1px solid var(--glass-border);
+  border-radius: var(--radius-lg);
+  padding: 1.75rem;
+}
+
+.hero-stat {
+  border-left: 2px solid var(--accent);
+}
+
+.server-strip {
+  background: var(--bg-card);
+  border: 1px solid var(--glass-border);
+  border-radius: var(--radius);
+  margin-bottom: 1rem;
+}
+
+.nav-highlight {
+  position: relative;
+}
+
+.nav-highlight::after {
+  content: '';
+  position: absolute;
+  right: 0.65rem;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--accent);
+  box-shadow: 0 0 8px var(--accent-glow);
+}
+
+.nav-btn[data-panel="anticheat"].active {
+  background: linear-gradient(90deg, rgba(34, 211, 238, 0.08), rgba(225, 29, 72, 0.12));
+  box-shadow: inset 3px 0 0 var(--accent), 0 0 20px rgba(225, 29, 72, 0.08);
+}
+
+.whats-new-card,
+.latest-update-card {
+  border-left: 3px solid var(--accent);
+}
+
+.card-grid .feature-card:hover {
+  transform: translateY(-2px);
+  border-color: rgba(225, 29, 72, 0.25);
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.35);
+}
+
+.stat-card {
+  background: var(--bg-card);
+  border: 1px solid var(--glass-border);
+  border-radius: var(--radius);
+  padding: 1rem;
+}
+
+.stat-card .stat-value {
+  font-size: 1.5rem;
+  font-weight: 800;
+  color: var(--accent-2);
+}
+
+.stat-card .stat-label {
+  font-size: 0.72rem;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--text-muted);
 }

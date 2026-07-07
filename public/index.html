@@ -10,8 +10,9 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="/styles.css?v=5.0.0" />
-  <link rel="stylesheet" href="/v4-theme.css?v=5.0.0" />
+  <link rel="stylesheet" href="/styles.css?v=6.0.0" />
+  <link rel="stylesheet" href="/v4-theme.css?v=6.0.0" />
+  <link rel="stylesheet" href="/ac-command.css?v=6.0.0" />
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js" defer></script>
 </head>
 <body>
@@ -372,146 +373,215 @@
     </section>
 
     <section id="panel-anticheat" class="panel" data-min-role="staff">
-      <header class="page-header ac-hub-header">
-        <h2 class="page-title">Anti-Cheat Command Center <span id="ac-portal-version" class="hint" style="font-weight:400;font-size:0.9rem"></span></h2>
-        <p class="page-subtitle">Monitor players live, review detections with evidence, and manage protections — synced from your FiveM server via <code>shaderp-ac</code>.</p>
-      </header>
-      <div id="ac-tamper-banner" class="ac-tamper-banner hidden" role="alert"></div>
-      <div id="ac-panel-body">
-        <div class="ac-tabs" id="ac-tabs">
-          <button type="button" class="ac-tab active" data-ac-tab="live">Live monitoring</button>
-          <button type="button" class="ac-tab" data-ac-tab="records">Detections &amp; bans</button>
-          <button type="button" class="ac-tab" data-ac-tab="intelligence">Intelligence</button>
-          <button type="button" class="ac-tab" data-ac-tab="config">Protections &amp; signatures</button>
-        </div>
-
-        <div class="ac-tab-panel active" data-ac-panel="live">
-        <div class="section-help"><strong>Live tab</strong> — See who is online, start up to 4 live screen watches, and review economy spikes. Green status = server connected. If offline, check <code>AC_API_KEY</code> matches <code>shade:acApiKey</code> on FXServer.</div>
-        <div class="ac-toolbar">
-          <span id="ac-server-status" class="ac-status ac-status-offline">Server offline</span>
-          <input type="search" id="ac-player-search" class="admin-search" placeholder="Search players…" autocomplete="off" />
-          <label class="ac-auto-label"><input type="checkbox" id="ac-auto-refresh" checked /> Auto-refresh</label>
-          <button type="button" class="btn ghost btn-sm" id="ac-watch-suspicious">Watch low trust</button>
-          <button type="button" class="btn ghost btn-sm" id="ac-stop-all-watch">Stop all</button>
-          <span id="ac-watch-count" class="hint ac-watch-count">0/4 watches</span>
-          <button type="button" class="btn ghost btn-sm" id="ac-refresh">Refresh now</button>
-        </div>
-        <div id="ac-threat-summary" class="ac-threat-bar"></div>
-        <div class="stat-grid" id="ac-stats"></div>
-        <div class="split-panels logs-split ac-main-split">
-          <div class="card logs-list-card">
-            <h3>Online players</h3>
-            <div id="ac-players-wrap" class="table-wrap"></div>
+      <div class="ac-hero">
+        <div class="ac-hero-text">
+          <div class="ac-hero-badge">Sentinel · Live SOC</div>
+          <h2 class="ac-hero-title"><span>Anti-Cheat</span> Command Center</h2>
+          <p class="ac-hero-sub">Real-time player monitoring, detection intelligence, and protection control — synced from <code>shaderp-ac</code> on your FXServer.</p>
+          <div class="ac-hero-meta">
+            <span id="ac-server-status" class="ac-status ac-status-offline">Server offline</span>
+            <span id="ac-portal-version" class="hint"></span>
           </div>
-          <div class="card logs-detail-card ac-watch-card">
-            <h3>Live watch grid <span class="hint" style="font-weight:400">— up to 4 players</span></h3>
-            <p id="ac-watch-hint" class="hint">Click <strong>Watch</strong> on a player or detection. Frames update every ~1s.</p>
-            <div id="ac-watch-grid" class="ac-watch-grid"></div>
-            <div id="ac-frame-wrap" class="ac-frame-wrap ac-frame-expanded" hidden>
-              <button type="button" class="btn ghost btn-sm" id="ac-frame-close">Close viewer</button>
-              <div id="ac-frame-placeholder" class="ac-frame-loading">Click a watch slot or use <strong>Watch</strong> on a player to expand a live frame.</div>
-              <img id="ac-frame" alt="Live frame" hidden />
+        </div>
+        <div class="ac-hero-actions">
+          <div class="ac-toolbar-compact">
+            <label class="ac-auto-label"><input type="checkbox" id="ac-auto-refresh" checked /> Auto-refresh</label>
+            <span id="ac-watch-count" class="ac-watch-count">0/4 LIVE</span>
+            <button type="button" class="btn ghost btn-sm" id="ac-refresh">↻ Sync</button>
+          </div>
+          <button type="button" class="btn primary btn-sm" id="ac-watch-suspicious">Watch low trust</button>
+          <button type="button" class="btn ghost btn-sm" id="ac-stop-all-watch">Stop all watches</button>
+        </div>
+      </div>
+
+      <div id="ac-tamper-banner" class="ac-tamper-banner hidden" role="alert"></div>
+      <div id="ac-threat-summary" class="ac-alert-inbox"></div>
+
+      <div id="ac-panel-body">
+        <nav class="ac-tabs" id="ac-tabs" aria-label="Anti-cheat sections">
+          <button type="button" class="ac-tab active" data-ac-tab="live">
+            <span class="ac-tab-icon">◉</span>
+            Live Ops
+          </button>
+          <button type="button" class="ac-tab" data-ac-tab="records">
+            <span class="ac-tab-icon">⚑</span>
+            Records
+          </button>
+          <button type="button" class="ac-tab" data-ac-tab="intelligence">
+            <span class="ac-tab-icon">◈</span>
+            Intel
+          </button>
+          <button type="button" class="ac-tab" data-ac-tab="config">
+            <span class="ac-tab-icon">⚙</span>
+            Shield Config
+          </button>
+        </nav>
+
+        <!-- LIVE OPS -->
+        <div class="ac-tab-panel active" data-ac-panel="live">
+          <details class="ac-help-toggle">
+            <summary>How live monitoring works</summary>
+            <div class="ac-help-body">Green status = FXServer connected. Start up to 4 live screen watches. If offline, verify <code>AC_API_KEY</code> on Render matches <code>shade:acApiKey</code> in server.cfg.</div>
+          </details>
+          <div class="ac-kpi-strip" id="ac-stats"></div>
+          <div class="ac-live-grid">
+            <div class="ac-section">
+              <div class="ac-section-head">
+                <h3>Player roster</h3>
+                <input type="search" id="ac-player-search" class="admin-search" placeholder="Search name or ID…" autocomplete="off" style="max-width:200px" />
+              </div>
+              <div class="ac-section-body flush">
+                <div id="ac-players-wrap" class="ac-roster"></div>
+              </div>
+            </div>
+            <div class="ac-section ac-monitor-panel">
+              <div class="ac-monitor-head">
+                <span>Live watch grid</span>
+                <span class="ac-monitor-rec">REC</span>
+              </div>
+              <div id="ac-watch-grid" class="ac-watch-grid"></div>
+              <div id="ac-frame-wrap" class="ac-frame-expanded" hidden>
+                <button type="button" class="btn ghost btn-sm" id="ac-frame-close">✕ Close viewer</button>
+                <div id="ac-frame-placeholder" class="ac-frame-loading">Select a watch slot to expand the live feed.</div>
+                <img id="ac-frame" alt="Live frame" hidden />
+              </div>
+            </div>
+          </div>
+          <div class="ac-section" style="margin-top:1rem">
+            <div class="ac-section-head">
+              <h3>💰 Economy exploit alerts</h3>
+              <span class="hint">Auto-freeze on spike</span>
+            </div>
+            <div class="ac-section-body flush">
+              <div id="ac-economy-wrap" class="table-wrap"></div>
             </div>
           </div>
         </div>
-        <div class="card" style="margin-top:1rem">
-          <h3>Money exploit alerts</h3>
-          <p class="hint" style="margin-bottom:0.75rem">Unusual cash or bank increases are flagged automatically. Frozen players need staff review.</p>
-          <div id="ac-economy-wrap" class="table-wrap"></div>
-        </div>
-        </div>
 
+        <!-- RECORDS -->
         <div class="ac-tab-panel" data-ac-panel="records">
-        <div class="section-help"><strong>Records tab</strong> — Every detection includes trust score and evidence clips when available. Tamper attempts (AC stopped locally) appear here with priority alerts.</div>
-        <div class="card">
-          <h3>Recent detections</h3>
-          <p class="hint" style="margin-bottom:0.75rem">Click <strong>Evidence</strong> for screenshot replay, <strong>Watch</strong> for live view, or <strong>Ban</strong> to remove the player.</p>
-          <div id="ac-detections-wrap" class="table-wrap"></div>
-        </div>
-        <div class="split-panels" style="margin-top:1rem">
-          <div class="card">
-            <h3>Recent bans</h3>
-            <p class="hint" style="margin-bottom:0.75rem">Portal + FXServer bans. Search by SHADE ID, Discord, license, or name — unban clears both portal and live server.</p>
-            <div id="ac-unban-tool"></div>
-            <div id="ac-bans-wrap"></div>
+          <details class="ac-help-toggle">
+            <summary>Detection &amp; ban workflow</summary>
+            <div class="ac-help-body">Every detection includes trust score and evidence clips. Open <strong>Evidence</strong> for 3-frame replay before banning. Unban clears both portal and live server.</div>
+          </details>
+          <div class="ac-section">
+            <div class="ac-section-head">
+              <h3>Recent detections</h3>
+            </div>
+            <div class="ac-section-body">
+              <div id="ac-detections-wrap" class="ac-det-feed"></div>
+            </div>
           </div>
-          <div class="card">
-            <h3>Blocked joins</h3>
-            <p class="hint" style="margin-bottom:0.75rem">Players denied at connect — global bans, flagged Discord, or failed security screening.</p>
-            <div id="ac-join-wrap"></div>
-            <div id="ac-rate-hints-wrap" style="margin-top:0.75rem"></div>
+          <div class="ac-records-grid" style="margin-top:1rem">
+            <div class="ac-section">
+              <div class="ac-section-head"><h3>Recent bans</h3></div>
+              <div class="ac-section-body">
+                <div id="ac-unban-tool"></div>
+                <div id="ac-bans-wrap" class="ac-ban-cards"></div>
+              </div>
+            </div>
+            <div class="ac-section">
+              <div class="ac-section-head"><h3>Blocked joins</h3></div>
+              <div class="ac-section-body">
+                <div id="ac-join-wrap"></div>
+                <div id="ac-rate-hints-wrap" style="margin-top:0.75rem"></div>
+              </div>
+            </div>
           </div>
-        </div>
-        <div class="card" style="margin-top:1rem">
-          <h3>Suspicious alt accounts</h3>
-          <p class="hint" style="margin-bottom:0.75rem">Players sharing fingerprints, licenses, or Discord IDs with banned accounts.</p>
-          <div id="ac-alt-wrap"></div>
-        </div>
+          <div class="ac-section" style="margin-top:1rem">
+            <div class="ac-section-head"><h3>Suspicious alt clusters</h3></div>
+            <div class="ac-section-body">
+              <div id="ac-alt-wrap"></div>
+            </div>
+          </div>
         </div>
 
+        <!-- INTELLIGENCE -->
         <div class="ac-tab-panel" data-ac-panel="intelligence">
-        <div class="section-help"><strong>Intelligence tab</strong> — Zero-trust PVS culling, ghost honeypots, movement simulation rollbacks, physics validation, tar-pits, and threat ML clustering.</div>
-        <div class="stat-grid" id="ac-intel-stats"></div>
-        <div class="card" style="margin-top:1rem">
-          <h3>Threat ML — isolation anomalies</h3>
-          <p class="hint" style="margin-bottom:0.75rem">Players drifting into isolated behavior clusters. Auto-ban runs every 5 minutes when enabled (<code>AC_ML_AUTO_BAN</code>).</p>
-          <div class="ac-toolbar" style="margin-bottom:0.75rem">
-            <button type="button" class="btn ghost btn-sm" id="ac-ml-refresh">Refresh ML</button>
-            <button type="button" class="btn ghost btn-sm" id="ac-ml-autoban">Queue bans (top 5)</button>
+          <details class="ac-help-toggle">
+            <summary>What intelligence tracks</summary>
+            <div class="ac-help-body">PVS culling, ghost honeypots, movement rollbacks, physics validation, tar-pits, biometrics, and ML anomaly clustering across all online players.</div>
+          </details>
+          <div class="ac-intel-grid" id="ac-intel-stats"></div>
+          <div class="ac-section" style="margin-top:1rem">
+            <div class="ac-section-head">
+              <h3>Threat ML — behavior anomalies</h3>
+              <div class="ac-toolbar-compact" style="border:none;padding:0;background:transparent">
+                <button type="button" class="btn ghost btn-sm" id="ac-ml-refresh">Refresh</button>
+                <button type="button" class="btn danger btn-sm" id="ac-ml-autoban">Ban top 5</button>
+              </div>
+            </div>
+            <div class="ac-section-body flush">
+              <div id="ac-ml-wrap" class="table-wrap"></div>
+            </div>
           </div>
-          <div id="ac-ml-wrap" class="table-wrap"></div>
-        </div>
-        <div class="card" style="margin-top:1rem">
-          <h3>Fragment hosts (anti-profiler)</h3>
-          <p class="hint" style="margin-bottom:0.75rem">AC micro-checks distributed across host resources — stopping <code>shaderp-ac</code> alone won't disable protections.</p>
-          <div id="ac-fragment-wrap"></div>
-        </div>
+          <div class="ac-section" style="margin-top:1rem">
+            <div class="ac-section-head">
+              <h3>Fragment hosts</h3>
+              <span class="hint">Anti-profiler distribution</span>
+            </div>
+            <div class="ac-section-body">
+              <div id="ac-fragment-wrap"></div>
+            </div>
+          </div>
         </div>
 
+        <!-- SHIELD CONFIG -->
         <div class="ac-tab-panel" data-ac-panel="config">
-        <div class="section-help"><strong>Config tab</strong> — Toggle individual detections on/off (syncs to server every 60 seconds). Add cheat menu signatures to catch new executors via OCR and resource scanning.</div>
-        <div class="card">
-          <h3>Detection toggles</h3>
-          <p class="hint" style="margin-bottom:0.75rem">Enable or disable each protection module. Changes require admin role and sync automatically to the live server.</p>
-          <div id="ac-toggles-wrap" class="ac-toggles-grid"></div>
-          <div class="ac-toolbar" style="margin-top:0.75rem">
-            <button type="button" class="btn ghost btn-sm" id="ac-toggles-save" disabled>Save toggles</button>
-            <span id="ac-toggles-meta" class="hint"></span>
+          <details class="ac-help-toggle">
+            <summary>Protection configuration</summary>
+            <div class="ac-help-body">Toggle detections on/off — syncs to FXServer every ~60s. Add cheat menu signatures for OCR and resource scanning. Admin role required to save.</div>
+          </details>
+          <div class="ac-section">
+            <div class="ac-section-head">
+              <h3>Detection modules</h3>
+              <div class="ac-toolbar-compact" style="border:none;padding:0;background:transparent">
+                <button type="button" class="btn primary btn-sm" id="ac-toggles-save" disabled>Save changes</button>
+                <span id="ac-toggles-meta" class="hint"></span>
+              </div>
+            </div>
+            <div class="ac-section-body">
+              <input type="search" id="ac-toggle-search" class="ac-toggle-search" placeholder="Filter protections…" autocomplete="off" />
+              <div id="ac-toggles-wrap" class="ac-toggles-grid"></div>
+            </div>
           </div>
-        </div>
-        <div class="card" style="margin-top:1rem">
-          <h3>Cheat signatures</h3>
-          <p class="hint" style="margin-bottom:0.75rem">Block known executor names, Lua patterns, and OCR strings. Apply a preset pack for common 2026 menus.</p>
-          <div class="ac-toolbar" style="margin-bottom:0.5rem;flex-wrap:wrap">
-            <select id="ac-sig-preset" class="admin-search" style="min-width:200px">
-              <option value="">Apply preset pack…</option>
-            </select>
-            <button type="button" class="btn ghost btn-sm" id="ac-sig-apply-preset">Apply preset</button>
-            <select id="ac-sig-category" class="admin-search">
-              <option value="executor">Executor name</option>
-              <option value="pattern">Partial pattern</option>
-              <option value="ocr">OCR word</option>
-            </select>
-            <input type="text" id="ac-sig-value" class="admin-search" placeholder="e.g. SusanoMenu" autocomplete="off" />
-            <button type="button" class="btn ghost btn-sm" id="ac-sig-add">Add signature</button>
+          <div class="ac-section" style="margin-top:1rem">
+            <div class="ac-section-head"><h3>Cheat signatures</h3></div>
+            <div class="ac-section-body">
+              <div class="ac-toolbar-compact" style="margin-bottom:0.75rem;border:none;padding:0;background:transparent;flex-wrap:wrap">
+                <select id="ac-sig-preset" class="admin-search" style="min-width:180px">
+                  <option value="">Apply preset pack…</option>
+                </select>
+                <button type="button" class="btn ghost btn-sm" id="ac-sig-apply-preset">Apply</button>
+                <select id="ac-sig-category" class="admin-search">
+                  <option value="executor">Executor</option>
+                  <option value="pattern">Pattern</option>
+                  <option value="ocr">OCR word</option>
+                </select>
+                <input type="text" id="ac-sig-value" class="admin-search" placeholder="e.g. SusanoMenu" autocomplete="off" />
+                <button type="button" class="btn ghost btn-sm" id="ac-sig-add">+ Add</button>
+              </div>
+              <div id="ac-signatures-wrap" class="table-wrap"></div>
+            </div>
           </div>
-          <div id="ac-signatures-wrap" class="table-wrap"></div>
-        </div>
-        <div class="card" style="margin-top:1rem">
-          <h3>Staff workflow</h3>
-          <div class="ac-playbook">
-            <div class="ac-playbook-step"><strong>1. Alert fires</strong> Detection or tamper alert appears — trust score drops and evidence auto-captures.</div>
-            <div class="ac-playbook-step"><strong>2. Review evidence</strong> Open the evidence replay to see 3-frame proof before banning.</div>
-            <div class="ac-playbook-step"><strong>3. Watch live</strong> Add up to 4 players to the watch grid. Use “Watch low trust” for quick review.</div>
-            <div class="ac-playbook-step"><strong>4. Ban or freeze</strong> Portal bans sync to shaderp-ac instantly. Economy alerts auto-freeze suspects.</div>
-            <div class="ac-playbook-step"><strong>5. Update signatures</strong> New menu name? Add it here — server picks it up within 60 seconds.</div>
+          <div class="ac-section" style="margin-top:1rem">
+            <div class="ac-section-head"><h3>Staff playbook</h3></div>
+            <div class="ac-section-body">
+              <div class="ac-playbook">
+                <div class="ac-playbook-step"><strong>01 · Alert</strong> Detection fires — trust drops, evidence auto-captures.</div>
+                <div class="ac-playbook-step"><strong>02 · Evidence</strong> Open 3-frame replay before any ban decision.</div>
+                <div class="ac-playbook-step"><strong>03 · Watch</strong> Add up to 4 players to the live monitor grid.</div>
+                <div class="ac-playbook-step"><strong>04 · Action</strong> Ban or freeze — portal syncs to shaderp-ac instantly.</div>
+                <div class="ac-playbook-step"><strong>05 · Signatures</strong> New menu name? Add it — live within 60 seconds.</div>
+              </div>
+            </div>
           </div>
-        </div>
         </div>
       </div>
+
       <div id="evidence-replay-modal" class="ac-modal" hidden aria-hidden="true">
         <div class="ac-modal-backdrop" data-evidence-close></div>
-        <div class="ac-modal-box card ac-replay-box">
+        <div class="ac-modal-box ac-replay-box">
           <h3 id="evidence-replay-title">Evidence replay</h3>
           <div id="evidence-replay-strip" class="ac-replay-strip"></div>
           <img id="evidence-replay-main" alt="Evidence frame" class="ac-replay-main" />
@@ -522,14 +592,14 @@
       </div>
       <div id="ac-ban-modal" class="ac-modal" hidden aria-hidden="true">
         <div class="ac-modal-backdrop" data-ac-close-ban></div>
-        <div class="ac-modal-box card">
-          <h3>Ban player</h3>
+        <div class="ac-modal-box">
+          <h3>⚠ Ban player</h3>
           <p id="ac-ban-target" class="hint"></p>
           <label class="ac-field-label" for="ac-ban-reason">Ban reason</label>
           <textarea id="ac-ban-reason" rows="3" placeholder="Cheating — menu detected, aimbot, etc."></textarea>
           <div class="ac-modal-actions">
             <button type="button" class="btn ghost" id="ac-ban-cancel">Cancel</button>
-            <button type="button" class="btn danger" id="ac-ban-confirm">Ban player</button>
+            <button type="button" class="btn danger" id="ac-ban-confirm">Confirm ban</button>
           </div>
         </div>
       </div>
@@ -613,6 +683,6 @@
   </div>
 
   <div id="toast" class="toast" hidden>Copied</div>
-  <script src="/app.js?v=4.8.1" type="module"></script>
+  <script src="/app.js?v=6.0.0" type="module"></script>
 </body>
 </html>

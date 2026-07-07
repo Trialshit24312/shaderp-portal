@@ -42,7 +42,7 @@ const NAV = [
   { id: 'hub', label: 'Command Center', min: 'staff', highlight: true },
   { id: 'analytics', label: 'Analytics', min: 'staff' },
   { id: 'bans', label: 'Ban Manager', min: 'moderator', highlight: true },
-  { id: 'anticheat', label: 'Anti-Cheat', min: 'staff', highlight: true },
+  { id: 'anticheat', label: 'Sentinel AC', min: 'staff', highlight: true },
   { id: 'tickets', label: 'Tickets', min: 'staff' },
   { id: 'discord', label: 'Discord Hub', min: 'staff' },
   { id: 'staff', label: 'Staff Hub', min: 'staff' },
@@ -344,7 +344,7 @@ function renderHub() {
   const q = QUEUE?.config || {};
   const actions = [
     { id: 'bans', icon: '⛔', title: 'Ban Manager', desc: 'Moderator, AC, hardware bans, IP & platform flags', min: 'moderator' },
-    { id: 'anticheat', icon: '🛡️', title: 'Anti-Cheat', desc: 'Players, bans, economy alerts, evidence' },
+    { id: 'anticheat', icon: '◉', title: 'Sentinel AC', desc: 'Live ops, detections, intel & shield config' },
     { id: 'tickets', icon: '🎫', title: 'Tickets', desc: 'Support threads linked to Discord' },
     { id: 'discord', icon: '🌐', title: 'Discord Hub', desc: 'All 5 servers — status, setup, bots' },
     { id: 'logs', icon: '📋', title: 'Server logs', desc: 'Crashes, joins, errors from FXServer' },
@@ -407,6 +407,14 @@ function renderHub() {
 
 function stat(label, value) {
   return `<div class="stat"><div class="stat-label">${esc(label)}</div><div class="stat-value">${esc(String(value))}</div></div>`;
+}
+
+function acKpi(icon, label, value, tone = '') {
+  return `<div class="ac-kpi${tone ? ` ac-kpi-${tone}` : ''}">
+    <div class="ac-kpi-icon">${icon}</div>
+    <div class="ac-kpi-value">${esc(String(value))}</div>
+    <div class="ac-kpi-label">${esc(label)}</div>
+  </div>`;
 }
 
 function renderHome() {
@@ -2055,7 +2063,7 @@ function acRenderWatchGrid() {
   grid.innerHTML = slots.join('');
   acBindFrameImgErrors(grid);
   const countEl = el('ac-watch-count');
-  if (countEl) countEl.textContent = `${acState.watches.size}/4 watches`;
+  if (countEl) countEl.textContent = `${acState.watches.size}/4 LIVE`;
   grid.querySelectorAll('.ac-watch-slot[data-session]').forEach((slot) => {
     slot.addEventListener('click', (e) => {
       if (e.target.closest('.ac-watch-slot-close')) return;
@@ -2204,18 +2212,32 @@ async function acRenderThreatSummary() {
     const res = await fetch('/api/ac/admin/threat-summary');
     if (!res.ok) { bar.innerHTML = ''; return; }
     const data = await res.json();
-    const chips = [];
+    const items = [];
     for (const t of data.tamperAlerts || []) {
-      chips.push(`<span class="ac-threat-chip critical">🛑 ${esc(t.playerName || '?')} — ${esc(t.reason || 'tamper')}</span>`);
+      items.push(`<div class="ac-alert-item critical">
+        <span class="ac-alert-icon">🛑</span>
+        <div class="ac-alert-body"><strong>Tamper — ${esc(t.playerName || '?')}</strong><small>${esc(t.reason || 'AC stopped locally')}</small></div>
+      </div>`);
     }
     for (const p of data.highRisk || []) {
-      chips.push(`<span class="ac-threat-chip danger">${esc(p.name)} · trust ${p.trust ?? '?'}${p.combat?.risk >= 60 ? ` · combat ${p.combat.risk}` : ''}</span>`);
+      items.push(`<div class="ac-alert-item danger">
+        <span class="ac-alert-icon">⚠</span>
+        <div class="ac-alert-body"><strong>${esc(p.name)}</strong><small>Trust ${p.trust ?? '?'}${p.combat?.risk >= 60 ? ` · combat risk ${p.combat.risk}` : ''}</small></div>
+      </div>`);
     }
     for (const t of data.topTypes || []) {
-      chips.push(`<span class="ac-threat-chip warn">${esc(t.type)} ×${t.count}</span>`);
+      items.push(`<div class="ac-alert-item warn">
+        <span class="ac-alert-icon">◆</span>
+        <div class="ac-alert-body"><strong>${esc(t.type)}</strong><small>${t.count} detections in last window</small></div>
+      </div>`);
     }
-    if (data.activeWatches) chips.push(`<span class="ac-threat-chip">${data.activeWatches} live watches</span>`);
-    bar.innerHTML = chips.length ? chips.join('') : '<span class="hint">All clear — no elevated threats</span>';
+    if (data.activeWatches) {
+      items.push(`<div class="ac-alert-item info">
+        <span class="ac-alert-icon">◉</span>
+        <div class="ac-alert-body"><strong>${data.activeWatches} active watches</strong><small>Live screen monitoring in progress</small></div>
+      </div>`);
+    }
+    bar.innerHTML = items.length ? items.join('') : '<div class="ac-alert-clear">✓ All clear — no elevated threats</div>';
     acRenderTamperBanner(data.recentTamper);
   } catch {
     bar.innerHTML = '';
@@ -2613,37 +2635,45 @@ function acRenderPlayers(players) {
     ? players.filter((p) => `${p.name} ${p.id}`.toLowerCase().includes(q))
     : players;
 
-  const rows = filtered.map((p) => {
+  const cards = filtered.map((p) => {
     const trust = p.trust ?? 100;
     const combat = p.combat || {};
     const combatLabel = combat.hits
       ? `${combat.headshotPct ?? 0}% HS · ${combat.avgDist ?? 0}m`
       : '—';
-    const combatClass = (combat.risk ?? 0) >= 60 ? 'ac-trust-low' : (combat.risk ?? 0) >= 35 ? 'ac-trust-mid' : 'ac-trust-good';
-    const rowClass = trust < 40 || (combat.risk ?? 0) >= 70 ? ' class="ac-row-danger"' : '';
-    return `<tr${rowClass}>
-      <td>${esc(p.name)}</td>
-      <td>#${p.id}</td>
-      <td><span class="ac-trust ${acTrustClass(trust)}">${trust}</span></td>
-      <td>${p.strikes ?? 0}</td>
-      <td><span class="ac-trust ${combatClass}" title="Risk ${combat.risk ?? 0} · ${combat.hits ?? 0} hits">${esc(combatLabel)}</span></td>
-      <td><code class="ac-fp">${esc(p.fingerprint || '—')}</code></td>
-      <td>${p.ping ?? 0}ms</td>
-      <td class="ac-actions">
-        <button type="button" class="btn ghost btn-sm ac-watch-btn" data-pid="${p.id}" data-pname="${esc(p.name)}">Watch</button>
-        <button type="button" class="btn ghost btn-sm ac-snap-btn" data-pid="${p.id}" data-pname="${esc(p.name)}">Snap</button>
-        <button type="button" class="btn ghost btn-sm ac-kick-btn" data-pid="${p.id}" data-pname="${esc(p.name)}">Kick</button>
-        <button type="button" class="btn ghost btn-sm ac-freeze-btn" data-pid="${p.id}">Freeze</button>
-        <button type="button" class="btn ghost btn-sm ac-heal-btn" data-pid="${p.id}">Heal</button>
-        <button type="button" class="btn ghost btn-sm ac-dm-btn" data-pid="${p.id}">DM</button>
+    const initial = (p.name || '?').charAt(0).toUpperCase();
+    const danger = trust < 40 || (combat.risk ?? 0) >= 70;
+    return `<div class="ac-player-card${danger ? ' danger' : ''}">
+      <div class="ac-player-avatar">${esc(initial)}</div>
+      <div class="ac-player-info">
+        <h4>${esc(p.name)} <span class="ac-trust ${acTrustClass(trust)}">${trust}</span></h4>
+        <div class="ac-player-meta">
+          <span>#${p.id}</span>
+          <span>${p.ping ?? 0}ms</span>
+          <span>${p.strikes ?? 0} strikes</span>
+          <span>${esc(combatLabel)}</span>
+          <span class="ac-fp">${esc((p.fingerprint || '—').slice(0, 12))}</span>
+        </div>
+      </div>
+      <div class="ac-player-actions">
+        <button type="button" class="btn primary btn-sm ac-watch-btn" data-pid="${p.id}" data-pname="${esc(p.name)}">Watch</button>
         <button type="button" class="btn danger btn-sm ac-ban-btn" data-pid="${p.id}" data-pname="${esc(p.name)}">Ban</button>
-      </td>
-    </tr>`;
+        <details class="ac-action-menu">
+          <summary>More</summary>
+          <div class="ac-action-dropdown">
+            <button type="button" class="ac-snap-btn" data-pid="${p.id}" data-pname="${esc(p.name)}">Snapshot</button>
+            <button type="button" class="ac-kick-btn" data-pid="${p.id}" data-pname="${esc(p.name)}">Kick</button>
+            <button type="button" class="ac-freeze-btn" data-pid="${p.id}">Freeze</button>
+            <button type="button" class="ac-heal-btn" data-pid="${p.id}">Heal</button>
+            <button type="button" class="ac-dm-btn" data-pid="${p.id}">DM</button>
+          </div>
+        </details>
+      </div>
+    </div>`;
   }).join('');
 
-  el('ac-players-wrap').innerHTML = rows
-    ? `<table><thead><tr><th>Player</th><th>Server ID</th><th>Trust score</th><th>Strikes</th><th>Combat stats</th><th>Fingerprint</th><th>Ping</th><th>Quick actions</th></tr></thead><tbody>${rows}</tbody></table>`
-    : `<p class="hint">${players.length ? 'No players match your search.' : 'No players synced — restart shaderp-ac and verify shade:acApiKey matches AC_API_KEY on Render.'}</p>`;
+  el('ac-players-wrap').innerHTML = cards
+    || `<p class="hint" style="padding:1rem">${players.length ? 'No players match your search.' : 'No players synced — restart shaderp-ac and verify shade:acApiKey matches AC_API_KEY on Render.'}</p>`;
   acBindPlayerActions();
 }
 
@@ -2653,29 +2683,32 @@ function acRenderDetections(dets) {
     return;
   }
 
-  const rows = dets.map((d) => {
+  const cards = dets.map((d) => {
     const pid = d.playerId ?? d.details?.playerId ?? '';
     const pname = d.playerName || '?';
     const detail = d.details?.detail || d.details?.details?.detail || d.details?.menu || d.details?.executor || '';
     const screenshot = d.details?.screenshot || d.details?.details?.screenshot;
     const evidenceId = d.evidenceId || d.details?.evidenceId;
     const canAct = pid !== '' && pid != null;
-    return `<tr class="ac-det-row">
-      <td>${d.at ? new Date(d.at).toLocaleString() : '—'}</td>
-      <td><strong>${esc(pname)}</strong>${pid ? ` <small>#${pid}</small>` : ''}</td>
-      <td><span class="ac-det-type">${esc(d.detection || 'unknown')}</span></td>
-      <td>${d.trust != null ? `<span class="ac-trust ${acTrustClass(d.trust)}">${d.trust}</span>` : '—'}</td>
-      <td><span class="ac-det-detail" title="${esc(String(detail))}">${esc(String(detail || '—'))}</span>
-        ${screenshot ? `<a href="${esc(screenshot)}" class="ac-screenshot-link" target="_blank" rel="noopener">📷</a>` : ''}
-        ${evidenceId ? `<button type="button" class="btn ghost btn-sm ac-det-evidence" data-evid="${esc(evidenceId)}">Evidence</button>` : ''}</td>
-      <td class="ac-actions">${canAct ? `
-        <button type="button" class="btn ghost btn-sm ac-det-watch" data-pid="${pid}" data-pname="${esc(pname)}">Watch</button>
+    const high = (d.trust != null && d.trust < 40);
+    const time = d.at ? new Date(d.at).toLocaleString() : '—';
+    return `<div class="ac-det-card${high ? ' high' : ''}">
+      <div class="ac-det-time">${esc(time)}</div>
+      <div>
+        <span class="ac-det-type-badge">${esc(d.detection || 'unknown')}</span>
+        <div><strong>${esc(pname)}</strong>${pid ? ` <small>#${pid}</small>` : ''} ${d.trust != null ? `<span class="ac-trust ${acTrustClass(d.trust)}">${d.trust}</span>` : ''}</div>
+        <div class="ac-det-detail-text">${esc(String(detail || '—'))}</div>
+        ${screenshot ? `<a href="${esc(screenshot)}" class="ac-screenshot-link" target="_blank" rel="noopener">📷 Screenshot</a>` : ''}
+        ${evidenceId ? `<button type="button" class="btn ghost btn-sm ac-det-evidence" data-evid="${esc(evidenceId)}">Evidence replay</button>` : ''}
+      </div>
+      <div class="ac-det-actions">${canAct ? `
+        <button type="button" class="btn primary btn-sm ac-det-watch" data-pid="${pid}" data-pname="${esc(pname)}">Watch</button>
         <button type="button" class="btn ghost btn-sm ac-det-snap" data-pid="${pid}" data-pname="${esc(pname)}">Snap</button>
-        <button type="button" class="btn danger btn-sm ac-det-ban" data-pid="${pid}" data-pname="${esc(pname)}" data-reason="${esc(`Cheating — ${d.detection || 'AC detection'}`)}">Ban</button>` : '<span class="hint">offline</span>'}</td>
-    </tr>`;
+        <button type="button" class="btn danger btn-sm ac-det-ban" data-pid="${pid}" data-pname="${esc(pname)}" data-reason="${esc(`Cheating — ${d.detection || 'AC detection'}`)}">Ban</button>` : '<span class="hint">offline</span>'}</div>
+    </div>`;
   }).join('');
 
-  el('ac-detections-wrap').innerHTML = `<table><thead><tr><th>Time</th><th>Player</th><th>Detection</th><th>Trust</th><th>Detail</th><th>Actions</th></tr></thead><tbody>${rows}</tbody></table>`;
+  el('ac-detections-wrap').innerHTML = cards;
   acBindDetectionActions();
 }
 
@@ -2697,7 +2730,7 @@ async function loadAcPortalVersion() {
     if (!res.ok) return;
     const data = await res.json();
     const badge = el('ac-portal-version');
-    if (badge) badge.textContent = `(Portal v${data.version || '?'})`;
+    if (badge) badge.textContent = `Portal v${data.version || '?'}`;
   } catch (_) {}
 }
 
@@ -2723,14 +2756,31 @@ function acRenderToggles(data) {
     { group: 'Extended', items: ['Anti Lua Injection', 'Anti Plate Changer', 'Anti Tiny Ped', 'Anti Handling Modifier', 'Anti Vehicle Weapons', 'Anti Network Events', 'Anti Chat Spam', 'Anti Explosive Damage', 'Anti Clear Tasks', 'Anti Event Blacklist', 'Anti Money Monitor'] },
   ];
   wrap.innerHTML = catalog.map((cat) => `
-    <div class="ac-toggle-group">
+    <div class="ac-toggle-group" data-toggle-group="${esc(cat.group)}">
       <h4>${esc(cat.group)}</h4>
+      <div class="ac-toggle-items">
       ${cat.items.map((name) => {
         const on = toggles[name] !== false;
-        return `<label class="ac-toggle-item"><input type="checkbox" data-toggle="${esc(name)}" ${on ? 'checked' : ''} ${hasRole('admin') ? '' : 'disabled'} /><span>${esc(name)}</span></label>`;
+        return `<label class="ac-toggle-item" data-toggle-name="${esc(name.toLowerCase())}"><input type="checkbox" data-toggle="${esc(name)}" ${on ? 'checked' : ''} ${hasRole('admin') ? '' : 'disabled'} /><span>${esc(name)}</span></label>`;
       }).join('')}
+      </div>
     </div>
   `).join('');
+  const searchInput = el('ac-toggle-search');
+  if (searchInput && !searchInput.dataset.bound) {
+    searchInput.dataset.bound = '1';
+    searchInput.addEventListener('input', () => {
+      const q = searchInput.value.trim().toLowerCase();
+      wrap.querySelectorAll('.ac-toggle-item').forEach((item) => {
+        const name = item.dataset.toggleName || '';
+        item.style.display = !q || name.includes(q) ? '' : 'none';
+      });
+      wrap.querySelectorAll('.ac-toggle-group').forEach((group) => {
+        const visible = [...group.querySelectorAll('.ac-toggle-item')].some((i) => i.style.display !== 'none');
+        group.style.display = visible ? '' : 'none';
+      });
+    });
+  }
   const meta = el('ac-toggles-meta');
   if (meta && data.meta?.updatedAt) {
     meta.textContent = `Last saved ${new Date(data.meta.updatedAt).toLocaleString()} by ${esc(data.meta.updatedBy || 'staff')}`;
@@ -2852,14 +2902,14 @@ async function loadAcIntelligence() {
     }
     const { intelligence: i } = await res.json();
     statsEl.innerHTML = [
-      stat('Ghost peds', i.ghostsActive ?? 0),
-      stat('Ghost hits', i.ghostHits ?? 0),
-      stat('PVS culled', i.pvsCulledPairs ?? 0),
-      stat('Rollbacks', i.movementRollbacks ?? 0),
-      stat('Physics flags', i.physicsFlags ?? 0),
-      stat('Tar-pits', i.tarpitSessions ?? 0),
-      stat('Biometrics', i.biometricsSamples ?? 0),
-    ].join('');
+      { icon: '👻', label: 'Ghost peds', value: i.ghostsActive ?? 0 },
+      { icon: '◎', label: 'Ghost hits', value: i.ghostHits ?? 0 },
+      { icon: '◈', label: 'PVS culled', value: i.pvsCulledPairs ?? 0 },
+      { icon: '↩', label: 'Rollbacks', value: i.movementRollbacks ?? 0 },
+      { icon: '⚡', label: 'Physics flags', value: i.physicsFlags ?? 0 },
+      { icon: '🕸', label: 'Tar-pits', value: i.tarpitSessions ?? 0 },
+      { icon: '🧬', label: 'Biometrics', value: i.biometricsSamples ?? 0 },
+    ].map((t) => `<div class="ac-intel-tile"><strong>${esc(String(t.value))}</strong><span>${esc(t.label)}</span></div>`).join('');
     const hosts = Object.entries(i.fragmentHosts || {});
     if (fragEl) {
       fragEl.innerHTML = hosts.length
@@ -2934,10 +2984,10 @@ async function loadAcPanel(silent = false) {
     acSetServerStatus(statusData);
     const stats = playersData.stats || statusData.stats || {};
     el('ac-stats').innerHTML = [
-      stat('Players online', stats.online ?? playersData.players?.length ?? 0),
-      stat('Server capacity', stats.maxSlots ?? '—'),
-      stat('Live watches', statusData.activeSessions ?? 0),
-      stat('Last AC sync', playersData.lastSync ? new Date(playersData.lastSync).toLocaleTimeString() : '—'),
+      acKpi('👥', 'Players online', stats.online ?? playersData.players?.length ?? 0, 'live'),
+      acKpi('⬡', 'Capacity', stats.maxSlots ?? '—'),
+      acKpi('◉', 'Live watches', statusData.activeSessions ?? 0, 'live'),
+      acKpi('↻', 'Last sync', playersData.lastSync ? new Date(playersData.lastSync).toLocaleTimeString() : '—'),
     ].join('');
 
     acRenderPlayers(playersData.players || []);
@@ -2947,12 +2997,14 @@ async function loadAcPanel(silent = false) {
     acRenderDetections(dets);
 
     el('ac-bans-wrap').innerHTML = (bansData.bans || []).length
-      ? `<ul class="ac-ban-list">${bansData.bans.map((b) => {
+      ? bansData.bans.map((b) => {
           const bid = String(b.banId || b.id || '');
           const disc = b.identifiers?.discord?.replace(/^discord:/i, '') || '';
-          return `<li><strong>${esc(b.playerName || '?')}</strong> <code>${esc(bid)}</code> — ${esc(b.reason || 'banned')} <small>${b.at ? new Date(b.at).toLocaleString() : ''}</small>
-            ${canUnban() ? `<button type="button" class="btn ghost btn-sm ac-unban-btn" data-banid="${esc(bid)}"${disc ? ` data-discord="${esc(disc)}"` : ''}>Unban</button>` : ''}</li>`;
-        }).join('')}</ul>`
+          return `<div class="ac-ban-card">
+            <div><strong>${esc(b.playerName || '?')}</strong> <code>${esc(bid)}</code><br><small class="hint">${esc(b.reason || 'banned')} · ${b.at ? new Date(b.at).toLocaleString() : ''}</small></div>
+            ${canUnban() ? `<button type="button" class="btn ghost btn-sm ac-unban-btn" data-banid="${esc(bid)}"${disc ? ` data-discord="${esc(disc)}"` : ''}>Unban</button>` : ''}
+          </div>`;
+        }).join('')
       : '<p class="hint">No bans on portal — bans may exist only on FXServer until next sync.</p>';
     if (canUnban() && el('ac-unban-tool') && !el('ac-unban-tool').dataset.init) {
       el('ac-unban-tool').dataset.init = '1';
@@ -3003,10 +3055,10 @@ async function loadAcPanel(silent = false) {
     const clusters = altData.clusters || [];
     el('ac-alt-wrap').innerHTML = clusters.length
       ? clusters.map((c) =>
-          `<div class="ac-alt-cluster" style="margin-bottom:0.75rem;padding:0.5rem;border:1px solid var(--border);border-radius:8px">
+          `<div class="ac-alt-cluster${c.risk === 'high' ? ' high' : ''}">
             <strong class="ac-trust ${c.risk === 'high' ? 'ac-trust-low' : 'ac-trust-mid'}">${esc(c.linkType)}</strong>
-            <code>${esc(String(c.key).slice(0, 48))}</code>
-            <ul class="ac-ban-list">${(c.members || []).map((m) =>
+            <code style="font-size:0.72rem;margin-left:0.5rem">${esc(String(c.key).slice(0, 48))}</code>
+            <ul class="ac-ban-list" style="margin-top:0.5rem">${(c.members || []).map((m) =>
               `<li>${esc(m.playerName || '?')} ${m.banned ? '<span class="ac-trust ac-trust-low">BANNED</span>' : ''} ${m.license ? `<small>${esc(m.license)}</small>` : ''}</li>`
             ).join('')}</ul>
           </div>`
@@ -3025,8 +3077,6 @@ async function loadAcPanel(silent = false) {
     console.error(err);
     if (!silent) el('ac-players-wrap').innerHTML = '<p class="hint">Failed to load anti-cheat data.</p>';
   }
-}
-
 }
 
 const banMgrState = { data: null, tab: 'all' };

@@ -46,6 +46,29 @@ function now() {
   return Date.now();
 }
 
+/** Live push to staff dashboards (SSE) — bans/detections appear instantly without polling. */
+const acSseClients = new Set();
+
+export const acEventHub = {
+  broadcast(type, data = {}) {
+    const payload = `event: ${type}\ndata: ${JSON.stringify({ ...data, at: now() })}\n\n`;
+    for (const res of acSseClients) {
+      try {
+        res.write(payload);
+      } catch {
+        acSseClients.delete(res);
+      }
+    }
+  },
+  attach(res) {
+    acSseClients.add(res);
+    res.on('close', () => acSseClients.delete(res));
+  },
+  clientCount() {
+    return acSseClients.size;
+  },
+};
+
 function defaultState() {
   return {
     version: 1,
@@ -586,6 +609,11 @@ export function createAcManager({ enabled = true, auditManager, logManager, init
         trust: entry.trust,
       }).catch(() => {});
       acLogIngest(logManager, 'ac_detection', entry);
+      acEventHub.broadcast('detection', {
+        playerId: entry.playerId,
+        playerName: entry.playerName,
+        detection: entry.detection,
+      });
     },
 
     pushTamperAlert(entry) {
@@ -636,8 +664,14 @@ export function createAcManager({ enabled = true, auditManager, logManager, init
         source: entry.source || 'fxserver',
         evidenceId: entry.evidenceId || null,
       };
+
+      if (!ban.pending && ban.playerId) {
+        const pid = Number(ban.playerId);
+        state.bans = (state.bans || []).filter((b) => !(b.pending && Number(b.playerId) === pid));
+      }
+
       const idx = (state.bans || []).findIndex((b) => String(b.banId || b.id) === ban.banId);
-      if (idx >= 0) state.bans[idx] = { ...state.bans[idx], ...ban };
+      if (idx >= 0) state.bans[idx] = { ...state.bans[idx], ...ban, pending: false };
       else state.bans.unshift(ban);
       if (state.bans.length > MAX_BANS) state.bans.length = MAX_BANS;
       rebuildFlagged(state);
@@ -673,6 +707,14 @@ export function createAcManager({ enabled = true, auditManager, logManager, init
         }).catch(() => {});
       }
       persist();
+      acEventHub.broadcast('ban', {
+        banId: ban.banId,
+        playerId: ban.playerId,
+        playerName: ban.playerName,
+        reason: ban.reason,
+        admin: ban.admin,
+        pending: !!ban.pending,
+      });
       return ban;
     },
 
@@ -872,6 +914,7 @@ export function createAcManager({ enabled = true, auditManager, logManager, init
         state.flagged = { discordIds: [], steamIds: [], ipAddresses: [] };
         rebuildFlagged(state);
         persist();
+        acEventHub.broadcast('unban', { query: plan.query, removed: count });
         return { removed: count, portalMatches: plan.portalMatches, query: plan.query };
       }
 
@@ -891,6 +934,9 @@ export function createAcManager({ enabled = true, auditManager, logManager, init
       }
       rebuildFlagged(state);
       persist();
+      if (removed > 0) {
+        acEventHub.broadcast('unban', { query: plan.query, removed });
+      }
       return { removed, portalMatches: plan.portalMatches, query: plan.query };
     },
 
@@ -1126,8 +1172,8 @@ export function createAcManager({ enabled = true, auditManager, logManager, init
       const lastSync = state.server.lastSync || 0;
       const age = lastSync ? now() - lastSync : Infinity;
       return {
-        connected: age < 45000,
-        stale: age >= 45000 && age < 120000,
+        connected: age < 12000,
+        stale: age >= 12000 && age < 60000,
         lastSync,
         lastSyncAgeMs: Number.isFinite(age) ? age : null,
         online: (state.server.players || []).length,
@@ -1213,17 +1259,30 @@ export function createAcManager({ enabled = true, auditManager, logManager, init
     },
 
     banPlayer(playerId, reason, requestedBy) {
+      const pid = Number(playerId);
+      const live = (state.server.players || []).find((p) => Number(p.id) === pid);
+      const pendingId = `pending_${now()}_${pid}`;
       auditManager?.log('portal_ban', {
         actorName: requestedBy || 'staff',
-        targetName: `Player #${playerId}`,
+        targetName: live?.name || `Player #${pid}`,
         reason,
         source: 'portal',
-        meta: { playerId: Number(playerId) },
+        meta: { playerId: pid },
+      });
+      this.pushBan({
+        banId: pendingId,
+        playerId: pid,
+        playerName: live?.name || `Player #${pid}`,
+        reason: reason || 'Banned via ShadeRP portal',
+        admin: requestedBy || 'staff',
+        source: 'portal-pending',
+        pending: true,
+        identifiers: live?.discord ? { discord: `discord:${live.discord}` } : {},
       });
       state.commands.push({
         id: `cmd_${now()}`,
         type: 'ban_player',
-        playerId: Number(playerId),
+        playerId: pid,
         reason: reason || 'Banned via ShadeRP portal',
         requestedBy: requestedBy || 'staff',
         createdAt: now(),
@@ -1480,8 +1539,8 @@ export function createAcManager({ enabled = true, auditManager, logManager, init
       const age = lastSync ? now() - lastSync : Infinity;
       const stats = state.server.stats || {};
       return {
-        connected: age < 45000,
-        stale: age >= 45000 && age < 120000,
+        connected: age < 12000,
+        stale: age >= 12000 && age < 60000,
         lastSync,
         lastSyncAgeMs: Number.isFinite(age) ? age : null,
         phase: stats.streamPhase || 'unknown',
@@ -1705,6 +1764,24 @@ export function registerAcRoutes(app, { acManager, portalEnv, requireRole }) {
 
   app.get('/api/ac/admin/status', requireRole('staff'), (_req, res) => {
     res.json(acManager.getStatus());
+  });
+
+  app.get('/api/ac/admin/events', requireRole('staff'), (req, res) => {
+    res.setHeader('Content-Type', 'text/event-stream; charset=utf-8');
+    res.setHeader('Cache-Control', 'no-cache, no-transform');
+    res.setHeader('Connection', 'keep-alive');
+    res.setHeader('X-Accel-Buffering', 'no');
+    if (typeof res.flushHeaders === 'function') res.flushHeaders();
+    res.write(': connected\n\n');
+    acEventHub.attach(res);
+    const ping = setInterval(() => {
+      try {
+        res.write(': ping\n\n');
+      } catch {
+        clearInterval(ping);
+      }
+    }, 25000);
+    req.on('close', () => clearInterval(ping));
   });
 
   app.get('/api/ac/admin/intelligence', requireRole('staff'), (_req, res) => {

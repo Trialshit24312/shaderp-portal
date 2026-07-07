@@ -614,6 +614,10 @@ export function registerTicketRoutes(app, { ticketManager, acManager, portalEnv,
     });
   });
 
+  app.get('/api/tickets/admin/setup', requireRole('admin'), (req, res) => {
+    res.json({ setup: ticketManager.getSetup(), panel: ticketManager.getPanel() });
+  });
+
   app.get('/api/tickets/admin/:id', requireRole('staff'), (req, res) => {
     const t = ticketManager.getTicket(req.params.id);
     if (!t) return res.status(404).json({ error: 'Ticket not found' });
@@ -667,10 +671,6 @@ export function registerTicketRoutes(app, { ticketManager, acManager, portalEnv,
     const ok = ticketManager.deleteTicket(req.params.id, user?.id, user?.username);
     if (!ok) return res.status(404).json({ error: 'Ticket not found' });
     res.json({ ok: true });
-  });
-
-  app.get('/api/tickets/admin/setup', requireRole('admin'), (req, res) => {
-    res.json({ setup: ticketManager.getSetup(), panel: ticketManager.getPanel() });
   });
 
   app.post('/api/tickets/admin/:id/unban', requireRole('staff'), (req, res) => {

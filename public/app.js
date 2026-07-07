@@ -345,12 +345,19 @@ function showPanel(id) {
   if (topbarPage) topbarPage.textContent = navItem?.label || id;
   if (id === 'hub' && hasRole('staff')) renderHub();
   if (id === 'analytics' && hasRole('staff')) loadAnalytics();
-  if (id === 'bans' && hasRole('moderator')) loadBanManagerPanel();
+  if (id === 'bans' && hasRole('moderator')) {
+    loadBanManagerPanel();
+    startAcEventStream();
+  }
   if (id === 'anticheat' && hasRole('staff')) {
     loadAcPanel();
     startAcAutoRefresh();
+    startAcEventStream();
   } else {
     stopAcAutoRefresh();
+  }
+  if (id !== 'anticheat' && id !== 'bans') {
+    stopAcEventStream();
   }
   if (id === 'commands' && hasRole('admin')) loadServerControl();
   if (id === 'tickets' && hasRole('staff')) loadTicketsPanel();
@@ -1719,6 +1726,27 @@ function renderCommandLog(log) {
   }</tbody></table>`;
 }
 
+async function submitStaffTicketReply(e) {
+  e.preventDefault();
+  const id = el('ticket-detail')?.dataset.ticketId;
+  const text = el('ticket-staff-reply-text')?.value?.trim();
+  if (!id || !text) return toast('Enter a reply', true);
+  try {
+    const res = await fetch(`/api/tickets/${encodeURIComponent(id)}/message`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ content: text }),
+    });
+    const data = await res.json().catch(() => ({}));
+    if (!res.ok) throw new Error(data.error || 'Reply failed');
+    el('ticket-staff-reply-text').value = '';
+    toast('Reply sent');
+    showTicketDetail(id);
+  } catch (err) {
+    toast(err.message || 'Reply failed', true);
+  }
+}
+
 async function showTicketDetail(id) {
   const panel = el('ticket-detail');
   const body = el('ticket-detail-body');
@@ -1735,7 +1763,11 @@ async function showTicketDetail(id) {
       ${t.transcriptSavedAt ? `<p class="hint">Transcript saved ${new Date(t.transcriptSavedAt).toLocaleString()}</p>` : ''}
       <div class="ticket-detail" style="margin-top:0.75rem">${msgs.length
         ? msgs.map((m) => `<div class="ticket-msg"><strong>${esc(m.authorName)}</strong> <span class="hint">${m.at ? new Date(m.at).toLocaleString() : ''}</span><br>${esc(m.content)}</div>`).join('')
-        : '<p class="hint">No messages captured yet.</p>'}</div>`;
+        : '<p class="hint">No messages captured yet.</p>'}</div>
+      ${t.status === 'open' ? `<form id="ticket-staff-reply-form" class="support-form" style="margin-top:1rem">
+        <textarea id="ticket-staff-reply-text" class="admin-search" placeholder="Reply to player (syncs to Discord)…" maxlength="4000" rows="4"></textarea>
+        <button type="submit" class="btn primary btn-sm" style="margin-top:0.5rem">Send staff reply</button>
+      </form>` : '<p class="hint">Ticket closed — reopen via Discord if needed.</p>'}`;
     panel.hidden = false;
     panel.dataset.ticketId = id;
     el('ticket-delete').hidden = !hasRole('owner');
@@ -1818,6 +1850,9 @@ function bindTicketsPanel() {
     }
   });
   el('ticket-detail-close')?.addEventListener('click', () => { el('ticket-detail').hidden = true; });
+  el('ticket-detail')?.addEventListener('submit', (e) => {
+    if (e.target?.id === 'ticket-staff-reply-form') submitStaffTicketReply(e);
+  });
   el('ticket-delete')?.addEventListener('click', async () => {
     const id = el('ticket-detail')?.dataset.ticketId;
     if (!id || !confirm(`Permanently delete ${id}? Owner only.`)) return;
@@ -2151,6 +2186,8 @@ let acState = {
   watchPollTimer: null,
   snapshotId: null,
   refreshTimer: null,
+  eventSource: null,
+  eventRefreshTimer: null,
   lastDetectionAt: 0,
   banPending: null,
   playerFilter: '',
@@ -2649,14 +2686,14 @@ async function acAdminAction(path, playerId, playerName, extra = {}, useConfirm 
       throw new Error(errText || 'Request failed');
     }
     const data = await res.json();
-    if (path === 'ban') toast(`Ban queued for ${playerName} — FXServer applies within ~1s`);
+    if (path === 'ban') toast(`Ban applied for ${playerName}`);
     else if (path === 'kick') toast(`Kick queued for ${playerName}`);
     else toast('Snapshot requested');
     if (path === 'snapshot' && data.requestId) {
       acState.snapshotId = data.requestId;
       pollAcSnapshot(data.requestId, playerName);
     }
-    if (path !== 'snapshot') setTimeout(() => loadAcPanel(true), 1200);
+    scheduleAcLiveRefresh(path === 'ban' ? 'ban' : 'action');
   } catch (err) {
     toast(path === 'ban' ? 'Ban failed — is player still online?' : 'Action failed');
     console.error(err);
@@ -3574,13 +3611,49 @@ function setupBanManagerPanel() {
   });
 }
 
+function scheduleAcLiveRefresh(reason = 'event') {
+  clearTimeout(acState.eventRefreshTimer);
+  acState.eventRefreshTimer = setTimeout(() => {
+    if (document.querySelector('#panel-anticheat.active') && hasRole('staff')) {
+      loadAcPanel(true);
+    }
+    if (document.querySelector('#panel-bans.active') && hasRole('moderator')) {
+      loadBanManagerPanel(true);
+    }
+    if (reason === 'ban' && hasRole('staff')) {
+      toast('Ban list updated');
+    }
+  }, 80);
+}
+
+function startAcEventStream() {
+  if (!hasRole('staff') || acState.eventSource) return;
+  const es = new EventSource('/api/ac/admin/events');
+  acState.eventSource = es;
+  es.addEventListener('ban', () => scheduleAcLiveRefresh('ban'));
+  es.addEventListener('unban', () => scheduleAcLiveRefresh('unban'));
+  es.addEventListener('detection', () => scheduleAcLiveRefresh('detection'));
+  es.onerror = () => {
+    es.close();
+    acState.eventSource = null;
+    setTimeout(startAcEventStream, 2500);
+  };
+}
+
+function stopAcEventStream() {
+  if (acState.eventSource) {
+    acState.eventSource.close();
+    acState.eventSource = null;
+  }
+}
+
 function startAcAutoRefresh() {
   stopAcAutoRefresh();
   if (!el('ac-auto-refresh')?.checked) return;
   acState.refreshTimer = setInterval(() => {
     const panel = document.querySelector('#panel-anticheat.active');
     if (panel && hasRole('staff')) loadAcPanel(true);
-  }, 10000);
+  }, 2000);
 }
 
 function stopAcAutoRefresh() {
@@ -3771,6 +3844,7 @@ async function init() {
   if (params.get('error')) toast('Login failed — check Discord OAuth config', true);
 
   await loadMe();
+  if (hasRole('staff')) startAcEventStream();
   await loadDashboard();
   startQueuePolling();
   setInterval(queueHeartbeat, 45000);

@@ -53,8 +53,12 @@ export function registerWebrtcRoutes(app, { requireRole }) {
     const key = req.headers['x-ac-key'];
     if (!key) return res.status(401).json({ error: 'Invalid AC key' });
     const pending = [];
+    const now = Date.now();
     for (const [, s] of sessions) {
-      if (s.offer && !s.answer && !s.dispatched) {
+      if (!s.offer || s.answer) continue;
+      const staleDispatch = s.dispatched && s.dispatchedAt && (now - s.dispatchedAt) > 8000;
+      if (!s.dispatched || staleDispatch) {
+        if (staleDispatch) s.dispatched = false;
         pending.push({ sessionId: s.sessionId, playerId: s.playerId, offer: s.offer });
       }
     }
@@ -68,6 +72,7 @@ export function registerWebrtcRoutes(app, { requireRole }) {
     const s = getSession(sessionId);
     if (!s) return res.status(404).json({ error: 'session not found' });
     s.dispatched = true;
+    s.dispatchedAt = Date.now();
     s.at = Date.now();
     res.json({ ok: true });
   });

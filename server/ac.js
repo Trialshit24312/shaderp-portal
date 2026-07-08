@@ -1615,6 +1615,21 @@ export function registerAcRoutes(app, { acManager, portalEnv, requireRole }) {
     res.json({ ok: true });
   });
 
+  // Optional off-server CV hook (wire YOLO/OpenCV worker here)
+  app.post('/api/ac/server/cv-analyze', (req, res) => {
+    if (!acApiKeyValid(req, portalEnv)) return res.status(401).json({ error: 'Invalid AC key' });
+    const { sessionId, playerId, image } = req.body || {};
+    if (!image) return res.status(400).json({ error: 'image required' });
+    res.json({
+      ok: true,
+      sessionId: sessionId || null,
+      playerId: playerId || null,
+      labels: [],
+      cheatScore: 0,
+      note: 'CV worker not configured — frames stored via /api/ac/server/frame',
+    });
+  });
+
   app.post('/api/ac/server/detection', (req, res) => {
     if (!acApiKeyValid(req, portalEnv)) return res.status(401).json({ error: 'Invalid AC key' });
     acManager.pushDetection(req.body || {});

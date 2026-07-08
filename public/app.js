@@ -2307,7 +2307,6 @@ function acRenderWatchGrid() {
 
 async function attachWatchStream(sessionId, w) {
   if (acState.watchStoppers.has(sessionId)) return;
-  await new Promise((r) => setTimeout(r, 2500));
   const stop = await startLiveWatch({
     sessionId,
     playerId: w.playerId,
@@ -2359,6 +2358,7 @@ async function startAcWatch(playerId, playerName) {
     });
     acRenderWatchGrid();
     toast(`Watch started: ${playerName}`);
+    scheduleWatchPoll();
     attachWatchStream(data.sessionId, acState.watches.get(data.sessionId));
   } catch (err) {
     toast(err.message || 'Watch failed', true);

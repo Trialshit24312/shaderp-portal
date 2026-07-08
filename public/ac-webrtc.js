@@ -162,9 +162,13 @@ export function startHttpFramePoll({ sessionId, onFrame, intervalMs = POLL_MS })
 }
 
 /**
- * Prefer WebRTC data channel; fall back to HTTP polling.
+ * HTTP frame polling always runs; WebRTC is an optional low-latency overlay.
  */
 export async function startLiveWatch({ sessionId, playerId, onFrame, onMode }) {
+  onMode?.('http');
+  const stopHttp = startHttpFramePoll({ sessionId, onFrame });
+
+  let stopRtc = null;
   try {
     const rtc = await createWebRtcWatch({
       sessionId,
@@ -177,10 +181,12 @@ export async function startLiveWatch({ sessionId, playerId, onFrame, onMode }) {
     });
     if (rtc) {
       onMode?.('webrtc');
-      return () => rtc.close();
+      stopRtc = () => rtc.close();
     }
   } catch (_) {}
 
-  onMode?.('http');
-  return startHttpFramePoll({ sessionId, onFrame });
+  return () => {
+    stopHttp();
+    if (stopRtc) stopRtc();
+  };
 }

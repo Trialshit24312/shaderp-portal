@@ -106,7 +106,7 @@ export function registerKovertLiveryRoutes(app, { requireRole, requireOwnerPage,
       catalog.resourcesRoot = root;
       if (!canServeYft) {
         catalog.previewNote =
-          'Real .yft meshes need a local portal with FIVEM_RESOURCES_ROOT. Website uses preview meshes for painting.';
+          'Link your FiveM [standalone] folder (button below) to load real .yft meshes in the browser. Or run the portal locally with FIVEM_RESOURCES_ROOT.';
       }
       res.json(catalog);
     } catch (err) {

@@ -155,6 +155,12 @@ export function scanServerVehicles(opts = {}) {
       const display = rawName === spawn && brand ? `${brand} · ${spawn}` : rawName;
 
       seen.add(spawn.toLowerCase());
+      let yftRel = file;
+      try {
+        yftRel = path.relative(root, file).split(path.sep).join('/');
+      } catch {
+        yftRel = path.basename(file);
+      }
       vehicles.push({
         id: `stream_${spawn}`,
         name: display,
@@ -171,7 +177,9 @@ export function scanServerVehicles(opts = {}) {
           yft: file,
           ytd: ytdPath,
           meta: metaPath || null,
+          yftRel,
         },
+        yftRel,
         hasYtd: true,
         hasGlb: false,
       });
@@ -213,6 +221,7 @@ export function writeCatalog(liveryRoot, scan) {
       hasGlb: cached,
       brand: v.source?.brand || v.category,
       pack: v.source?.pack,
+      yftRel: v.yftRel || v.source?.yftRel || null,
     };
   });
   const payload = {

@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-07-15T04:55:14.308Z",
+  "generatedAt": "2026-07-15T05:27:46.895Z",
   "root": "F:\\txData\\QBCore_A9FD7A.base\\resources\\[standalone]",
   "count": 603,
   "packs": [
@@ -51,7 +51,8 @@
       "hasYtd": true,
       "hasGlb": true,
       "brand": "Lamborghini",
-      "pack": "600-debadged-17"
+      "pack": "600-debadged-17",
+      "yftRel": "600-debadged-17/stream/[Lamborghini]/1016rwdevo/stream/1016rwdevo.yft"
     },
     {
       "id": "stream_17m760i",
@@ -66,7 +67,8 @@
       "hasYtd": true,
       "hasGlb": true,
       "brand": "BMW",
-      "pack": "600-debadged-14"
+      "pack": "600-debadged-14",
+      "yftRel": "600-debadged-14/stream/[BMW]/17m760i/stream/17m760i.yft"
     },
     {
       "id": "stream_c63hr",
@@ -81,7 +83,8 @@
       "hasYtd": true,
       "hasGlb": true,
       "brand": "Mercedes",
-      "pack": "600-debadged-17"
+      "pack": "600-debadged-17",
+      "yftRel": "600-debadged-17/stream/[Mercedes]/c63hr/stream/c63hr.yft"
     },
     {
       "id": "stream_impalag",
@@ -96,7 +99,8 @@
       "hasYtd": true,
       "hasGlb": true,
       "brand": "Chevrolet",
-      "pack": "600-debadged-05"
+      "pack": "600-debadged-05",
+      "yftRel": "600-debadged-05/stream/[Chevrolet]/impalag/stream/impalag.yft"
     },
     {
       "id": "stream_cls19",
@@ -111,7 +115,8 @@
       "hasYtd": true,
       "hasGlb": true,
       "brand": "Mercedes",
-      "pack": "600-debadged-14"
+      "pack": "600-debadged-14",
+      "yftRel": "600-debadged-14/stream/[Mercedes]/cls19/stream/cls19.yft"
     },
     {
       "id": "stream_2019tundrac",
@@ -126,7 +131,8 @@
       "hasYtd": true,
       "hasGlb": true,
       "brand": "Toyota",
-      "pack": "600-debadged-03"
+      "pack": "600-debadged-03",
+      "yftRel": "600-debadged-03/stream/[Toyota]/2019tundrac/stream/2019tundrac.yft"
     },
     {
       "id": "stream_2020CLA45s",
@@ -141,7 +147,8 @@
       "hasYtd": true,
       "hasGlb": true,
       "brand": "Mercedes",
-      "pack": "600-debadged-16"
+      "pack": "600-debadged-16",
+      "yftRel": "600-debadged-16/stream/[Mercedes]/2020CLA45s/stream/2020CLA45s.yft"
     },
     {
       "id": "stream_sw_subrb",
@@ -156,7 +163,8 @@
       "hasYtd": true,
       "hasGlb": true,
       "brand": "Police",
-      "pack": "600-debadged-22"
+      "pack": "600-debadged-22",
+      "yftRel": "600-debadged-22/stream/[Police]/sw_subrb/stream/sw_subrb.yft"
     },
     {
       "id": "stream_20xb7",
@@ -171,7 +179,8 @@
       "hasYtd": true,
       "hasGlb": false,
       "brand": "BMW",
-      "pack": "600-debadged-13"
+      "pack": "600-debadged-13",
+      "yftRel": "600-debadged-13/stream/[BMW]/20xb7/stream/20xb7.yft"
     },
     {
       "id": "stream_22g63",
@@ -186,7 +195,8 @@
       "hasYtd": true,
       "hasGlb": false,
       "brand": "Police",
-      "pack": "600-debadged-32"
+      "pack": "600-debadged-32",
+      "yftRel": "600-debadged-32/stream/[Police]/22g63/stream/22g63.yft"
     },
     {
       "id": "stream_2ncsx7",
@@ -201,7 +211,8 @@
       "hasYtd": true,
       "hasGlb": false,
       "brand": "BMW",
-      "pack": "600-debadged-22"
+      "pack": "600-debadged-22",
+      "yftRel": "600-debadged-22/stream/[BMW]/2ncsx7/stream/2ncsx7.yft"
     },
     {
       "id": "stream_350z",
@@ -216,7 +227,8 @@
       "hasYtd": true,
       "hasGlb": true,
       "brand": "Nissan",
-      "pack": "600-debadged-21"
+      "pack": "600-debadged-21",
+      "yftRel": "600-debadged-21/stream/[Nissan]/350z/stream/350z.yft"
     },
     {
       "id": "stream_6x6",
@@ -231,7 +243,8 @@
       "hasYtd": true,
       "hasGlb": false,
       "brand": "Mercedes",
-      "pack": "600-debadged-23"
+      "pack": "600-debadged-23",
+      "yftRel": "600-debadged-23/stream/[Mercedes]/6x6/stream/6x6.yft"
     },
     {
       "id": "stream_911gtrs",
@@ -246,7 +259,8 @@
       "hasYtd": true,
       "hasGlb": false,
       "brand": "Porsche",
-      "pack": "600-debadged-30"
+      "pack": "600-debadged-30",
+      "yftRel": "600-debadged-30/stream/[Porsche]/911gtrs/stream/911gtrs.yft"
     },
     {
       "id": "stream_a90sh",
@@ -261,7 +275,8 @@
       "hasYtd": true,
       "hasGlb": false,
       "brand": "Toyota",
-      "pack": "600-debadged-03"
+      "pack": "600-debadged-03",
+      "yftRel": "600-debadged-03/stream/[Toyota]/a90sh/stream/a90sh.yft"
     },
     {
       "id": "stream_aaq4",
@@ -276,7 +291,8 @@
       "hasYtd": true,
       "hasGlb": false,
       "brand": "Audi",
-      "pack": "600-debadged-05"
+      "pack": "600-debadged-05",
+      "yftRel": "600-debadged-05/stream/[Audi]/aaq4/stream/aaq4.yft"
     },
     {
       "id": "stream_675lt",
@@ -291,7 +307,8 @@
       "hasYtd": true,
       "hasGlb": false,
       "brand": "McLaren",
-      "pack": "600-debadged-07"
+      "pack": "600-debadged-07",
+      "yftRel": "600-debadged-07/stream/[McLaren]/675lt/stream/675lt.yft"
     },
     {
       "id": "stream_alpinab7",
@@ -306,7 +323,8 @@
       "hasYtd": true,
       "hasGlb": false,
       "brand": "BMW",
-      "pack": "600-debadged-10"
+      "pack": "600-debadged-10",
+      "yftRel": "600-debadged-10/stream/[BMW]/alpinab7/stream/alpinab7.yft"
     },
     {
       "id": "stream_alpinab7BLACKEDITION",
@@ -321,7 +339,8 @@
       "hasYtd": true,
       "hasGlb": false,
       "brand": "BMW",
-      "pack": "600-debadged-15"
+      "pack": "600-debadged-15",
+      "yftRel": "600-debadged-15/stream/[BMW]/alpinab7BLACKEDITION/stream/alpinab7BLACKEDITION.yft"
     },
     {
       "id": "stream_amgone",
@@ -336,7 +355,8 @@
       "hasYtd": true,
       "hasGlb": false,
       "brand": "Mercedes",
-      "pack": "600-debadged-22"
+      "pack": "600-debadged-22",
+      "yftRel": "600-debadged-22/stream/[Mercedes]/amgone/stream/amgone.yft"
     },
     {
       "id": "stream_fxxkevo",
@@ -351,7 +371,8 @@
       "hasYtd": true,
       "hasGlb": false,
       "brand": "Ferrari",
-      "pack": "600-debadged-01"
+      "pack": "600-debadged-01",
+      "yftRel": "600-debadged-01/stream/[Ferrari]/fxxkevo/stream/fxxkevo.yft"
     },
     {
       "id": "stream_sex6",
@@ -366,7 +387,8 @@
       "hasYtd": true,
       "hasGlb": false,
       "brand": "Lamborghini",
-      "pack": "600-debadged-31"
+      "pack": "600-debadged-31",
+      "yftRel": "600-debadged-31/stream/[Lamborghini]/sex6/stream/sex6.yft"
     },
     {
       "id": "stream_gt63mt",
@@ -381,7 +403,8 @@
       "hasYtd": true,
       "hasGlb": false,
       "brand": "Mercedes",
-      "pack": "600-debadged-19"
+      "pack": "600-debadged-19",
+      "yftRel": "600-debadged-19/stream/[Mercedes]/gt63mt/stream/gt63mt.yft"
     },
     {
       "id": "stream_amggt16",
@@ -396,7 +419,8 @@
       "hasYtd": true,
       "hasGlb": false,
       "brand": "Mercedes",
-      "pack": "600-debadged-32"
+      "pack": "600-debadged-32",
+      "yftRel": "600-debadged-32/stream/[Mercedes]/amggt16/stream/amggt16.yft"
     },
     {
       "id": "stream_AmgGtrLight",
@@ -411,7 +435,8 @@
       "hasYtd": true,
       "hasGlb": false,
       "brand": "Mercedes",
-      "pack": "600-debadged-30"
+      "pack": "600-debadged-30",
+      "yftRel": "600-debadged-30/stream/[Mercedes]/AmgGtrLight/stream/AmgGtrLight.yft"
     },
     {
       "id": "stream_vantage23",
@@ -426,7 +451,8 @@
       "hasYtd": true,
       "hasGlb": false,
       "brand": "Aston Martin",
-      "pack": "600-debadged-27"
+      "pack": "600-debadged-27",
+      "yftRel": "600-debadged-27/stream/[Aston Martin]/vantage23/stream/vantage23.yft"
     },
     {
       "id": "stream_rs7bratwa",
@@ -441,7 +467,8 @@
       "hasYtd": true,
       "hasGlb": false,
       "brand": "Gang Vehicles",
-      "pack": "600-debadged-28"
+      "pack": "600-debadged-28",
+      "yftRel": "600-debadged-28/stream/[Gang Vehicles]/rs7bratwa/stream/rs7bratwa.yft"
     },
     {
       "id": "stream_rs7c8beast",
@@ -456,7 +483,8 @@
       "hasYtd": true,
       "hasGlb": false,
       "brand": "Audi",
-      "pack": "600-debadged-24"
+      "pack": "600-debadged-24",
+      "yftRel": "600-debadged-24/stream/[Audi]/rs7c8beast/stream/rs7c8beast.yft"
     },
     {
       "id": "stream_q8hycade",
@@ -471,7 +499,8 @@
       "hasYtd": true,
       "hasGlb": false,
       "brand": "Audi",
-      "pack": "600-debadged-17"
+      "pack": "600-debadged-17",
+      "yftRel": "600-debadged-17/stream/[Audi]/q8hycade/stream/q8hycade.yft"
     },
     {
       "id": "stream_q8prior",
@@ -486,7 +515,8 @@
       "hasYtd": true,
       "hasGlb": false,
       "brand": "Audi",
-      "pack": "600-debadged-12"
+      "pack": "600-debadged-12",
+      "yftRel": "600-debadged-12/stream/[Audi]/q8prior/stream/q8prior.yft"
     },
     {
       "id": "stream_CarsonsPriorRS3",
@@ -501,7 +531,8 @@
       "hasYtd": true,
       "hasGlb": false,
       "brand": "Audi",
-      "pack": "600-debadged-19"
+      "pack": "600-debadged-19",
+      "yftRel": "600-debadged-19/stream/[Audi]/CarsonsPriorRS3/stream/CarsonsPriorRS3.yft"
     },
     {
       "id": "stream_ikx3abt20",
@@ -516,7 +547,8 @@
       "hasYtd": true,
       "hasGlb": false,
       "brand": "Audi",
-      "pack": "600-debadged-31"
+      "pack": "600-debadged-31",
+      "yftRel": "600-debadged-31/stream/[Audi]/ikx3abt20/stream/ikx3abt20.yft"
     },
     {
       "id": "stream_mansrs6",
@@ -531,7 +563,8 @@
       "hasYtd": true,
       "hasGlb": false,
       "brand": "Audi",
-      "pack": "600-debadged-31"
+      "pack": "600-debadged-31",
+      "yftRel": "600-debadged-31/stream/[Audi]/mansrs6/stream/mansrs6.yft"
     },
     {
       "id": "stream_ocnetrongt",
@@ -546,7 +579,8 @@
       "hasYtd": true,
       "hasGlb": false,
       "brand": "Audi",
-      "pack": "600-debadged-19"
+      "pack": "600-debadged-19",
+      "yftRel": "600-debadged-19/stream/[Audi]/ocnetrongt/stream/ocnetrongt.yft"
     },
     {
       "id": "stream_rmodr8alpil",
@@ -561,7 +595,8 @@
       "hasYtd": true,
       "hasGlb": false,
       "brand": "Audi",
-      "pack": "600-debadged-25"
+      "pack": "600-debadged-25",
+      "yftRel": "600-debadged-25/stream/[Audi]/rmodr8alpil/stream/rmodr8alpil.yft"
     },
     {
       "id": "stream_rmodr8alpilx",
@@ -576,7 +611,8 @@
       "hasYtd": true,
       "hasGlb": false,
       "brand": "Audi",
-      "pack": "600-debadged-23"
+      "pack": "600-debadged-23",
+      "yftRel": "600-debadged-23/stream/[Audi]/rmodr8alpilx/stream/rmodr8alpilx.yft"
     },
     {
       "id": "stream_rs6_cali",
@@ -591,7 +627,8 @@
       "hasYtd": true,
       "hasGlb": false,
       "brand": "Gang Vehicles",
-      "pack": "600-debadged-18"
+      "pack": "600-debadged-18",
+      "yftRel": "600-debadged-18/stream/[Gang Vehicles]/rs6_cali/stream/rs6_cali.yft"
     },
     {
       "id": "stream_rs6_criminals",
@@ -606,7 +643,8 @@
       "hasYtd": true,
       "hasGlb": false,
       "brand": "Gang Vehicles",
-      "pack": "600-debadged-18"
+      "pack": "600-debadged-18",
+      "yftRel": "600-debadged-18/stream/[Gang Vehicles]/rs6_criminals/stream/rs6_criminals.yft"
     },
     {
       "id": "stream_rs6_gonzales",
@@ -621,7 +659,8 @@
       "hasYtd": true,
       "hasGlb": false,
       "brand": "Gang Vehicles",
-      "pack": "600-debadged-18"
+      "pack": "600-debadged-18",
+      "yftRel": "600-debadged-18/stream/[Gang Vehicles]/rs6_gonzales/stream/rs6_gonzales.yft"
     },
     {
       "id": "stream_rs6_kadir",
@@ -636,7 +675,8 @@
       "hasYtd": true,
       "hasGlb": false,
       "brand": "Gang Vehicles",
-      "pack": "600-debadged-18"
+      "pack": "600-debadged-18",
+      "yftRel": "600-debadged-18/stream/[Gang Vehicles]/rs6_kadir/stream/rs6_kadir.yft"
     },
     {
       "id": "stream_rs6_lcn",
@@ -651,7 +691,8 @@
       "hasYtd": true,
       "hasGlb": false,
       "brand": "Gang Vehicles",
-      "pack": "600-debadged-18"
+      "pack": "600-debadged-18",
+      "yftRel": "600-debadged-18/stream/[Gang Vehicles]/rs6_lcn/stream/rs6_lcn.yft"
     },
     {
       "id": "stream_rs6_santasofia",
@@ -666,7 +707,8 @@
       "hasYtd": true,
       "hasGlb": false,
       "brand": "Gang Vehicles",
-      "pack": "600-debadged-17"
+      "pack": "600-debadged-17",
+      "yftRel": "600-debadged-17/stream/[Gang Vehicles]/rs6_santasofia/stream/rs6_santasofia.yft"
     },
     {
       "id": "stream_rs6abtkit",
@@ -681,7 +723,8 @@
       "hasYtd": true,
       "hasGlb": false,
       "brand": "Audi",
-      "pack": "600-debadged-24"
+      "pack": "600-debadged-24",
+      "yftRel": "600-debadged-24/stream/[Audi]/rs6abtkit/stream/rs6abtkit.yft"
     },
     {
       "id": "stream_rs7wide",
@@ -696,7 +739,8 @@
       "hasYtd": true,
       "hasGlb": false,
       "brand": "Audi",
-      "pack": "600-debadged-20"
+      "pack": "600-debadged-20",
+      "yftRel": "600-debadged-20/stream/[Audi]/rs7wide/stream/rs7wide.yft"
     },
     {
       "id": "stream_r820",
@@ -711,7 +755,8 @@
       "hasYtd": true,
       "hasGlb": false,
       "brand": "Audi",
-      "pack": "600-debadged-25"
+      "pack": "600-debadged-25",
+      "yftRel": "600-debadged-25/stream/[Audi]/r820/stream/r820.yft"
     },
     {
       "id": "stream_rs6abt20",
@@ -726,7 +771,8 @@
       "hasYtd": true,
       "hasGlb": false,
       "brand": "Audi",
-      "pack": "600-debadged-16"
+      "pack": "600-debadged-16",
+      "yftRel": "600-debadged-16/stream/[Audi]/rs6abt20/stream/rs6abt20.yft"
     },
     {
       "id": "stream_18rs7",
@@ -741,7 +787,8 @@
       "hasYtd": true,
       "hasGlb": false,
       "brand": "Audi",
-      "pack": "600-debadged-31"
+      "pack": "600-debadged-31",
+      "yftRel": "600-debadged-31/stream/[Audi]/18rs7/stream/18rs7.yft"
     },
     {
       "id": "stream_21rsq8",
@@ -756,7 +803,8 @@
       "hasYtd": true,
       "hasGlb": false,
       "brand": "Audi",
-      "pack": "600-debadged-20"
+      "pack": "600-debadged-20",
+      "yftRel": "600-debadged-20/stream/[Audi]/21rsq8/stream/21rsq8.yft"
     },
     {
       "id": "stream_RoyalCustom_RSQ8_EMS",
@@ -771,7 +819,8 @@
       "hasYtd": true,
       "hasGlb": false,
       "brand": "Medic",
-      "pack": "600-debadged-02"
+      "pack": "600-debadged-02",
+      "yftRel": "600-debadged-02/stream/[Medic]/RoyalCustom_RSQ8_EMS/stream/RoyalCustom_RSQ8_EMS.yft"
     },
     {
       "id": "stream_rs6c8",
@@ -786,7 +835,8 @@
       "hasYtd": true,
       "hasGlb": false,
       "brand": "Audi",
-      "pack": "600-debadged-25"
+      "pack": "600-debadged-25",
+      "yftRel": "600-debadged-25/stream/[Audi]/rs6c8/stream/rs6c8.yft"
     },
     {
       "id": "stream_rs7beast",
@@ -801,7 +851,8 @@
       "hasYtd": true,
       "hasGlb": false,
       "brand": "Audi",
-      "pack": "600-debadged-16"
+      "pack": "600-debadged-16",
+      "yftRel": "600-debadged-16/stream/[Audi]/rs7beast/stream/rs7beast.yft"
     },
     {
       "id": "stream_audirs8",
@@ -816,7 +867,8 @@
       "hasYtd": true,
       "hasGlb": false,
       "brand": "Audi",
-      "pack": "600-debadged-12"
+      "pack": "600-debadged-12",
+      "yftRel": "600-debadged-12/stream/[Audi]/audirs8/stream/audirs8.yft"
     },
     {
       "id": "stream_aw139",
@@ -831,7 +883,8 @@
       "hasYtd": true,
       "hasGlb": false,
       "brand": "Medic",
-      "pack": "600-debadged-02"
+      "pack": "600-debadged-02",
+      "yftRel": "600-debadged-02/stream/[Medic]/aw139/stream/aw139.yft"
     },
     {
       "id": "stream_banana",
@@ -846,7 +899,8 @@
       "hasYtd": true,
       "hasGlb": false,
       "brand": "Others",
-      "pack": "600-debadged-33"
+      "pack": "600-debadged-33",
+      "yftRel": "600-debadged-33/stream/[Others]/banana/stream/banana.yft"
     },
     {
       "id": "stream_polheli",
@@ -861,7 +915,8 @@
       "hasYtd": true,
       "hasGlb": false,
       "brand": "Police",
-      "pack": "600-debadged-33"
+      "pack": "600-debadged-33",
+      "yftRel": "600-debadged-33/stream/[Police]/polheli/stream/polheli.yft"
     },
     {
       "id": "stream_2f2fgts",
@@ -876,7 +931,8 @@
       "hasYtd": true,
       "hasGlb": false,
       "brand": "Mitsubishi",
-      "pack": "600-debadged-04"
+      "pack": "600-debadged-04",
+      "yftRel": "600-debadged-04/stream/[Mitsubishi]/2f2fgts/stream/2f2fgts.yft"
     },
     {
       "id": "stream_GLK",
@@ -891,7 +947,8 @@
       "hasYtd": true,
       "hasGlb": false,
       "brand": "Mercedes",
-      "pack": "600-debadged-23"
+      "pack": "600-debadged-23",
+      "yftRel": "600-debadged-23/stream/[Mercedes]/GLK/stream/GLK.yft"
     },
     {
       "id": "stream_ben17",
@@ -906,7 +963,8 @@
       "hasYtd": true,
       "hasGlb": false,
       "brand": "Bentley",
-      "pack": "600-debadged-02"
+      "pack": "600-debadged-02",
+      "yftRel": "600-debadged-02/stream/[Bentley]/ben17/stream/ben17.yft"
     },
     {
       "id": "stream_bentaygam",
@@ -921,7 +979,8 @@
       "hasYtd": true,
       "hasGlb": false,
       "brand": "Bentley",
-      "pack": "600-debadged-02"
+      "pack": "600-debadged-02",
+      "yftRel": "600-debadged-02/stream/[Bentley]/bentaygam/stream/bentaygam.yft"
     },
     {
       "id": "stream_contgt2011",
@@ -936,7 +995,8 @@
       "hasYtd": true,
       "hasGlb": false,
       "brand": "Bentley",
-      "pack": "600-debadged-02"
+      "pack": "600-debadged-02",
+      "yftRel": "600-debadged-02/stream/[Bentley]/contgt2011/stream/contgt2011.yft"
     },
     {
       "id": "stream_GODzVIPS63AMG",
@@ -951,7 +1011,8 @@
       "hasYtd": true,
       "hasGlb": false,
       "brand": "Mercedes",
-      "pack": "600-debadged-17"
+      "pack": "600-debadged-17",
+      "yftRel": "600-debadged-17/stream/[Mercedes]/GODzVIPS63AMG/stream/GODzVIPS63AMG.yft"
     },
     {
       "id": "stream_benzsl63",
@@ -966,7 +1027,8 @@
       "hasYtd": true,
       "hasGlb": false,
       "brand": "Mercedes",
-      "pack": "600-debadged-32"
+      "pack": "600-debadged-32",
+      "yftRel": "600-debadged-32/stream/[Mercedes]/benzsl63/stream/benzsl63.yft"
     },
     {
       "id": "stream_bg700w",
@@ -981,7 +1043,8 @@
       "hasYtd": true,
       "hasGlb": false,
       "brand": "Mercedes",
-      "pack": "600-debadged-25"
+      "pack": "600-debadged-25",
+      "yftRel": "600-debadged-25/stream/[Mercedes]/bg700w/stream/bg700w.yft"
     },
     {
       "id": "stream_m3e92",
@@ -996,7 +1059,8 @@
       "hasYtd": true,
       "hasGlb": false,
       "brand": "BMW",
-      "pack": "600-debadged-32"
+      "pack": "600-debadged-32",
+      "yftRel": "600-debadged-32/stream/[BMW]/m3e92/stream/m3e92.yft"
     },
     {
       "id": "stream_2ncsbmwm8",
@@ -1011,7 +1075,8 @@
       "hasYtd": true,
       "hasGlb": false,
       "brand": "BMW",
-      "pack": "600-debadged-30"
+      "pack": "600-debadged-30",
+      "yftRel": "600-debadged-30/stream/[BMW]/2ncsbmwm8/stream/2ncsbmwm8.yft"
     },
     {
       "id": "stream_ckbmwm4offwhite",
@@ -1026,7 +1091,8 @@
       "hasYtd": true,
       "hasGlb": false,
       "brand": "BMW",
-      "pack": "600-debadged-26"
+      "pack": "600-debadged-26",
+      "yftRel": "600-debadged-26/stream/[BMW]/ckbmwm4offwhite/stream/ckbmwm4offwhite.yft"
     },
     {
       "id": "stream_e92bb",
@@ -1041,7 +1107,8 @@
       "hasYtd": true,
       "hasGlb": false,
       "brand": "BMW",
-      "pack": "600-debadged-27"
+      "pack": "600-debadged-27",
+      "yftRel": "600-debadged-27/stream/[BMW]/e92bb/stream/e92bb.yft"
     },
     {
       "id": "stream_GODzBMWS1000RR",
@@ -1056,7 +1123,8 @@
       "hasYtd": true,
       "hasGlb": false,
       "brand": "Bikes",
-      "pack": "600-debadged-30"
+      "pack": "600-debadged-30",
+      "yftRel": "600-debadged-30/stream/[Bikes]/GODzBMWS1000RR/stream/GODzBMWS1000RR.yft"
     },
     {
       "id": "stream_km1000rr",
@@ -1071,7 +1139,8 @@
       "hasYtd": true,
       "hasGlb": false,
       "brand": "Bikes",
-      "pack": "600-debadged-27"
+      "pack": "600-debadged-27",
+      "yftRel": "600-debadged-27/stream/[Bikes]/km1000rr/stream/km1000rr.yft"
     },
     {
       "id": "stream_m3e36",
@@ -1086,7 +1155,8 @@
       "hasYtd": true,
       "hasGlb": false,
       "brand": "BMW",
-      "pack": "600-debadged-29"
+      "pack": "600-debadged-29",
+      "yftRel": "600-debadged-29/stream/[BMW]/m3e36/stream/m3e36.yft"
     },
     {
       "id": "stream_m3e46",
@@ -1101,7 +1171,8 @@
       "hasYtd": true,
       "hasGlb": false,
       "brand": "BMW",
-      "pack": "600-debadged-02"
+      "pack": "600-debadged-02",
+      "yftRel": "600-debadged-02/stream/[BMW]/m3e46/stream/m3e46.yft"
     },
     {
       "id": "stream_m4c",
@@ -1116,7 +1187,8 @@
       "hasYtd": true,
       "hasGlb": false,
       "brand": "BMW",
-      "pack": "600-debadged-11"
+      "pack": "600-debadged-11",
+      "yftRel": "600-debadged-11/stream/[BMW]/m4c/stream/m4c.yft"
     },
     {
       "id": "stream_m4lb2",
@@ -1131,7 +1203,8 @@
       "hasYtd": true,
       "hasGlb": false,
       "brand": "BMW",
-      "pack": "600-debadged-11"
+      "pack": "600-debadged-11",
+      "yftRel": "600-debadged-11/stream/[BMW]/m4lb2/stream/m4lb2.yft"
     },
     {
       "id": "stream_m5e60",
@@ -1146,7 +1219,8 @@
       "hasYtd": true,
       "hasGlb": false,
       "brand": "BMW",
-      "pack": "600-debadged-28"
+      "pack": "600-debadged-28",
+      "yftRel": "600-debadged-28/stream/[BMW]/m5e60/stream/m5e60.yft"
     },
     {
       "id": "stream_m5prime",
@@ -1161,7 +1235,8 @@
       "hasYtd": true,
       "hasGlb": false,
       "brand": "BMW",
-      "pack": "600-debadged-29"
+      "pack": "600-debadged-29",
+      "yftRel": "600-debadged-29/stream/[BMW]/m5prime/stream/m5prime.yft"
     },
     {
       "id": "stream_m6e24",
@@ -1176,7 +1251,8 @@
       "hasYtd": true,
       "hasGlb": false,
       "brand": "BMW",
-      "pack": "600-debadged-29"
+      "pack": "600-debadged-29",
+      "yftRel": "600-debadged-29/stream/[BMW]/m6e24/stream/m6e24.yft"
     },
     {
       "id": "stream_polbmwm3",
@@ -1191,7 +1267,8 @@
       "hasYtd": true,
       "hasGlb": false,
       "brand": "Police",
-      "pack": "600-debadged-29"
+      "pack": "600-debadged-29",
+      "yftRel": "600-debadged-29/stream/[Police]/polbmwm3/stream/polbmwm3.yft"
     },
     {
       "id": "stream_rmodm3e36",
@@ -1206,7 +1283,8 @@
       "hasYtd": true,
       "hasGlb": false,
       "brand": "BMW",
-      "pack": "600-debadged-30"
+      "pack": "600-debadged-30",
+      "yftRel": "600-debadged-30/stream/[BMW]/rmodm3e36/stream/rmodm3e36.yft"
     },
     {
       "id": "stream_rmodm4",
@@ -1221,7 +1299,8 @@
       "hasYtd": true,
       "hasGlb": false,
       "brand": "BMW",
-      "pack": "600-debadged-29"
+      "pack": "600-debadged-29",
+      "yftRel": "600-debadged-29/stream/[BMW]/rmodm4/stream/rmodm4.yft"
     },
     {
       "id": "stream_rmodm4gts",
@@ -1236,7 +1315,8 @@
       "hasYtd": true,
       "hasGlb": false,
       "brand": "BMW",
-      "pack": "600-debadged-23"
+      "pack": "600-debadged-23",
+      "yftRel": "600-debadged-23/stream/[BMW]/rmodm4gts/stream/rmodm4gts.yft"
     },
     {
       "id": "stream_rmodx6",
@@ -1251,7 +1331,8 @@
       "hasYtd": true,
       "hasGlb": false,
       "brand": "BMW",
-      "pack": "600-debadged-24"
+      "pack": "600-debadged-24",
+      "yftRel": "600-debadged-24/stream/[BMW]/rmodx6/stream/rmodx6.yft"
     },
     {
       "id": "stream_RoyalCustome39m5_wb",
@@ -1266,7 +1347,8 @@
       "hasYtd": true,
       "hasGlb": false,
       "brand": "Gang Vehicles",
-      "pack": "600-debadged-28"
+      "pack": "600-debadged-28",
+      "yftRel": "600-debadged-28/stream/[Gang Vehicles]/RoyalCustome39m5_wb/stream/RoyalCustome39m5_wb.yft"
     },
     {
       "id": "stream_x6_brigada",
@@ -1281,7 +1363,8 @@
       "hasYtd": true,
       "hasGlb": false,
       "brand": "Gang Vehicles",
-      "pack": "600-debadged-26"
+      "pack": "600-debadged-26",
+      "yftRel": "600-debadged-26/stream/[Gang Vehicles]/x6_brigada/stream/x6_brigada.yft"
     },
     {
       "id": "stream_x6_cali",
@@ -1296,7 +1379,8 @@
       "hasYtd": true,
       "hasGlb": false,
       "brand": "Gang Vehicles",
-      "pack": "600-debadged-26"
+      "pack": "600-debadged-26",
+      "yftRel": "600-debadged-26/stream/[Gang Vehicles]/x6_cali/stream/x6_cali.yft"
     },
     {
       "id": "stream_x6_camorra",
@@ -1311,7 +1395,8 @@
       "hasYtd": true,
       "hasGlb": false,
       "brand": "Gang Vehicles",
-      "pack": "600-debadged-26"
+      "pack": "600-debadged-26",
+      "yftRel": "600-debadged-26/stream/[Gang Vehicles]/x6_camorra/stream/x6_camorra.yft"
     },
     {
       "id": "stream_x6_midnight",
@@ -1326,7 +1411,8 @@
       "hasYtd": true,
       "hasGlb": false,
       "brand": "Gang Vehicles",
-      "pack": "600-debadged-26"
+      "pack": "600-debadged-26",
+      "yftRel": "600-debadged-26/stream/[Gang Vehicles]/x6_midnight/stream/x6_midnight.yft"
     },
     {
       "id": "stream_x6_narcos",
@@ -1341,7 +1427,8 @@
       "hasYtd": true,
       "hasGlb": false,
       "brand": "Gang Vehicles",
-      "pack": "600-debadged-26"
+      "pack": "600-debadged-26",
+      "yftRel": "600-debadged-26/stream/[Gang Vehicles]/x6_narcos/stream/x6_narcos.yft"
     },
     {
       "id": "stream_x6_orga",
@@ -1356,7 +1443,8 @@
       "hasYtd": true,
       "hasGlb": false,
       "brand": "Gang Vehicles",
-      "pack": "600-debadged-26"
+      "pack": "600-debadged-26",
+      "yftRel": "600-debadged-26/stream/[Gang Vehicles]/x6_orga/stream/x6_orga.yft"
     },
     {
       "id": "stream_x6_yakuza",
@@ -1371,7 +1459,8 @@
       "hasYtd": true,
       "hasGlb": false,
       "brand": "Gang Vehicles",
-      "pack": "600-debadged-26"
+      "pack": "600-debadged-26",
+      "yftRel": "600-debadged-26/stream/[Gang Vehicles]/x6_yakuza/stream/x6_yakuza.yft"
     },
     {
       "id": "stream_x6wz",
@@ -1386,7 +1475,8 @@
       "hasYtd": true,
       "hasGlb": false,
       "brand": "BMW",
-      "pack": "600-debadged-19"
+      "pack": "600-debadged-19",
+      "yftRel": "600-debadged-19/stream/[BMW]/x6wz/stream/x6wz.yft"
     },
     {
       "id": "stream_mteche39",
@@ -1401,7 +1491,8 @@
       "hasYtd": true,
       "hasGlb": false,
       "brand": "BMW",
-      "pack": "600-debadged-32"
+      "pack": "600-debadged-32",
+      "yftRel": "600-debadged-32/stream/[BMW]/mteche39/stream/mteche39.yft"
     },
     {
       "id": "stream_g81hr",
@@ -1416,7 +1507,8 @@
       "hasYtd": true,
       "hasGlb": false,
       "brand": "BMW",
-      "pack": "600-debadged-10"
+      "pack": "600-debadged-10",
+      "yftRel": "600-debadged-10/stream/[BMW]/g81hr/stream/g81hr.yft"
     },
     {
       "id": "stream_bmwg07",
@@ -1431,7 +1523,8 @@
       "hasYtd": true,
       "hasGlb": false,
       "brand": "BMW",
-      "pack": "600-debadged-28"
+      "pack": "600-debadged-28",
+      "yftRel": "600-debadged-28/stream/[BMW]/bmwg07/stream/bmwg07.yft"
     },
     {
       "id": "stream_m4hr",
@@ -1446,7 +1539,8 @@
       "hasYtd": true,
       "hasGlb": false,
       "brand": "BMW",
-      "pack": "600-debadged-22"
+      "pack": "600-debadged-22",
+      "yftRel": "600-debadged-22/stream/[BMW]/m4hr/stream/m4hr.yft"
     },
     {
       "id": "stream_mh47g",
@@ -1461,7 +1555,8 @@
       "hasYtd": true,
       "hasGlb": false,
       "brand": "Planes",
-      "pack": "600-debadged-29"
+      "pack": "600-debadged-29",
+      "yftRel": "600-debadged-29/stream/[Planes]/mh47g/stream/mh47g.yft"
     },
     {
       "id": "stream_ospreyhmx",
@@ -1476,7 +1571,8 @@
       "hasYtd": true,
       "hasGlb": false,
       "brand": "Gang Vehicles",
-      "pack": "600-debadged-21"
+      "pack": "600-debadged-21",
+      "yftRel": "600-debadged-21/stream/[Gang Vehicles]/ospreyhmx/stream/ospreyhmx.yft"
     },
     {
       "id": "stream_boss429",
@@ -1491,7 +1587,8 @@
       "hasYtd": true,
       "hasGlb": false,
       "brand": "Ford",
-      "pack": "600-debadged-16"
+      "pack": "600-debadged-16",
+      "yftRel": "600-debadged-16/stream/[Ford]/boss429/stream/boss429.yft"
     },
     {
       "id": "stream_b63s",
@@ -1506,7 +1603,8 @@
       "hasYtd": true,
       "hasGlb": false,
       "brand": "Mercedes",
-      "pack": "600-debadged-32"
+      "pack": "600-debadged-32",
+      "yftRel": "600-debadged-32/stream/[Mercedes]/b63s/stream/b63s.yft"
     },
     {
       "id": "stream_mayb900",
@@ -1521,7 +1619,8 @@
       "hasYtd": true,
       "hasGlb": false,
       "brand": "Mercedes",
-      "pack": "600-debadged-21"
+      "pack": "600-debadged-21",
+      "yftRel": "600-debadged-21/stream/[Mercedes]/mayb900/stream/mayb900.yft"
     },
     {
       "id": "stream_zm_rocket900",
@@ -1536,7 +1635,8 @@
       "hasYtd": true,
       "hasGlb": false,
       "brand": "Police",
-      "pack": "600-debadged-13"
+      "pack": "600-debadged-13",
+      "yftRel": "600-debadged-13/stream/[Police]/zm_rocket900/stream/zm_rocket900.yft"
     },
     {
       "id": "stream_DBb800",
@@ -1551,7 +1651,8 @@
       "hasYtd": true,
       "hasGlb": false,
       "brand": "Mercedes",
-      "pack": "600-debadged-22"
+      "pack": "600-debadged-22",
+      "yftRel": "600-debadged-22/stream/[Mercedes]/DBb800/stream/DBb800.yft"
     },
     {
       "id": "stream_duallybshack",
@@ -1566,7 +1667,8 @@
       "hasYtd": true,
       "hasGlb": false,
       "brand": "Ram",
-      "pack": "600-debadged-08"
+      "pack": "600-debadged-08",
+      "yftRel": "600-debadged-08/stream/[Ram]/duallybshack/stream/duallybshack.yft"
     },
     {
       "id": "stream_volatus2",
@@ -1581,7 +1683,8 @@
       "hasYtd": true,
       "hasGlb": false,
       "brand": "Gang Vehicles",
-      "pack": "600-debadged-30"
+      "pack": "600-debadged-30",
+      "yftRel": "600-debadged-30/stream/[Gang Vehicles]/volatus2/stream/volatus2.yft"
     },
     {
       "id": "stream_2019chiron",
@@ -1596,7 +1699,8 @@
       "hasYtd": true,
       "hasGlb": false,
       "brand": "Bugatti",
-      "pack": "600-debadged-07"
+      "pack": "600-debadged-07",
+      "yftRel": "600-debadged-07/stream/[Bugatti]/2019chiron/stream/2019chiron.yft"
     },
     {
       "id": "stream_centuria",
@@ -1611,7 +1715,8 @@
       "hasYtd": true,
       "hasGlb": false,
       "brand": "Bugatti",
-      "pack": "600-debadged-07"
+      "pack": "600-debadged-07",
+      "yftRel": "600-debadged-07/stream/[Bugatti]/centuria/stream/centuria.yft"
     },
     {
       "id": "stream_dtdbolide",
@@ -1626,7 +1731,8 @@
       "hasYtd": true,
       "hasGlb": false,
       "brand": "Bugatti",
-      "pack": "600-debadged-07"
+      "pack": "600-debadged-07",
+      "yftRel": "600-debadged-07/stream/[Bugatti]/dtdbolide/stream/dtdbolide.yft"
     },
     {
       "id": "stream_GODzMISTRALs",
@@ -1641,7 +1747,8 @@
       "hasYtd": true,
       "hasGlb": false,
       "brand": "Bugatti",
-      "pack": "600-debadged-07"
+      "pack": "600-debadged-07",
+      "yftRel": "600-debadged-07/stream/[Bugatti]/GODzMISTRALs/stream/GODzMISTRALs.yft"
     },
     {
       "id": "stream_GODzVEYRONSSWB",
@@ -1656,7 +1763,8 @@
       "hasYtd": true,
       "hasGlb": false,
       "brand": "Bugatti",
-      "pack": "600-debadged-07"
+      "pack": "600-debadged-07",
+      "yftRel": "600-debadged-07/stream/[Bugatti]/GODzVEYRONSSWB/stream/GODzVEYRONSSWB.yft"
     },
     {
       "id": "stream_gta5rp_veh_c63s",
@@ -1671,7 +1779,8 @@
       "hasYtd": true,
       "hasGlb": false,
       "brand": "Mercedes",
-      "pack": "600-debadged-25"
+      "pack": "600-debadged-25",
+      "yftRel": "600-debadged-25/stream/[Mercedes]/gta5rp_veh_c63s/stream/gta5rp_veh_c63s.yft"
     },
     {
       "id": "stream_escaladeprime",
@@ -1686,7 +1795,8 @@
       "hasYtd": true,
       "hasGlb": false,
       "brand": "Cadillac",
-      "pack": "600-debadged-24"
+      "pack": "600-debadged-24",
+      "yftRel": "600-debadged-24/stream/[Cadillac]/escaladeprime/stream/escaladeprime.yft"
     },
     {
       "id": "stream_pd_escalader",
@@ -1701,7 +1811,8 @@
       "hasYtd": true,
       "hasGlb": false,
       "brand": "Police",
-      "pack": "600-debadged-23"
+      "pack": "600-debadged-23",
+      "yftRel": "600-debadged-23/stream/[Police]/pd_escalader/stream/pd_escalader.yft"
     },
     {
       "id": "stream_c8",
@@ -1716,7 +1827,8 @@
       "hasYtd": true,
       "hasGlb": false,
       "brand": "Chevrolet",
-      "pack": "600-debadged-05"
+      "pack": "600-debadged-05",
+      "yftRel": "600-debadged-05/stream/[Chevrolet]/c8/stream/c8.yft"
     },
     {
       "id": "stream_chironsuper",
@@ -1731,7 +1843,8 @@
       "hasYtd": true,
       "hasGlb": false,
       "brand": "Bugatti",
-      "pack": "600-debadged-07"
+      "pack": "600-debadged-07",
+      "yftRel": "600-debadged-07/stream/[Bugatti]/chironsuper/stream/chironsuper.yft"
     },
     {
       "id": "stream_jes21",
@@ -1746,7 +1859,8 @@
       "hasYtd": true,
       "hasGlb": false,
       "brand": "Koenigsegg",
-      "pack": "600-debadged-10"
+      "pack": "600-debadged-10",
+      "yftRel": "600-debadged-10/stream/[Koenigsegg]/jes21/stream/jes21.yft"
     },
     {
       "id": "stream_cayen19",
@@ -1761,7 +1875,8 @@
       "hasYtd": true,
       "hasGlb": false,
       "brand": "Porsche",
-      "pack": "600-debadged-30"
+      "pack": "600-debadged-30",
+      "yftRel": "600-debadged-30/stream/[Porsche]/cayen19/stream/cayen19.yft"
     },
     {
       "id": "stream_charger21",
@@ -1776,7 +1891,8 @@
       "hasYtd": true,
       "hasGlb": false,
       "brand": "Dodge",
-      "pack": "600-debadged-26"
+      "pack": "600-debadged-26",
+      "yftRel": "600-debadged-26/stream/[Dodge]/charger21/stream/charger21.yft"
     },
     {
       "id": "stream_carsonswbc6",
@@ -1791,7 +1907,8 @@
       "hasYtd": true,
       "hasGlb": false,
       "brand": "Others",
-      "pack": "600-debadged-20"
+      "pack": "600-debadged-20",
+      "yftRel": "600-debadged-20/stream/[Others]/carsonswbc6/stream/carsonswbc6.yft"
     },
     {
       "id": "stream_rmodzl1",
@@ -1806,7 +1923,8 @@
       "hasYtd": true,
       "hasGlb": false,
       "brand": "Camaro",
-      "pack": "600-debadged-10"
+      "pack": "600-debadged-10",
+      "yftRel": "600-debadged-10/stream/[Camaro]/rmodzl1/stream/rmodzl1.yft"
     },
     {
       "id": "stream_BMW-x5_medic",
@@ -1821,7 +1939,8 @@
       "hasYtd": true,
       "hasGlb": false,
       "brand": "Medic",
-      "pack": "600-debadged-02"
+      "pack": "600-debadged-02",
+      "yftRel": "600-debadged-02/stream/[Medic]/BMW-x5_medic/stream/BMW-x5_medic.yft"
     },
     {
       "id": "stream_camaro68t",
@@ -1836,7 +1955,8 @@
       "hasYtd": true,
       "hasGlb": false,
       "brand": "Camaro",
-      "pack": "600-debadged-10"
+      "pack": "600-debadged-10",
+      "yftRel": "600-debadged-10/stream/[Camaro]/camaro68t/stream/camaro68t.yft"
     },
     {
       "id": "stream_camarodragmachine",
@@ -1851,7 +1971,8 @@
       "hasYtd": true,
       "hasGlb": false,
       "brand": "Chevrolet",
-      "pack": "600-debadged-05"
+      "pack": "600-debadged-05",
+      "yftRel": "600-debadged-05/stream/[Chevrolet]/camarodragmachine/stream/camarodragmachine.yft"
     },
     {
       "id": "stream_nm_z71",
@@ -1866,7 +1987,8 @@
       "hasYtd": true,
       "hasGlb": false,
       "brand": "Police",
-      "pack": "600-debadged-31"
+      "pack": "600-debadged-31",
+      "yftRel": "600-debadged-31/stream/[Police]/nm_z71/stream/nm_z71.yft"
     },
     {
       "id": "stream_valor9rb",
@@ -1881,7 +2003,8 @@
       "hasYtd": true,
       "hasGlb": false,
       "brand": "Sheriff",
-      "pack": "600-debadged-04"
+      "pack": "600-debadged-04",
+      "yftRel": "600-debadged-04/stream/[Sheriff]/valor9rb/stream/valor9rb.yft"
     },
     {
       "id": "stream_C8WidebodyLC",
@@ -1896,7 +2019,8 @@
       "hasYtd": true,
       "hasGlb": false,
       "brand": "Chevrolet",
-      "pack": "600-debadged-05"
+      "pack": "600-debadged-05",
+      "yftRel": "600-debadged-05/stream/[Chevrolet]/C8WidebodyLC/stream/C8WidebodyLC.yft"
     },
     {
       "id": "stream_rr21camarowide",
@@ -1911,7 +2035,8 @@
       "hasYtd": true,
       "hasGlb": false,
       "brand": "Camaro",
-      "pack": "600-debadged-10"
+      "pack": "600-debadged-10",
+      "yftRel": "600-debadged-10/stream/[Camaro]/rr21camarowide/stream/rr21camarowide.yft"
     },
     {
       "id": "stream_chironspeedhunter",
@@ -1926,7 +2051,8 @@
       "hasYtd": true,
       "hasGlb": false,
       "brand": "Bugatti",
-      "pack": "600-debadged-07"
+      "pack": "600-debadged-07",
+      "yftRel": "600-debadged-07/stream/[Bugatti]/chironspeedhunter/stream/chironspeedhunter.yft"
     },
     {
       "id": "stream_chironsupersport22",
@@ -1941,7 +2067,8 @@
       "hasYtd": true,
       "hasGlb": false,
       "brand": "Bugatti",
-      "pack": "600-debadged-07"
+      "pack": "600-debadged-07",
+      "yftRel": "600-debadged-07/stream/[Bugatti]/chironsupersport22/stream/chironsupersport22.yft"
     },
     {
       "id": "stream_ab300",
@@ -1956,7 +2083,8 @@
       "hasYtd": true,
       "hasGlb": false,
       "brand": "Rolls Royce",
-      "pack": "600-debadged-06"
+      "pack": "600-debadged-06",
+      "yftRel": "600-debadged-06/stream/[Rolls Royce]/ab300/stream/ab300.yft"
     },
     {
       "id": "stream_brkout",
@@ -1971,7 +2099,8 @@
       "hasYtd": true,
       "hasGlb": false,
       "brand": "Bikes",
-      "pack": "600-debadged-31"
+      "pack": "600-debadged-31",
+      "yftRel": "600-debadged-31/stream/[Bikes]/brkout/stream/brkout.yft"
     },
     {
       "id": "stream_claw",
@@ -1986,7 +2115,8 @@
       "hasYtd": true,
       "hasGlb": false,
       "brand": "Bikes",
-      "pack": "600-debadged-29"
+      "pack": "600-debadged-29",
+      "yftRel": "600-debadged-29/stream/[Bikes]/claw/stream/claw.yft"
     },
     {
       "id": "stream_crownbp",
@@ -2001,7 +2131,8 @@
       "hasYtd": true,
       "hasGlb": false,
       "brand": "Toyota",
-      "pack": "600-debadged-03"
+      "pack": "600-debadged-03",
+      "yftRel": "600-debadged-03/stream/[Toyota]/crownbp/stream/crownbp.yft"
     },
     {
       "id": "stream_cx30wz",
@@ -2016,7 +2147,8 @@
       "hasYtd": true,
       "hasGlb": false,
       "brand": "Mazda",
-      "pack": "600-debadged-06"
+      "pack": "600-debadged-06",
+      "yftRel": "600-debadged-06/stream/[Mazda]/cx30wz/stream/cx30wz.yft"
     },
     {
       "id": "stream_a80",
@@ -2031,7 +2163,8 @@
       "hasYtd": true,
       "hasGlb": false,
       "brand": "Toyota",
-      "pack": "600-debadged-03"
+      "pack": "600-debadged-03",
+      "yftRel": "600-debadged-03/stream/[Toyota]/a80/stream/a80.yft"
     },
     {
       "id": "stream_gta5rp_veh_gtr33",
@@ -2046,7 +2179,8 @@
       "hasYtd": true,
       "hasGlb": false,
       "brand": "Nissan",
-      "pack": "600-debadged-32"
+      "pack": "600-debadged-32",
+      "yftRel": "600-debadged-32/stream/[Nissan]/gta5rp_veh_gtr33/stream/gta5rp_veh_gtr33.yft"
     },
     {
       "id": "stream_rs7",
@@ -2061,7 +2195,8 @@
       "hasYtd": true,
       "hasGlb": false,
       "brand": "Audi",
-      "pack": "600-debadged-14"
+      "pack": "600-debadged-14",
+      "yftRel": "600-debadged-14/stream/[Audi]/rs7/stream/rs7.yft"
     },
     {
       "id": "stream_nsx17",
@@ -2076,7 +2211,8 @@
       "hasYtd": true,
       "hasGlb": false,
       "brand": "Honda",
-      "pack": "600-debadged-09"
+      "pack": "600-debadged-09",
+      "yftRel": "600-debadged-09/stream/[Honda]/nsx17/stream/nsx17.yft"
     },
     {
       "id": "stream_DL_a45",
@@ -2091,7 +2227,8 @@
       "hasYtd": true,
       "hasGlb": false,
       "brand": "Police",
-      "pack": "600-debadged-16"
+      "pack": "600-debadged-16",
+      "yftRel": "600-debadged-16/stream/[Police]/DL_a45/stream/DL_a45.yft"
     },
     {
       "id": "stream_DL_rs6",
@@ -2106,7 +2243,8 @@
       "hasYtd": true,
       "hasGlb": false,
       "brand": "Police",
-      "pack": "600-debadged-32"
+      "pack": "600-debadged-32",
+      "yftRel": "600-debadged-32/stream/[Police]/DL_rs6/stream/DL_rs6.yft"
     },
     {
       "id": "stream_DL_RS7",
@@ -2121,7 +2259,8 @@
       "hasYtd": true,
       "hasGlb": false,
       "brand": "Police",
-      "pack": "600-debadged-18"
+      "pack": "600-debadged-18",
+      "yftRel": "600-debadged-18/stream/[Police]/DL_RS7/stream/DL_RS7.yft"
     },
     {
       "id": "stream_DL_G900",
@@ -2136,7 +2275,8 @@
       "hasYtd": true,
       "hasGlb": false,
       "brand": "Mercedes",
-      "pack": "600-debadged-22"
+      "pack": "600-debadged-22",
+      "yftRel": "600-debadged-22/stream/[Mercedes]/DL_G900/stream/DL_G900.yft"
     },
     {
       "id": "stream_dzdaytona",
@@ -2151,7 +2291,8 @@
       "hasYtd": true,
       "hasGlb": false,
       "brand": "Dodge",
-      "pack": "600-debadged-24"
+      "pack": "600-debadged-24",
+      "yftRel": "600-debadged-24/stream/[Dodge]/dzdaytona/stream/dzdaytona.yft"
     },
     {
       "id": "stream_GODzDEMONUTE",
@@ -2166,7 +2307,8 @@
       "hasYtd": true,
       "hasGlb": false,
       "brand": "Dodge",
-      "pack": "600-debadged-28"
+      "pack": "600-debadged-28",
+      "yftRel": "600-debadged-28/stream/[Dodge]/GODzDEMONUTE/stream/GODzDEMONUTE.yft"
     },
     {
       "id": "stream_HellstingerwbSC",
@@ -2181,7 +2323,8 @@
       "hasYtd": true,
       "hasGlb": false,
       "brand": "Dodge",
-      "pack": "600-debadged-20"
+      "pack": "600-debadged-20",
+      "yftRel": "600-debadged-20/stream/[Dodge]/HellstingerwbSC/stream/HellstingerwbSC.yft"
     },
     {
       "id": "stream_chargerf8",
@@ -2196,7 +2339,8 @@
       "hasYtd": true,
       "hasGlb": false,
       "brand": "Dodge",
-      "pack": "600-debadged-20"
+      "pack": "600-debadged-20",
+      "yftRel": "600-debadged-20/stream/[Dodge]/chargerf8/stream/chargerf8.yft"
     },
     {
       "id": "stream_demon",
@@ -2211,7 +2355,8 @@
       "hasYtd": true,
       "hasGlb": false,
       "brand": "Dodge",
-      "pack": "600-debadged-31"
+      "pack": "600-debadged-31",
+      "yftRel": "600-debadged-31/stream/[Dodge]/demon/stream/demon.yft"
     },
     {
       "id": "stream_gcram1500",
@@ -2226,7 +2371,8 @@
       "hasYtd": true,
       "hasGlb": false,
       "brand": "Ram",
-      "pack": "600-debadged-08"
+      "pack": "600-debadged-08",
+      "yftRel": "600-debadged-08/stream/[Ram]/gcram1500/stream/gcram1500.yft"
     },
     {
       "id": "stream_hellcatlb",
@@ -2241,7 +2387,8 @@
       "hasYtd": true,
       "hasGlb": false,
       "brand": "Dodge",
-      "pack": "600-debadged-32"
+      "pack": "600-debadged-32",
+      "yftRel": "600-debadged-32/stream/[Dodge]/hellcatlb/stream/hellcatlb.yft"
     },
     {
       "id": "stream_HellcatMagnum21",
@@ -2256,7 +2403,8 @@
       "hasYtd": true,
       "hasGlb": false,
       "brand": "Dodge",
-      "pack": "600-debadged-25"
+      "pack": "600-debadged-25",
+      "yftRel": "600-debadged-25/stream/[Dodge]/HellcatMagnum21/stream/HellcatMagnum21.yft"
     },
     {
       "id": "stream_16charger",
@@ -2271,7 +2419,8 @@
       "hasYtd": true,
       "hasGlb": false,
       "brand": "Dodge",
-      "pack": "600-debadged-29"
+      "pack": "600-debadged-29",
+      "yftRel": "600-debadged-29/stream/[Dodge]/16charger/stream/16charger.yft"
     },
     {
       "id": "stream_chr20",
@@ -2286,7 +2435,8 @@
       "hasYtd": true,
       "hasGlb": false,
       "brand": "Dodge",
-      "pack": "600-debadged-24"
+      "pack": "600-debadged-24",
+      "yftRel": "600-debadged-24/stream/[Dodge]/chr20/stream/chr20.yft"
     },
     {
       "id": "stream_fmagnum",
@@ -2301,7 +2451,8 @@
       "hasYtd": true,
       "hasGlb": false,
       "brand": "Others",
-      "pack": "600-debadged-25"
+      "pack": "600-debadged-25",
+      "yftRel": "600-debadged-25/stream/[Others]/fmagnum/stream/fmagnum.yft"
     },
     {
       "id": "stream_GODzDRIFTCAT",
@@ -2316,7 +2467,8 @@
       "hasYtd": true,
       "hasGlb": false,
       "brand": "Dodge",
-      "pack": "600-debadged-24"
+      "pack": "600-debadged-24",
+      "yftRel": "600-debadged-24/stream/[Dodge]/GODzDRIFTCAT/stream/GODzDRIFTCAT.yft"
     },
     {
       "id": "stream_GODzRAMTRX6x6",
@@ -2331,7 +2483,8 @@
       "hasYtd": true,
       "hasGlb": false,
       "brand": "Ram",
-      "pack": "600-debadged-08"
+      "pack": "600-debadged-08",
+      "yftRel": "600-debadged-08/stream/[Ram]/GODzRAMTRX6x6/stream/GODzRAMTRX6x6.yft"
     },
     {
       "id": "stream_nm_hell",
@@ -2346,7 +2499,8 @@
       "hasYtd": true,
       "hasGlb": false,
       "brand": "Police",
-      "pack": "600-debadged-22"
+      "pack": "600-debadged-22",
+      "yftRel": "600-debadged-22/stream/[Police]/nm_hell/stream/nm_hell.yft"
     },
     {
       "id": "stream_raid",
@@ -2361,7 +2515,8 @@
       "hasYtd": true,
       "hasGlb": false,
       "brand": "Dodge",
-      "pack": "600-debadged-27"
+      "pack": "600-debadged-27",
+      "yftRel": "600-debadged-27/stream/[Dodge]/raid/stream/raid.yft"
     },
     {
       "id": "stream_rmodcharger",
@@ -2376,7 +2531,8 @@
       "hasYtd": true,
       "hasGlb": false,
       "brand": "Dodge",
-      "pack": "600-debadged-31"
+      "pack": "600-debadged-31",
+      "yftRel": "600-debadged-31/stream/[Dodge]/rmodcharger/stream/rmodcharger.yft"
     },
     {
       "id": "stream_rmodcharger69",
@@ -2391,7 +2547,8 @@
       "hasYtd": true,
       "hasGlb": false,
       "brand": "Dodge",
-      "pack": "600-debadged-18"
+      "pack": "600-debadged-18",
+      "yftRel": "600-debadged-18/stream/[Dodge]/rmodcharger69/stream/rmodcharger69.yft"
     },
     {
       "id": "stream_ToraChargerLifted",
@@ -2406,7 +2563,8 @@
       "hasYtd": true,
       "hasGlb": false,
       "brand": "Dodge",
-      "pack": "600-debadged-23"
+      "pack": "600-debadged-23",
+      "yftRel": "600-debadged-23/stream/[Dodge]/ToraChargerLifted/stream/ToraChargerLifted.yft"
     },
     {
       "id": "stream_trx",
@@ -2421,7 +2579,8 @@
       "hasYtd": true,
       "hasGlb": false,
       "brand": "Ram",
-      "pack": "600-debadged-08"
+      "pack": "600-debadged-08",
+      "yftRel": "600-debadged-08/stream/[Ram]/trx/stream/trx.yft"
     },
     {
       "id": "stream_dvc63darwin",
@@ -2436,7 +2595,8 @@
       "hasYtd": true,
       "hasGlb": false,
       "brand": "Mercedes",
-      "pack": "600-debadged-21"
+      "pack": "600-debadged-21",
+      "yftRel": "600-debadged-21/stream/[Mercedes]/dvc63darwin/stream/dvc63darwin.yft"
     },
     {
       "id": "stream_e39touring",
@@ -2451,7 +2611,8 @@
       "hasYtd": true,
       "hasGlb": false,
       "brand": "BMW",
-      "pack": "600-debadged-32"
+      "pack": "600-debadged-32",
+      "yftRel": "600-debadged-32/stream/[BMW]/e39touring/stream/e39touring.yft"
     },
     {
       "id": "stream_e55",
@@ -2466,7 +2627,8 @@
       "hasYtd": true,
       "hasGlb": false,
       "brand": "Mercedes",
-      "pack": "600-debadged-31"
+      "pack": "600-debadged-31",
+      "yftRel": "600-debadged-31/stream/[Mercedes]/e55/stream/e55.yft"
     },
     {
       "id": "stream_eleanor",
@@ -2481,7 +2643,8 @@
       "hasYtd": true,
       "hasGlb": false,
       "brand": "Ford",
-      "pack": "600-debadged-33"
+      "pack": "600-debadged-33",
+      "yftRel": "600-debadged-33/stream/[Ford]/eleanor/stream/eleanor.yft"
     },
     {
       "id": "stream_espiritu",
@@ -2496,7 +2659,8 @@
       "hasYtd": true,
       "hasGlb": false,
       "brand": "Bikes",
-      "pack": "600-debadged-01"
+      "pack": "600-debadged-01",
+      "yftRel": "600-debadged-01/stream/[Bikes]/espiritu/stream/espiritu.yft"
     },
     {
       "id": "stream_evo9",
@@ -2511,7 +2675,8 @@
       "hasYtd": true,
       "hasGlb": false,
       "brand": "Mitsubishi",
-      "pack": "600-debadged-04"
+      "pack": "600-debadged-04",
+      "yftRel": "600-debadged-04/stream/[Mitsubishi]/evo9/stream/evo9.yft"
     },
     {
       "id": "stream_evoss",
@@ -2526,7 +2691,8 @@
       "hasYtd": true,
       "hasGlb": false,
       "brand": "Mitsubishi",
-      "pack": "600-debadged-04"
+      "pack": "600-debadged-04",
+      "yftRel": "600-debadged-04/stream/[Mitsubishi]/evoss/stream/evoss.yft"
     },
     {
       "id": "stream_f12rp",
@@ -2541,7 +2707,8 @@
       "hasYtd": true,
       "hasGlb": false,
       "brand": "Ferrari",
-      "pack": "600-debadged-01"
+      "pack": "600-debadged-01",
+      "yftRel": "600-debadged-01/stream/[Ferrari]/f12rp/stream/f12rp.yft"
     },
     {
       "id": "stream_f8kspider",
@@ -2556,7 +2723,8 @@
       "hasYtd": true,
       "hasGlb": false,
       "brand": "Ferrari",
-      "pack": "600-debadged-01"
+      "pack": "600-debadged-01",
+      "yftRel": "600-debadged-01/stream/[Ferrari]/f8kspider/stream/f8kspider.yft"
     },
     {
       "id": "stream_2019m5",
@@ -2571,7 +2739,8 @@
       "hasYtd": true,
       "hasGlb": false,
       "brand": "BMW",
-      "pack": "600-debadged-32"
+      "pack": "600-debadged-32",
+      "yftRel": "600-debadged-32/stream/[BMW]/2019m5/stream/2019m5.yft"
     },
     {
       "id": "stream_fangle450",
@@ -2586,7 +2755,8 @@
       "hasYtd": true,
       "hasGlb": false,
       "brand": "Gang Vehicles",
-      "pack": "600-debadged-19"
+      "pack": "600-debadged-19",
+      "yftRel": "600-debadged-19/stream/[Gang Vehicles]/fangle450/stream/fangle450.yft"
     },
     {
       "id": "stream_fcxl",
@@ -2601,7 +2771,8 @@
       "hasYtd": true,
       "hasGlb": false,
       "brand": "Others",
-      "pack": "600-debadged-21"
+      "pack": "600-debadged-21",
+      "yftRel": "600-debadged-21/stream/[Others]/fcxl/stream/fcxl.yft"
     },
     {
       "id": "stream_GODz22LIGHTNINGWB",
@@ -2616,7 +2787,8 @@
       "hasYtd": true,
       "hasGlb": false,
       "brand": "Ram",
-      "pack": "600-debadged-08"
+      "pack": "600-debadged-08",
+      "yftRel": "600-debadged-08/stream/[Ram]/GODz22LIGHTNINGWB/stream/GODz22LIGHTNINGWB.yft"
     },
     {
       "id": "stream_812mnsry",
@@ -2631,7 +2803,8 @@
       "hasYtd": true,
       "hasGlb": false,
       "brand": "Ferrari",
-      "pack": "600-debadged-01"
+      "pack": "600-debadged-01",
+      "yftRel": "600-debadged-01/stream/[Ferrari]/812mnsry/stream/812mnsry.yft"
     },
     {
       "id": "stream_rmodf40",
@@ -2646,7 +2819,8 @@
       "hasYtd": true,
       "hasGlb": false,
       "brand": "Ferrari",
-      "pack": "600-debadged-01"
+      "pack": "600-debadged-01",
+      "yftRel": "600-debadged-01/stream/[Ferrari]/rmodf40/stream/rmodf40.yft"
     },
     {
       "id": "stream_488animated",
@@ -2661,7 +2835,8 @@
       "hasYtd": true,
       "hasGlb": true,
       "brand": "Ferrari",
-      "pack": "600-debadged-01"
+      "pack": "600-debadged-01",
+      "yftRel": "600-debadged-01/stream/[Ferrari]/488animated/stream/488animated.yft"
     },
     {
       "id": "stream_daytonasp3",
@@ -2676,7 +2851,8 @@
       "hasYtd": true,
       "hasGlb": false,
       "brand": "Ferrari",
-      "pack": "600-debadged-01"
+      "pack": "600-debadged-01",
+      "yftRel": "600-debadged-01/stream/[Ferrari]/daytonasp3/stream/daytonasp3.yft"
     },
     {
       "id": "stream_f812",
@@ -2691,7 +2867,8 @@
       "hasYtd": true,
       "hasGlb": false,
       "brand": "Ferrari",
-      "pack": "600-debadged-01"
+      "pack": "600-debadged-01",
+      "yftRel": "600-debadged-01/stream/[Ferrari]/f812/stream/f812.yft"
     },
     {
       "id": "stream_gta5rp_veh_ferrari19",
@@ -2706,7 +2883,8 @@
       "hasYtd": true,
       "hasGlb": false,
       "brand": "Ferrari",
-      "pack": "600-debadged-01"
+      "pack": "600-debadged-01",
+      "yftRel": "600-debadged-01/stream/[Ferrari]/gta5rp_veh_ferrari19/stream/gta5rp_veh_ferrari19.yft"
     },
     {
       "id": "stream_impronta4",
@@ -2721,7 +2899,8 @@
       "hasYtd": true,
       "hasGlb": false,
       "brand": "Ferrari",
-      "pack": "600-debadged-01"
+      "pack": "600-debadged-01",
+      "yftRel": "600-debadged-01/stream/[Ferrari]/impronta4/stream/impronta4.yft"
     },
     {
       "id": "stream_ferrari812super",
@@ -2736,7 +2915,8 @@
       "hasYtd": true,
       "hasGlb": false,
       "brand": "Ferrari",
-      "pack": "600-debadged-01"
+      "pack": "600-debadged-01",
+      "yftRel": "600-debadged-01/stream/[Ferrari]/ferrari812super/stream/ferrari812super.yft"
     },
     {
       "id": "stream_488sp",
@@ -2751,7 +2931,8 @@
       "hasYtd": true,
       "hasGlb": false,
       "brand": "Ferrari",
-      "pack": "600-debadged-01"
+      "pack": "600-debadged-01",
+      "yftRel": "600-debadged-01/stream/[Ferrari]/488sp/stream/488sp.yft"
     },
     {
       "id": "stream_rmodbiposto",
@@ -2766,7 +2947,8 @@
       "hasYtd": true,
       "hasGlb": false,
       "brand": "Fiat",
-      "pack": "600-debadged-25"
+      "pack": "600-debadged-25",
+      "yftRel": "600-debadged-25/stream/[Fiat]/rmodbiposto/stream/rmodbiposto.yft"
     },
     {
       "id": "stream_GODzOOF6x6",
@@ -2781,7 +2963,8 @@
       "hasYtd": true,
       "hasGlb": false,
       "brand": "GMC",
-      "pack": "600-debadged-10"
+      "pack": "600-debadged-10",
+      "yftRel": "600-debadged-10/stream/[GMC]/GODzOOF6x6/stream/GODzOOF6x6.yft"
     },
     {
       "id": "stream_GODz67ELGT500",
@@ -2796,7 +2979,8 @@
       "hasYtd": true,
       "hasGlb": false,
       "brand": "Ford",
-      "pack": "600-debadged-30"
+      "pack": "600-debadged-30",
+      "yftRel": "600-debadged-30/stream/[Ford]/GODz67ELGT500/stream/GODz67ELGT500.yft"
     },
     {
       "id": "stream_mach1",
@@ -2811,7 +2995,8 @@
       "hasYtd": true,
       "hasGlb": false,
       "brand": "Ford",
-      "pack": "600-debadged-32"
+      "pack": "600-debadged-32",
+      "yftRel": "600-debadged-32/stream/[Ford]/mach1/stream/mach1.yft"
     },
     {
       "id": "stream_mache",
@@ -2826,7 +3011,8 @@
       "hasYtd": true,
       "hasGlb": false,
       "brand": "Ford",
-      "pack": "600-debadged-20"
+      "pack": "600-debadged-20",
+      "yftRel": "600-debadged-20/stream/[Ford]/mache/stream/mache.yft"
     },
     {
       "id": "stream_ugcprime350",
@@ -2841,7 +3027,8 @@
       "hasYtd": true,
       "hasGlb": false,
       "brand": "Ford",
-      "pack": "600-debadged-23"
+      "pack": "600-debadged-23",
+      "yftRel": "600-debadged-23/stream/[Ford]/ugcprime350/stream/ugcprime350.yft"
     },
     {
       "id": "stream_f450",
@@ -2856,7 +3043,8 @@
       "hasYtd": true,
       "hasGlb": false,
       "brand": "Ford",
-      "pack": "600-debadged-27"
+      "pack": "600-debadged-27",
+      "yftRel": "600-debadged-27/stream/[Ford]/f450/stream/f450.yft"
     },
     {
       "id": "stream_ffrs",
@@ -2871,7 +3059,8 @@
       "hasYtd": true,
       "hasGlb": false,
       "brand": "Ford",
-      "pack": "600-debadged-27"
+      "pack": "600-debadged-27",
+      "yftRel": "600-debadged-27/stream/[Ford]/ffrs/stream/ffrs.yft"
     },
     {
       "id": "stream_lightningdually22",
@@ -2886,7 +3075,8 @@
       "hasYtd": true,
       "hasGlb": false,
       "brand": "Ford",
-      "pack": "600-debadged-13"
+      "pack": "600-debadged-13",
+      "yftRel": "600-debadged-13/stream/[Ford]/lightningdually22/stream/lightningdually22.yft"
     },
     {
       "id": "stream_mgt",
@@ -2901,7 +3091,8 @@
       "hasYtd": true,
       "hasGlb": false,
       "brand": "Ford",
-      "pack": "600-debadged-27"
+      "pack": "600-debadged-27",
+      "yftRel": "600-debadged-27/stream/[Ford]/mgt/stream/mgt.yft"
     },
     {
       "id": "stream_rapger19",
@@ -2916,7 +3107,8 @@
       "hasYtd": true,
       "hasGlb": false,
       "brand": "Ford",
-      "pack": "600-debadged-19"
+      "pack": "600-debadged-19",
+      "yftRel": "600-debadged-19/stream/[Ford]/rapger19/stream/rapger19.yft"
     },
     {
       "id": "stream_rmodfordgt",
@@ -2931,7 +3123,8 @@
       "hasYtd": true,
       "hasGlb": false,
       "brand": "Ford",
-      "pack": "600-debadged-30"
+      "pack": "600-debadged-30",
+      "yftRel": "600-debadged-30/stream/[Ford]/rmodfordgt/stream/rmodfordgt.yft"
     },
     {
       "id": "stream_rmodmustang",
@@ -2946,7 +3139,8 @@
       "hasYtd": true,
       "hasGlb": false,
       "brand": "Ford",
-      "pack": "600-debadged-30"
+      "pack": "600-debadged-30",
+      "yftRel": "600-debadged-30/stream/[Ford]/rmodmustang/stream/rmodmustang.yft"
     },
     {
       "id": "stream_boss302",
@@ -2961,7 +3155,8 @@
       "hasYtd": true,
       "hasGlb": false,
       "brand": "Ford",
-      "pack": "600-debadged-32"
+      "pack": "600-debadged-32",
+      "yftRel": "600-debadged-32/stream/[Ford]/boss302/stream/boss302.yft"
     },
     {
       "id": "stream_ToraRTRShow",
@@ -2976,7 +3171,8 @@
       "hasYtd": true,
       "hasGlb": false,
       "brand": "Ford",
-      "pack": "600-debadged-27"
+      "pack": "600-debadged-27",
+      "yftRel": "600-debadged-27/stream/[Ford]/ToraRTRShow/stream/ToraRTRShow.yft"
     },
     {
       "id": "stream_fortwo17",
@@ -2991,7 +3187,8 @@
       "hasYtd": true,
       "hasGlb": false,
       "brand": "Others",
-      "pack": "600-debadged-13"
+      "pack": "600-debadged-13",
+      "yftRel": "600-debadged-13/stream/[Others]/fortwo17/stream/fortwo17.yft"
     },
     {
       "id": "stream_g63",
@@ -3006,7 +3203,8 @@
       "hasYtd": true,
       "hasGlb": false,
       "brand": "Mercedes",
-      "pack": "600-debadged-26"
+      "pack": "600-debadged-26",
+      "yftRel": "600-debadged-26/stream/[Mercedes]/g63/stream/g63.yft"
     },
     {
       "id": "stream_G63Sam",
@@ -3021,7 +3219,8 @@
       "hasYtd": true,
       "hasGlb": false,
       "brand": "Mercedes",
-      "pack": "600-debadged-22"
+      "pack": "600-debadged-22",
+      "yftRel": "600-debadged-22/stream/[Mercedes]/G63Sam/stream/G63Sam.yft"
     },
     {
       "id": "stream_g900przemo6x6",
@@ -3036,7 +3235,8 @@
       "hasYtd": true,
       "hasGlb": false,
       "brand": "Mercedes",
-      "pack": "600-debadged-12"
+      "pack": "600-debadged-12",
+      "yftRel": "600-debadged-12/stream/[Mercedes]/g900przemo6x6/stream/g900przemo6x6.yft"
     },
     {
       "id": "stream_taxipolmav",
@@ -3051,7 +3251,8 @@
       "hasYtd": true,
       "hasGlb": false,
       "brand": "Gang Vehicles",
-      "pack": "600-debadged-33"
+      "pack": "600-debadged-33",
+      "yftRel": "600-debadged-33/stream/[Gang Vehicles]/taxipolmav/stream/taxipolmav.yft"
     },
     {
       "id": "stream_gcma4sedan2021",
@@ -3066,7 +3267,8 @@
       "hasYtd": true,
       "hasGlb": false,
       "brand": "Audi",
-      "pack": "600-debadged-22"
+      "pack": "600-debadged-22",
+      "yftRel": "600-debadged-22/stream/[Audi]/gcma4sedan2021/stream/gcma4sedan2021.yft"
     },
     {
       "id": "stream_gcmlamboultimae",
@@ -3081,7 +3283,8 @@
       "hasYtd": true,
       "hasGlb": false,
       "brand": "Lamborghini",
-      "pack": "600-debadged-28"
+      "pack": "600-debadged-28",
+      "yftRel": "600-debadged-28/stream/[Lamborghini]/gcmlamboultimae/stream/gcmlamboultimae.yft"
     },
     {
       "id": "stream_gdivo",
@@ -3096,7 +3299,8 @@
       "hasYtd": true,
       "hasGlb": false,
       "brand": "Bugatti",
-      "pack": "600-debadged-07"
+      "pack": "600-debadged-07",
+      "yftRel": "600-debadged-07/stream/[Bugatti]/gdivo/stream/gdivo.yft"
     },
     {
       "id": "stream_gemera",
@@ -3111,7 +3315,8 @@
       "hasYtd": true,
       "hasGlb": false,
       "brand": "Koenigsegg",
-      "pack": "600-debadged-10"
+      "pack": "600-debadged-10",
+      "yftRel": "600-debadged-10/stream/[Koenigsegg]/gemera/stream/gemera.yft"
     },
     {
       "id": "stream_giulia_2021",
@@ -3126,7 +3331,8 @@
       "hasYtd": true,
       "hasGlb": false,
       "brand": "BMW",
-      "pack": "600-debadged-25"
+      "pack": "600-debadged-25",
+      "yftRel": "600-debadged-25/stream/[BMW]/giulia_2021/stream/giulia_2021.yft"
     },
     {
       "id": "stream_gmcev2",
@@ -3141,7 +3347,8 @@
       "hasYtd": true,
       "hasGlb": false,
       "brand": "GMC",
-      "pack": "600-debadged-10"
+      "pack": "600-debadged-10",
+      "yftRel": "600-debadged-10/stream/[GMC]/gmcev2/stream/gmcev2.yft"
     },
     {
       "id": "stream_GODzHYCADER34",
@@ -3156,7 +3363,8 @@
       "hasYtd": true,
       "hasGlb": false,
       "brand": "Nissan",
-      "pack": "600-debadged-17"
+      "pack": "600-debadged-17",
+      "yftRel": "600-debadged-17/stream/[Nissan]/GODzHYCADER34/stream/GODzHYCADER34.yft"
     },
     {
       "id": "stream_GODzRB26SUBI",
@@ -3171,7 +3379,8 @@
       "hasYtd": true,
       "hasGlb": false,
       "brand": "Others",
-      "pack": "600-debadged-22"
+      "pack": "600-debadged-22",
+      "yftRel": "600-debadged-22/stream/[Others]/GODzRB26SUBI/stream/GODzRB26SUBI.yft"
     },
     {
       "id": "stream_golf1",
@@ -3186,7 +3395,8 @@
       "hasYtd": true,
       "hasGlb": false,
       "brand": "VW",
-      "pack": "600-debadged-05"
+      "pack": "600-debadged-05",
+      "yftRel": "600-debadged-05/stream/[VW]/golf1/stream/golf1.yft"
     },
     {
       "id": "stream_golf8gti",
@@ -3201,7 +3411,8 @@
       "hasYtd": true,
       "hasGlb": false,
       "brand": "VW",
-      "pack": "600-debadged-05"
+      "pack": "600-debadged-05",
+      "yftRel": "600-debadged-05/stream/[VW]/golf8gti/stream/golf8gti.yft"
     },
     {
       "id": "stream_gstbird1",
@@ -3216,7 +3427,8 @@
       "hasYtd": true,
       "hasGlb": false,
       "brand": "Others",
-      "pack": "600-debadged-20"
+      "pack": "600-debadged-20",
+      "yftRel": "600-debadged-20/stream/[Others]/gstbird1/stream/gstbird1.yft"
     },
     {
       "id": "stream_gt63",
@@ -3231,7 +3443,8 @@
       "hasYtd": true,
       "hasGlb": false,
       "brand": "Mercedes",
-      "pack": "600-debadged-30"
+      "pack": "600-debadged-30",
+      "yftRel": "600-debadged-30/stream/[Mercedes]/gt63/stream/gt63.yft"
     },
     {
       "id": "stream_gta5rp_veh_gle1",
@@ -3246,7 +3459,8 @@
       "hasYtd": true,
       "hasGlb": false,
       "brand": "Mercedes",
-      "pack": "600-debadged-29"
+      "pack": "600-debadged-29",
+      "yftRel": "600-debadged-29/stream/[Mercedes]/gta5rp_veh_gle1/stream/gta5rp_veh_gle1.yft"
     },
     {
       "id": "stream_gtr50",
@@ -3261,7 +3475,8 @@
       "hasYtd": true,
       "hasGlb": false,
       "brand": "Nissan",
-      "pack": "600-debadged-19"
+      "pack": "600-debadged-19",
+      "yftRel": "600-debadged-19/stream/[Nissan]/gtr50/stream/gtr50.yft"
     },
     {
       "id": "stream_gtrh",
@@ -3276,7 +3491,8 @@
       "hasYtd": true,
       "hasGlb": false,
       "brand": "Nissan",
-      "pack": "600-debadged-12"
+      "pack": "600-debadged-12",
+      "yftRel": "600-debadged-12/stream/[Nissan]/gtrh/stream/gtrh.yft"
     },
     {
       "id": "stream_gurkharb",
@@ -3291,7 +3507,8 @@
       "hasYtd": true,
       "hasGlb": false,
       "brand": "Sheriff",
-      "pack": "600-debadged-04"
+      "pack": "600-debadged-04",
+      "yftRel": "600-debadged-04/stream/[Sheriff]/gurkharb/stream/gurkharb.yft"
     },
     {
       "id": "stream_gxone",
@@ -3306,7 +3523,8 @@
       "hasYtd": true,
       "hasGlb": false,
       "brand": "Koenigsegg",
-      "pack": "600-debadged-10"
+      "pack": "600-debadged-10",
+      "yftRel": "600-debadged-10/stream/[Koenigsegg]/gxone/stream/gxone.yft"
     },
     {
       "id": "stream_haitun",
@@ -3321,7 +3539,8 @@
       "hasYtd": true,
       "hasGlb": false,
       "brand": "Gang Vehicles",
-      "pack": "600-debadged-33"
+      "pack": "600-debadged-33",
+      "yftRel": "600-debadged-33/stream/[Gang Vehicles]/haitun/stream/haitun.yft"
     },
     {
       "id": "stream_rd",
@@ -3336,7 +3555,8 @@
       "hasYtd": true,
       "hasGlb": false,
       "brand": "Bikes",
-      "pack": "600-debadged-32"
+      "pack": "600-debadged-32",
+      "yftRel": "600-debadged-32/stream/[Bikes]/rd/stream/rd.yft"
     },
     {
       "id": "stream_vrodwidowape",
@@ -3351,7 +3571,8 @@
       "hasYtd": true,
       "hasGlb": false,
       "brand": "Bikes",
-      "pack": "600-debadged-32"
+      "pack": "600-debadged-32",
+      "yftRel": "600-debadged-32/stream/[Bikes]/vrodwidowape/stream/vrodwidowape.yft"
     },
     {
       "id": "stream_hellcatf9",
@@ -3366,7 +3587,8 @@
       "hasYtd": true,
       "hasGlb": false,
       "brand": "Dodge",
-      "pack": "600-debadged-13"
+      "pack": "600-debadged-13",
+      "yftRel": "600-debadged-13/stream/[Dodge]/hellcatf9/stream/hellcatf9.yft"
     },
     {
       "id": "stream_HycadeHellcatDurango",
@@ -3381,7 +3603,8 @@
       "hasYtd": true,
       "hasGlb": false,
       "brand": "Dodge",
-      "pack": "600-debadged-22"
+      "pack": "600-debadged-22",
+      "yftRel": "600-debadged-22/stream/[Dodge]/HycadeHellcatDurango/stream/HycadeHellcatDurango.yft"
     },
     {
       "id": "stream_kgjoker",
@@ -3396,7 +3619,8 @@
       "hasYtd": true,
       "hasGlb": false,
       "brand": "Dodge",
-      "pack": "600-debadged-25"
+      "pack": "600-debadged-25",
+      "yftRel": "600-debadged-25/stream/[Dodge]/kgjoker/stream/kgjoker.yft"
     },
     {
       "id": "stream_dc5",
@@ -3411,7 +3635,8 @@
       "hasYtd": true,
       "hasGlb": false,
       "brand": "Honda",
-      "pack": "600-debadged-09"
+      "pack": "600-debadged-09",
+      "yftRel": "600-debadged-09/stream/[Honda]/dc5/stream/dc5.yft"
     },
     {
       "id": "stream_animfk8hr",
@@ -3426,7 +3651,8 @@
       "hasYtd": true,
       "hasGlb": false,
       "brand": "Honda",
-      "pack": "600-debadged-09"
+      "pack": "600-debadged-09",
+      "yftRel": "600-debadged-09/stream/[Honda]/animfk8hr/stream/animfk8hr.yft"
     },
     {
       "id": "stream_EK9",
@@ -3441,7 +3667,8 @@
       "hasYtd": true,
       "hasGlb": false,
       "brand": "Honda",
-      "pack": "600-debadged-09"
+      "pack": "600-debadged-09",
+      "yftRel": "600-debadged-09/stream/[Honda]/EK9/stream/EK9.yft"
     },
     {
       "id": "stream_fk8",
@@ -3456,7 +3683,8 @@
       "hasYtd": true,
       "hasGlb": false,
       "brand": "Honda",
-      "pack": "600-debadged-09"
+      "pack": "600-debadged-09",
+      "yftRel": "600-debadged-09/stream/[Honda]/fk8/stream/fk8.yft"
     },
     {
       "id": "stream_ody18",
@@ -3471,7 +3699,8 @@
       "hasYtd": true,
       "hasGlb": false,
       "brand": "Honda",
-      "pack": "600-debadged-09"
+      "pack": "600-debadged-09",
+      "yftRel": "600-debadged-09/stream/[Honda]/ody18/stream/ody18.yft"
     },
     {
       "id": "stream_polcross",
@@ -3486,7 +3715,8 @@
       "hasYtd": true,
       "hasGlb": false,
       "brand": "Police",
-      "pack": "600-debadged-08"
+      "pack": "600-debadged-08",
+      "yftRel": "600-debadged-08/stream/[Police]/polcross/stream/polcross.yft"
     },
     {
       "id": "stream_rx7",
@@ -3501,7 +3731,8 @@
       "hasYtd": true,
       "hasGlb": false,
       "brand": "Mazda",
-      "pack": "600-debadged-06"
+      "pack": "600-debadged-06",
+      "yftRel": "600-debadged-06/stream/[Mazda]/rx7/stream/rx7.yft"
     },
     {
       "id": "stream_74civrswb",
@@ -3516,7 +3747,8 @@
       "hasYtd": true,
       "hasGlb": false,
       "brand": "Renault",
-      "pack": "600-debadged-28"
+      "pack": "600-debadged-28",
+      "yftRel": "600-debadged-28/stream/[Renault]/74civrswb/stream/74civrswb.yft"
     },
     {
       "id": "stream_cb650r",
@@ -3531,7 +3763,8 @@
       "hasYtd": true,
       "hasGlb": false,
       "brand": "Bikes",
-      "pack": "600-debadged-30"
+      "pack": "600-debadged-30",
+      "yftRel": "600-debadged-30/stream/[Bikes]/cb650r/stream/cb650r.yft"
     },
     {
       "id": "stream_ccb_1000cbr",
@@ -3546,7 +3779,8 @@
       "hasYtd": true,
       "hasGlb": false,
       "brand": "Bikes",
-      "pack": "600-debadged-18"
+      "pack": "600-debadged-18",
+      "yftRel": "600-debadged-18/stream/[Bikes]/ccb_1000cbr/stream/ccb_1000cbr.yft"
     },
     {
       "id": "stream_civic2020",
@@ -3561,7 +3795,8 @@
       "hasYtd": true,
       "hasGlb": false,
       "brand": "Honda",
-      "pack": "600-debadged-09"
+      "pack": "600-debadged-09",
+      "yftRel": "600-debadged-09/stream/[Honda]/civic2020/stream/civic2020.yft"
     },
     {
       "id": "stream_cu2",
@@ -3576,7 +3811,8 @@
       "hasYtd": true,
       "hasGlb": false,
       "brand": "Honda",
-      "pack": "600-debadged-09"
+      "pack": "600-debadged-09",
+      "yftRel": "600-debadged-09/stream/[Honda]/cu2/stream/cu2.yft"
     },
     {
       "id": "stream_mv2019",
@@ -3591,7 +3827,8 @@
       "hasYtd": true,
       "hasGlb": false,
       "brand": "Bikes",
-      "pack": "600-debadged-27"
+      "pack": "600-debadged-27",
+      "yftRel": "600-debadged-27/stream/[Bikes]/mv2019/stream/mv2019.yft"
     },
     {
       "id": "stream_hpfm8",
@@ -3606,7 +3843,8 @@
       "hasYtd": true,
       "hasGlb": false,
       "brand": "BMW",
-      "pack": "600-debadged-21"
+      "pack": "600-debadged-21",
+      "yftRel": "600-debadged-21/stream/[BMW]/hpfm8/stream/hpfm8.yft"
     },
     {
       "id": "stream_h2m",
@@ -3621,7 +3859,8 @@
       "hasYtd": true,
       "hasGlb": false,
       "brand": "Hummer",
-      "pack": "600-debadged-33"
+      "pack": "600-debadged-33",
+      "yftRel": "600-debadged-33/stream/[Hummer]/h2m/stream/h2m.yft"
     },
     {
       "id": "stream_Hycaders6",
@@ -3636,7 +3875,8 @@
       "hasYtd": true,
       "hasGlb": false,
       "brand": "Audi",
-      "pack": "600-debadged-22"
+      "pack": "600-debadged-22",
+      "yftRel": "600-debadged-22/stream/[Audi]/Hycaders6/stream/Hycaders6.yft"
     },
     {
       "id": "stream_hycadeurus",
@@ -3651,7 +3891,8 @@
       "hasYtd": true,
       "hasGlb": false,
       "brand": "Lamborghini",
-      "pack": "600-debadged-25"
+      "pack": "600-debadged-25",
+      "yftRel": "600-debadged-25/stream/[Lamborghini]/hycadeurus/stream/hycadeurus.yft"
     },
     {
       "id": "stream_hyundaiveloster",
@@ -3666,7 +3907,8 @@
       "hasYtd": true,
       "hasGlb": false,
       "brand": "Hyundai",
-      "pack": "600-debadged-24"
+      "pack": "600-debadged-24",
+      "yftRel": "600-debadged-24/stream/[Hyundai]/hyundaiveloster/stream/hyundaiveloster.yft"
     },
     {
       "id": "stream_ikx3gt3rs23",
@@ -3681,7 +3923,8 @@
       "hasYtd": true,
       "hasGlb": false,
       "brand": "Porsche",
-      "pack": "600-debadged-30"
+      "pack": "600-debadged-30",
+      "yftRel": "600-debadged-30/stream/[Porsche]/ikx3gt3rs23/stream/ikx3gt3rs23.yft"
     },
     {
       "id": "stream_ikx3hn65",
@@ -3696,7 +3939,8 @@
       "hasYtd": true,
       "hasGlb": false,
       "brand": "Porsche",
-      "pack": "600-debadged-32"
+      "pack": "600-debadged-32",
+      "yftRel": "600-debadged-32/stream/[Porsche]/ikx3hn65/stream/ikx3hn65.yft"
     },
     {
       "id": "stream_ikx3mc2021",
@@ -3711,7 +3955,8 @@
       "hasYtd": true,
       "hasGlb": false,
       "brand": "Maserati",
-      "pack": "600-debadged-12"
+      "pack": "600-debadged-12",
+      "yftRel": "600-debadged-12/stream/[Maserati]/ikx3mc2021/stream/ikx3mc2021.yft"
     },
     {
       "id": "stream_ikx3sf90custom",
@@ -3726,7 +3971,8 @@
       "hasYtd": true,
       "hasGlb": false,
       "brand": "Ferrari",
-      "pack": "600-debadged-01"
+      "pack": "600-debadged-01",
+      "yftRel": "600-debadged-01/stream/[Ferrari]/ikx3sf90custom/stream/ikx3sf90custom.yft"
     },
     {
       "id": "stream_ikx3rebel22",
@@ -3741,7 +3987,8 @@
       "hasYtd": true,
       "hasGlb": false,
       "brand": "Others",
-      "pack": "600-debadged-31"
+      "pack": "600-debadged-31",
+      "yftRel": "600-debadged-31/stream/[Others]/ikx3rebel22/stream/ikx3rebel22.yft"
     },
     {
       "id": "stream_fenrir",
@@ -3756,7 +4003,8 @@
       "hasYtd": true,
       "hasGlb": false,
       "brand": "Bikes",
-      "pack": "600-debadged-26"
+      "pack": "600-debadged-26",
+      "yftRel": "600-debadged-26/stream/[Bikes]/fenrir/stream/fenrir.yft"
     },
     {
       "id": "stream_fpaceprior",
@@ -3771,7 +4019,8 @@
       "hasYtd": true,
       "hasGlb": false,
       "brand": "Jaguar",
-      "pack": "600-debadged-10"
+      "pack": "600-debadged-10",
+      "yftRel": "600-debadged-10/stream/[Jaguar]/fpaceprior/stream/fpaceprior.yft"
     },
     {
       "id": "stream_xkgt",
@@ -3786,7 +4035,8 @@
       "hasYtd": true,
       "hasGlb": false,
       "brand": "Jaguar",
-      "pack": "600-debadged-10"
+      "pack": "600-debadged-10",
+      "yftRel": "600-debadged-10/stream/[Jaguar]/xkgt/stream/xkgt.yft"
     },
     {
       "id": "stream_jcw",
@@ -3801,7 +4051,8 @@
       "hasYtd": true,
       "hasGlb": false,
       "brand": "Mini",
-      "pack": "600-debadged-11"
+      "pack": "600-debadged-11",
+      "yftRel": "600-debadged-11/stream/[Mini]/jcw/stream/jcw.yft"
     },
     {
       "id": "stream_2022jeep",
@@ -3816,7 +4067,8 @@
       "hasYtd": true,
       "hasGlb": false,
       "brand": "Jeep",
-      "pack": "600-debadged-08"
+      "pack": "600-debadged-08",
+      "yftRel": "600-debadged-08/stream/[Jeep]/2022jeep/stream/2022jeep.yft"
     },
     {
       "id": "stream_gjeep",
@@ -3831,7 +4083,8 @@
       "hasYtd": true,
       "hasGlb": false,
       "brand": "Jeep",
-      "pack": "600-debadged-08"
+      "pack": "600-debadged-08",
+      "yftRel": "600-debadged-08/stream/[Jeep]/gjeep/stream/gjeep.yft"
     },
     {
       "id": "stream_abhawk",
@@ -3846,7 +4099,8 @@
       "hasYtd": true,
       "hasGlb": false,
       "brand": "Jeep",
-      "pack": "600-debadged-08"
+      "pack": "600-debadged-08",
+      "yftRel": "600-debadged-08/stream/[Jeep]/abhawk/stream/abhawk.yft"
     },
     {
       "id": "stream_demonhawkk",
@@ -3861,7 +4115,8 @@
       "hasYtd": true,
       "hasGlb": false,
       "brand": "Jeep",
-      "pack": "600-debadged-08"
+      "pack": "600-debadged-08",
+      "yftRel": "600-debadged-08/stream/[Jeep]/demonhawkk/stream/demonhawkk.yft"
     },
     {
       "id": "stream_f22thawk",
@@ -3876,7 +4131,8 @@
       "hasYtd": true,
       "hasGlb": false,
       "brand": "Jeep",
-      "pack": "600-debadged-08"
+      "pack": "600-debadged-08",
+      "yftRel": "600-debadged-08/stream/[Jeep]/f22thawk/stream/f22thawk.yft"
     },
     {
       "id": "stream_hychawk",
@@ -3891,7 +4147,8 @@
       "hasYtd": true,
       "hasGlb": false,
       "brand": "Jeep",
-      "pack": "600-debadged-08"
+      "pack": "600-debadged-08",
+      "yftRel": "600-debadged-08/stream/[Jeep]/hychawk/stream/hychawk.yft"
     },
     {
       "id": "stream_KillerHwak",
@@ -3906,7 +4163,8 @@
       "hasYtd": true,
       "hasGlb": false,
       "brand": "Jeep",
-      "pack": "600-debadged-08"
+      "pack": "600-debadged-08",
+      "yftRel": "600-debadged-08/stream/[Jeep]/KillerHwak/stream/KillerHwak.yft"
     },
     {
       "id": "stream_rmodjeepg",
@@ -3921,7 +4179,8 @@
       "hasYtd": true,
       "hasGlb": false,
       "brand": "Jeep",
-      "pack": "600-debadged-08"
+      "pack": "600-debadged-08",
+      "yftRel": "600-debadged-08/stream/[Jeep]/rmodjeepg/stream/rmodjeepg.yft"
     },
     {
       "id": "stream_cls500w219",
@@ -3936,7 +4195,8 @@
       "hasYtd": true,
       "hasGlb": false,
       "brand": "Mercedes",
-      "pack": "600-debadged-23"
+      "pack": "600-debadged-23",
+      "yftRel": "600-debadged-23/stream/[Mercedes]/cls500w219/stream/cls500w219.yft"
     },
     {
       "id": "stream_modelx",
@@ -3951,7 +4211,8 @@
       "hasYtd": true,
       "hasGlb": false,
       "brand": "Tesla",
-      "pack": "600-debadged-09"
+      "pack": "600-debadged-09",
+      "yftRel": "600-debadged-09/stream/[Tesla]/modelx/stream/modelx.yft"
     },
     {
       "id": "stream_swl",
@@ -3966,7 +4227,8 @@
       "hasYtd": true,
       "hasGlb": false,
       "brand": "Others",
-      "pack": "600-debadged-07"
+      "pack": "600-debadged-07",
+      "yftRel": "600-debadged-07/stream/[Others]/swl/stream/swl.yft"
     },
     {
       "id": "stream_RoyalCustomKawasakiSH2",
@@ -3981,7 +4243,8 @@
       "hasYtd": true,
       "hasGlb": false,
       "brand": "Bikes",
-      "pack": "600-debadged-23"
+      "pack": "600-debadged-23",
+      "yftRel": "600-debadged-23/stream/[Bikes]/RoyalCustomKawasakiSH2/stream/RoyalCustomKawasakiSH2.yft"
     },
     {
       "id": "stream_esrmzo",
@@ -3996,7 +4259,8 @@
       "hasYtd": true,
       "hasGlb": false,
       "brand": "Bikes",
-      "pack": "600-debadged-24"
+      "pack": "600-debadged-24",
+      "yftRel": "600-debadged-24/stream/[Bikes]/esrmzo/stream/esrmzo.yft"
     },
     {
       "id": "stream_GODzNINJAH2",
@@ -4011,7 +4275,8 @@
       "hasYtd": true,
       "hasGlb": false,
       "brand": "Bikes",
-      "pack": "600-debadged-29"
+      "pack": "600-debadged-29",
+      "yftRel": "600-debadged-29/stream/[Bikes]/GODzNINJAH2/stream/GODzNINJAH2.yft"
     },
     {
       "id": "stream_kawagala",
@@ -4026,7 +4291,8 @@
       "hasYtd": true,
       "hasGlb": false,
       "brand": "Bikes",
-      "pack": "600-debadged-31"
+      "pack": "600-debadged-31",
+      "yftRel": "600-debadged-31/stream/[Bikes]/kawagala/stream/kawagala.yft"
     },
     {
       "id": "stream_rr01",
@@ -4041,7 +4307,8 @@
       "hasYtd": true,
       "hasGlb": false,
       "brand": "Bikes",
-      "pack": "600-debadged-26"
+      "pack": "600-debadged-26",
+      "yftRel": "600-debadged-26/stream/[Bikes]/rr01/stream/rr01.yft"
     },
     {
       "id": "stream_yzfr6",
@@ -4056,7 +4323,8 @@
       "hasYtd": true,
       "hasGlb": false,
       "brand": "Bikes",
-      "pack": "600-debadged-31"
+      "pack": "600-debadged-31",
+      "yftRel": "600-debadged-31/stream/[Bikes]/yzfr6/stream/yzfr6.yft"
     },
     {
       "id": "stream_zx6r",
@@ -4071,7 +4339,8 @@
       "hasYtd": true,
       "hasGlb": false,
       "brand": "Bikes",
-      "pack": "600-debadged-24"
+      "pack": "600-debadged-24",
+      "yftRel": "600-debadged-24/stream/[Bikes]/zx6r/stream/zx6r.yft"
     },
     {
       "id": "stream_z8r",
@@ -4086,7 +4355,8 @@
       "hasYtd": true,
       "hasGlb": false,
       "brand": "Bikes",
-      "pack": "600-debadged-33"
+      "pack": "600-debadged-33",
+      "yftRel": "600-debadged-33/stream/[Bikes]/z8r/stream/z8r.yft"
     },
     {
       "id": "stream_agerars",
@@ -4101,7 +4371,8 @@
       "hasYtd": true,
       "hasGlb": false,
       "brand": "Koenigsegg",
-      "pack": "600-debadged-10"
+      "pack": "600-debadged-10",
+      "yftRel": "600-debadged-10/stream/[Koenigsegg]/agerars/stream/agerars.yft"
     },
     {
       "id": "stream_laferrariquadturbo",
@@ -4116,7 +4387,8 @@
       "hasYtd": true,
       "hasGlb": false,
       "brand": "Ferrari",
-      "pack": "600-debadged-01"
+      "pack": "600-debadged-01",
+      "yftRel": "600-debadged-01/stream/[Ferrari]/laferrariquadturbo/stream/laferrariquadturbo.yft"
     },
     {
       "id": "stream_lpi80041",
@@ -4131,7 +4403,8 @@
       "hasYtd": true,
       "hasGlb": false,
       "brand": "Lamborghini",
-      "pack": "600-debadged-26"
+      "pack": "600-debadged-26",
+      "yftRel": "600-debadged-26/stream/[Lamborghini]/lpi80041/stream/lpi80041.yft"
     },
     {
       "id": "stream_1016urus",
@@ -4146,7 +4419,8 @@
       "hasYtd": true,
       "hasGlb": false,
       "brand": "Lamborghini",
-      "pack": "600-debadged-17"
+      "pack": "600-debadged-17",
+      "yftRel": "600-debadged-17/stream/[Lamborghini]/1016urus/stream/1016urus.yft"
     },
     {
       "id": "stream_amrevu23mg",
@@ -4161,7 +4435,8 @@
       "hasYtd": true,
       "hasGlb": false,
       "brand": "Lamborghini",
-      "pack": "600-debadged-33"
+      "pack": "600-debadged-33",
+      "yftRel": "600-debadged-33/stream/[Lamborghini]/amrevu23mg/stream/amrevu23mg.yft"
     },
     {
       "id": "stream_carboDRCustoM",
@@ -4176,7 +4451,8 @@
       "hasYtd": true,
       "hasGlb": false,
       "brand": "Lamborghini",
-      "pack": "600-debadged-15"
+      "pack": "600-debadged-15",
+      "yftRel": "600-debadged-15/stream/[Lamborghini]/carboDRCustoM/stream/carboDRCustoM.yft"
     },
     {
       "id": "stream_ftecnica",
@@ -4191,7 +4467,8 @@
       "hasYtd": true,
       "hasGlb": false,
       "brand": "Lamborghini",
-      "pack": "600-debadged-32"
+      "pack": "600-debadged-32",
+      "yftRel": "600-debadged-32/stream/[Lamborghini]/ftecnica/stream/ftecnica.yft"
     },
     {
       "id": "stream_GODzKSTERZOTACHA",
@@ -4206,7 +4483,8 @@
       "hasYtd": true,
       "hasGlb": false,
       "brand": "Others",
-      "pack": "600-debadged-31"
+      "pack": "600-debadged-31",
+      "yftRel": "600-debadged-31/stream/[Others]/GODzKSTERZOTACHA/stream/GODzKSTERZOTACHA.yft"
     },
     {
       "id": "stream_huracanpriorbeast",
@@ -4221,7 +4499,8 @@
       "hasYtd": true,
       "hasGlb": false,
       "brand": "Lamborghini",
-      "pack": "600-debadged-31"
+      "pack": "600-debadged-31",
+      "yftRel": "600-debadged-31/stream/[Lamborghini]/huracanpriorbeast/stream/huracanpriorbeast.yft"
     },
     {
       "id": "stream_lbwkevo",
@@ -4236,7 +4515,8 @@
       "hasYtd": true,
       "hasGlb": false,
       "brand": "Lamborghini",
-      "pack": "600-debadged-14"
+      "pack": "600-debadged-14",
+      "yftRel": "600-debadged-14/stream/[Lamborghini]/lbwkevo/stream/lbwkevo.yft"
     },
     {
       "id": "stream_rmodsvj",
@@ -4251,7 +4531,8 @@
       "hasYtd": true,
       "hasGlb": false,
       "brand": "Lamborghini",
-      "pack": "600-debadged-31"
+      "pack": "600-debadged-31",
+      "yftRel": "600-debadged-31/stream/[Lamborghini]/rmodsvj/stream/rmodsvj.yft"
     },
     {
       "id": "stream_sian",
@@ -4266,7 +4547,8 @@
       "hasYtd": true,
       "hasGlb": false,
       "brand": "Lamborghini",
-      "pack": "600-debadged-31"
+      "pack": "600-debadged-31",
+      "yftRel": "600-debadged-31/stream/[Lamborghini]/sian/stream/sian.yft"
     },
     {
       "id": "stream_sinacp",
@@ -4281,7 +4563,8 @@
       "hasYtd": true,
       "hasGlb": false,
       "brand": "Lamborghini",
-      "pack": "600-debadged-32"
+      "pack": "600-debadged-32",
+      "yftRel": "600-debadged-32/stream/[Lamborghini]/sinacp/stream/sinacp.yft"
     },
     {
       "id": "stream_terzo1",
@@ -4296,7 +4579,8 @@
       "hasYtd": true,
       "hasGlb": false,
       "brand": "Lamborghini",
-      "pack": "600-debadged-21"
+      "pack": "600-debadged-21",
+      "yftRel": "600-debadged-21/stream/[Lamborghini]/terzo1/stream/terzo1.yft"
     },
     {
       "id": "stream_TTSTO",
@@ -4311,7 +4595,8 @@
       "hasYtd": true,
       "hasGlb": false,
       "brand": "Lamborghini",
-      "pack": "600-debadged-20"
+      "pack": "600-debadged-20",
+      "yftRel": "600-debadged-20/stream/[Lamborghini]/TTSTO/stream/TTSTO.yft"
     },
     {
       "id": "stream_mansurus",
@@ -4326,7 +4611,8 @@
       "hasYtd": true,
       "hasGlb": false,
       "brand": "Lamborghini",
-      "pack": "600-debadged-29"
+      "pack": "600-debadged-29",
+      "yftRel": "600-debadged-29/stream/[Lamborghini]/mansurus/stream/mansurus.yft"
     },
     {
       "id": "stream_zentenario",
@@ -4341,7 +4627,8 @@
       "hasYtd": true,
       "hasGlb": false,
       "brand": "Lamborghini",
-      "pack": "600-debadged-25"
+      "pack": "600-debadged-25",
+      "yftRel": "600-debadged-25/stream/[Lamborghini]/zentenario/stream/zentenario.yft"
     },
     {
       "id": "stream_18Velar",
@@ -4356,7 +4643,8 @@
       "hasYtd": true,
       "hasGlb": false,
       "brand": "Range Rover",
-      "pack": "600-debadged-11"
+      "pack": "600-debadged-11",
+      "yftRel": "600-debadged-11/stream/[Range Rover]/18Velar/stream/18Velar.yft"
     },
     {
       "id": "stream_oycdefender",
@@ -4371,7 +4659,8 @@
       "hasYtd": true,
       "hasGlb": false,
       "brand": "Land Rover",
-      "pack": "600-debadged-13"
+      "pack": "600-debadged-13",
+      "yftRel": "600-debadged-13/stream/[Land Rover]/oycdefender/stream/oycdefender.yft"
     },
     {
       "id": "stream_lc500",
@@ -4386,7 +4675,8 @@
       "hasYtd": true,
       "hasGlb": false,
       "brand": "Lexus",
-      "pack": "600-debadged-19"
+      "pack": "600-debadged-19",
+      "yftRel": "600-debadged-19/stream/[Lexus]/lc500/stream/lc500.yft"
     },
     {
       "id": "stream_hexerz2",
@@ -4401,7 +4691,8 @@
       "hasYtd": true,
       "hasGlb": false,
       "brand": "Gang Vehicles",
-      "pack": "600-debadged-33"
+      "pack": "600-debadged-33",
+      "yftRel": "600-debadged-33/stream/[Gang Vehicles]/hexerz2/stream/hexerz2.yft"
     },
     {
       "id": "stream_f22a",
@@ -4416,7 +4707,8 @@
       "hasYtd": true,
       "hasGlb": false,
       "brand": "Planes",
-      "pack": "600-debadged-29"
+      "pack": "600-debadged-29",
+      "yftRel": "600-debadged-29/stream/[Planes]/f22a/stream/f22a.yft"
     },
     {
       "id": "stream_loweyezv",
@@ -4431,7 +4723,8 @@
       "hasYtd": true,
       "hasGlb": false,
       "brand": "Others",
-      "pack": "600-debadged-21"
+      "pack": "600-debadged-21",
+      "yftRel": "600-debadged-21/stream/[Others]/loweyezv/stream/loweyezv.yft"
     },
     {
       "id": "stream_lowrider_ballas",
@@ -4446,7 +4739,8 @@
       "hasYtd": true,
       "hasGlb": false,
       "brand": "Gang Vehicles",
-      "pack": "600-debadged-33"
+      "pack": "600-debadged-33",
+      "yftRel": "600-debadged-33/stream/[Gang Vehicles]/lowrider_ballas/stream/lowrider_ballas.yft"
     },
     {
       "id": "stream_lowrider_blacklions",
@@ -4461,7 +4755,8 @@
       "hasYtd": true,
       "hasGlb": false,
       "brand": "Gang Vehicles",
-      "pack": "600-debadged-33"
+      "pack": "600-debadged-33",
+      "yftRel": "600-debadged-33/stream/[Gang Vehicles]/lowrider_blacklions/stream/lowrider_blacklions.yft"
     },
     {
       "id": "stream_lowrider_bloods",
@@ -4476,7 +4771,8 @@
       "hasYtd": true,
       "hasGlb": false,
       "brand": "Gang Vehicles",
-      "pack": "600-debadged-33"
+      "pack": "600-debadged-33",
+      "yftRel": "600-debadged-33/stream/[Gang Vehicles]/lowrider_bloods/stream/lowrider_bloods.yft"
     },
     {
       "id": "stream_lowrider_crips",
@@ -4491,7 +4787,8 @@
       "hasYtd": true,
       "hasGlb": false,
       "brand": "Gang Vehicles",
-      "pack": "600-debadged-33"
+      "pack": "600-debadged-33",
+      "yftRel": "600-debadged-33/stream/[Gang Vehicles]/lowrider_crips/stream/lowrider_crips.yft"
     },
     {
       "id": "stream_lowrider_deparis",
@@ -4506,7 +4803,8 @@
       "hasYtd": true,
       "hasGlb": false,
       "brand": "Gang Vehicles",
-      "pack": "600-debadged-33"
+      "pack": "600-debadged-33",
+      "yftRel": "600-debadged-33/stream/[Gang Vehicles]/lowrider_deparis/stream/lowrider_deparis.yft"
     },
     {
       "id": "stream_lowrider_grove",
@@ -4521,7 +4819,8 @@
       "hasYtd": true,
       "hasGlb": false,
       "brand": "Gang Vehicles",
-      "pack": "600-debadged-33"
+      "pack": "600-debadged-33",
+      "yftRel": "600-debadged-33/stream/[Gang Vehicles]/lowrider_grove/stream/lowrider_grove.yft"
     },
     {
       "id": "stream_lowrider_hoover",
@@ -4536,7 +4835,8 @@
       "hasYtd": true,
       "hasGlb": false,
       "brand": "Gang Vehicles",
-      "pack": "600-debadged-33"
+      "pack": "600-debadged-33",
+      "yftRel": "600-debadged-33/stream/[Gang Vehicles]/lowrider_hoover/stream/lowrider_hoover.yft"
     },
     {
       "id": "stream_lowrider_mg13",
@@ -4551,7 +4851,8 @@
       "hasYtd": true,
       "hasGlb": false,
       "brand": "Gang Vehicles",
-      "pack": "600-debadged-33"
+      "pack": "600-debadged-33",
+      "yftRel": "600-debadged-33/stream/[Gang Vehicles]/lowrider_mg13/stream/lowrider_mg13.yft"
     },
     {
       "id": "stream_lowrider_st187",
@@ -4566,7 +4867,8 @@
       "hasYtd": true,
       "hasGlb": false,
       "brand": "Gang Vehicles",
-      "pack": "600-debadged-33"
+      "pack": "600-debadged-33",
+      "yftRel": "600-debadged-33/stream/[Gang Vehicles]/lowrider_st187/stream/lowrider_st187.yft"
     },
     {
       "id": "stream_lowrider_vagos",
@@ -4581,7 +4883,8 @@
       "hasYtd": true,
       "hasGlb": false,
       "brand": "Gang Vehicles",
-      "pack": "600-debadged-33"
+      "pack": "600-debadged-33",
+      "yftRel": "600-debadged-33/stream/[Gang Vehicles]/lowrider_vagos/stream/lowrider_vagos.yft"
     },
     {
       "id": "stream_lowrider_woo",
@@ -4596,7 +4899,8 @@
       "hasYtd": true,
       "hasGlb": false,
       "brand": "Gang Vehicles",
-      "pack": "600-debadged-33"
+      "pack": "600-debadged-33",
+      "yftRel": "600-debadged-33/stream/[Gang Vehicles]/lowrider_woo/stream/lowrider_woo.yft"
     },
     {
       "id": "stream_lpchopper2",
@@ -4611,7 +4915,8 @@
       "hasYtd": true,
       "hasGlb": false,
       "brand": "Bikes",
-      "pack": "600-debadged-33"
+      "pack": "600-debadged-33",
+      "yftRel": "600-debadged-33/stream/[Bikes]/lpchopper2/stream/lpchopper2.yft"
     },
     {
       "id": "stream_m135iwb",
@@ -4626,7 +4931,8 @@
       "hasYtd": true,
       "hasGlb": false,
       "brand": "BMW",
-      "pack": "600-debadged-17"
+      "pack": "600-debadged-17",
+      "yftRel": "600-debadged-17/stream/[BMW]/m135iwb/stream/m135iwb.yft"
     },
     {
       "id": "stream_m3g80mp",
@@ -4641,7 +4947,8 @@
       "hasYtd": true,
       "hasGlb": false,
       "brand": "BMW",
-      "pack": "600-debadged-21"
+      "pack": "600-debadged-21",
+      "yftRel": "600-debadged-21/stream/[BMW]/m3g80mp/stream/m3g80mp.yft"
     },
     {
       "id": "stream_m3mafia",
@@ -4656,7 +4963,8 @@
       "hasYtd": true,
       "hasGlb": false,
       "brand": "BMW",
-      "pack": "600-debadged-16"
+      "pack": "600-debadged-16",
+      "yftRel": "600-debadged-16/stream/[BMW]/m3mafia/stream/m3mafia.yft"
     },
     {
       "id": "stream_m3s",
@@ -4671,7 +4979,8 @@
       "hasYtd": true,
       "hasGlb": false,
       "brand": "BMW",
-      "pack": "600-debadged-29"
+      "pack": "600-debadged-29",
+      "yftRel": "600-debadged-29/stream/[BMW]/m3s/stream/m3s.yft"
     },
     {
       "id": "stream_m4g82",
@@ -4686,7 +4995,8 @@
       "hasYtd": true,
       "hasGlb": false,
       "brand": "BMW",
-      "pack": "600-debadged-28"
+      "pack": "600-debadged-28",
+      "yftRel": "600-debadged-28/stream/[BMW]/m4g82/stream/m4g82.yft"
     },
     {
       "id": "stream_m4speedhunter",
@@ -4701,7 +5011,8 @@
       "hasYtd": true,
       "hasGlb": false,
       "brand": "BMW",
-      "pack": "600-debadged-27"
+      "pack": "600-debadged-27",
+      "yftRel": "600-debadged-27/stream/[BMW]/m4speedhunter/stream/m4speedhunter.yft"
     },
     {
       "id": "stream_22m5",
@@ -4716,7 +5027,8 @@
       "hasYtd": true,
       "hasGlb": false,
       "brand": "BMW",
-      "pack": "600-debadged-31"
+      "pack": "600-debadged-31",
+      "yftRel": "600-debadged-31/stream/[BMW]/22m5/stream/22m5.yft"
     },
     {
       "id": "stream_m5cs22",
@@ -4731,7 +5043,8 @@
       "hasYtd": true,
       "hasGlb": false,
       "brand": "BMW",
-      "pack": "600-debadged-28"
+      "pack": "600-debadged-28",
+      "yftRel": "600-debadged-28/stream/[BMW]/m5cs22/stream/m5cs22.yft"
     },
     {
       "id": "stream_m8hc",
@@ -4746,7 +5059,8 @@
       "hasYtd": true,
       "hasGlb": false,
       "brand": "BMW",
-      "pack": "600-debadged-15"
+      "pack": "600-debadged-15",
+      "yftRel": "600-debadged-15/stream/[BMW]/m8hc/stream/m8hc.yft"
     },
     {
       "id": "stream_machewb",
@@ -4761,7 +5075,8 @@
       "hasYtd": true,
       "hasGlb": false,
       "brand": "Ford",
-      "pack": "600-debadged-27"
+      "pack": "600-debadged-27",
+      "yftRel": "600-debadged-27/stream/[Ford]/machewb/stream/machewb.yft"
     },
     {
       "id": "stream_fnfmits",
@@ -4776,7 +5091,8 @@
       "hasYtd": true,
       "hasGlb": false,
       "brand": "Mitsubishi",
-      "pack": "600-debadged-04"
+      "pack": "600-debadged-04",
+      "yftRel": "600-debadged-04/stream/[Mitsubishi]/fnfmits/stream/fnfmits.yft"
     },
     {
       "id": "stream_manhartx7",
@@ -4791,7 +5107,8 @@
       "hasYtd": true,
       "hasGlb": false,
       "brand": "BMW",
-      "pack": "600-debadged-15"
+      "pack": "600-debadged-15",
+      "yftRel": "600-debadged-15/stream/[BMW]/manhartx7/stream/manhartx7.yft"
     },
     {
       "id": "stream_s63msc",
@@ -4806,7 +5123,8 @@
       "hasYtd": true,
       "hasGlb": false,
       "brand": "Mercedes",
-      "pack": "600-debadged-13"
+      "pack": "600-debadged-13",
+      "yftRel": "600-debadged-13/stream/[Mercedes]/s63msc/stream/s63msc.yft"
     },
     {
       "id": "stream_manscountach",
@@ -4821,7 +5139,8 @@
       "hasYtd": true,
       "hasGlb": false,
       "brand": "Lamborghini",
-      "pack": "600-debadged-24"
+      "pack": "600-debadged-24",
+      "yftRel": "600-debadged-24/stream/[Lamborghini]/manscountach/stream/manscountach.yft"
     },
     {
       "id": "stream_17mansorypnmr",
@@ -4836,7 +5155,8 @@
       "hasYtd": true,
       "hasGlb": false,
       "brand": "Porsche",
-      "pack": "600-debadged-28"
+      "pack": "600-debadged-28",
+      "yftRel": "600-debadged-28/stream/[Porsche]/17mansorypnmr/stream/17mansorypnmr.yft"
     },
     {
       "id": "stream_manspana",
@@ -4851,7 +5171,8 @@
       "hasYtd": true,
       "hasGlb": false,
       "brand": "Porsche",
-      "pack": "600-debadged-20"
+      "pack": "600-debadged-20",
+      "yftRel": "600-debadged-20/stream/[Porsche]/manspana/stream/manspana.yft"
     },
     {
       "id": "stream_mansoryg63",
@@ -4866,7 +5187,8 @@
       "hasYtd": true,
       "hasGlb": false,
       "brand": "Mercedes",
-      "pack": "600-debadged-16"
+      "pack": "600-debadged-16",
+      "yftRel": "600-debadged-16/stream/[Mercedes]/mansoryg63/stream/mansoryg63.yft"
     },
     {
       "id": "stream_maybach",
@@ -4881,7 +5203,8 @@
       "hasYtd": true,
       "hasGlb": false,
       "brand": "Mercedes",
-      "pack": "600-debadged-32"
+      "pack": "600-debadged-32",
+      "yftRel": "600-debadged-32/stream/[Mercedes]/maybach/stream/maybach.yft"
     },
     {
       "id": "stream_furai",
@@ -4896,7 +5219,8 @@
       "hasYtd": true,
       "hasGlb": false,
       "brand": "Mazda",
-      "pack": "600-debadged-06"
+      "pack": "600-debadged-06",
+      "yftRel": "600-debadged-06/stream/[Mazda]/furai/stream/furai.yft"
     },
     {
       "id": "stream_mxpan",
@@ -4911,7 +5235,8 @@
       "hasYtd": true,
       "hasGlb": false,
       "brand": "Mazda",
-      "pack": "600-debadged-06"
+      "pack": "600-debadged-06",
+      "yftRel": "600-debadged-06/stream/[Mazda]/mxpan/stream/mxpan.yft"
     },
     {
       "id": "stream_na6",
@@ -4926,7 +5251,8 @@
       "hasYtd": true,
       "hasGlb": false,
       "brand": "Mazda",
-      "pack": "600-debadged-06"
+      "pack": "600-debadged-06",
+      "yftRel": "600-debadged-06/stream/[Mazda]/na6/stream/na6.yft"
     },
     {
       "id": "stream_GODzKRCRX7FD",
@@ -4941,7 +5267,8 @@
       "hasYtd": true,
       "hasGlb": false,
       "brand": "Mazda",
-      "pack": "600-debadged-06"
+      "pack": "600-debadged-06",
+      "yftRel": "600-debadged-06/stream/[Mazda]/GODzKRCRX7FD/stream/GODzKRCRX7FD.yft"
     },
     {
       "id": "stream_rx7veilside",
@@ -4956,7 +5283,8 @@
       "hasYtd": true,
       "hasGlb": false,
       "brand": "Mazda",
-      "pack": "600-debadged-06"
+      "pack": "600-debadged-06",
+      "yftRel": "600-debadged-06/stream/[Mazda]/rx7veilside/stream/rx7veilside.yft"
     },
     {
       "id": "stream_720sdd",
@@ -4971,7 +5299,8 @@
       "hasYtd": true,
       "hasGlb": false,
       "brand": "McLaren",
-      "pack": "600-debadged-07"
+      "pack": "600-debadged-07",
+      "yftRel": "600-debadged-07/stream/[McLaren]/720sdd/stream/720sdd.yft"
     },
     {
       "id": "stream_765LT1016sc",
@@ -4986,7 +5315,8 @@
       "hasYtd": true,
       "hasGlb": false,
       "brand": "McLaren",
-      "pack": "600-debadged-07"
+      "pack": "600-debadged-07",
+      "yftRel": "600-debadged-07/stream/[McLaren]/765LT1016sc/stream/765LT1016sc.yft"
     },
     {
       "id": "stream_rmodp1gtr",
@@ -5001,7 +5331,8 @@
       "hasYtd": true,
       "hasGlb": false,
       "brand": "McLaren",
-      "pack": "600-debadged-07"
+      "pack": "600-debadged-07",
+      "yftRel": "600-debadged-07/stream/[McLaren]/rmodp1gtr/stream/rmodp1gtr.yft"
     },
     {
       "id": "stream_600ltwb",
@@ -5016,7 +5347,8 @@
       "hasYtd": true,
       "hasGlb": false,
       "brand": "McLaren",
-      "pack": "600-debadged-07"
+      "pack": "600-debadged-07",
+      "yftRel": "600-debadged-07/stream/[McLaren]/600ltwb/stream/600ltwb.yft"
     },
     {
       "id": "stream_mansgt",
@@ -5031,7 +5363,8 @@
       "hasYtd": true,
       "hasGlb": false,
       "brand": "McLaren",
-      "pack": "600-debadged-07"
+      "pack": "600-debadged-07",
+      "yftRel": "600-debadged-07/stream/[McLaren]/mansgt/stream/mansgt.yft"
     },
     {
       "id": "stream_f450c",
@@ -5046,7 +5379,8 @@
       "hasYtd": true,
       "hasGlb": false,
       "brand": "Mechanic",
-      "pack": "600-debadged-11"
+      "pack": "600-debadged-11",
+      "yftRel": "600-debadged-11/stream/[Mechanic]/f450c/stream/f450c.yft"
     },
     {
       "id": "stream_f550rbc",
@@ -5061,7 +5395,8 @@
       "hasYtd": true,
       "hasGlb": false,
       "brand": "Mechanic",
-      "pack": "600-debadged-11"
+      "pack": "600-debadged-11",
+      "yftRel": "600-debadged-11/stream/[Mechanic]/f550rbc/stream/f550rbc.yft"
     },
     {
       "id": "stream_Ambulance_Dodge_RAM",
@@ -5076,7 +5411,8 @@
       "hasYtd": true,
       "hasGlb": false,
       "brand": "Medic",
-      "pack": "600-debadged-02"
+      "pack": "600-debadged-02",
+      "yftRel": "600-debadged-02/stream/[Medic]/Ambulance_Dodge_RAM/stream/Ambulance_Dodge_RAM.yft"
     },
     {
       "id": "stream_ambulance1",
@@ -5091,7 +5427,8 @@
       "hasYtd": true,
       "hasGlb": false,
       "brand": "Medic",
-      "pack": "600-debadged-02"
+      "pack": "600-debadged-02",
+      "yftRel": "600-debadged-02/stream/[Medic]/ambulance1/stream/ambulance1.yft"
     },
     {
       "id": "stream_amrvan",
@@ -5106,7 +5443,8 @@
       "hasYtd": true,
       "hasGlb": false,
       "brand": "Medic",
-      "pack": "600-debadged-02"
+      "pack": "600-debadged-02",
+      "yftRel": "600-debadged-02/stream/[Medic]/amrvan/stream/amrvan.yft"
     },
     {
       "id": "stream_audirs6emsfire",
@@ -5121,7 +5459,8 @@
       "hasYtd": true,
       "hasGlb": false,
       "brand": "Medic",
-      "pack": "600-debadged-02"
+      "pack": "600-debadged-02",
+      "yftRel": "600-debadged-02/stream/[Medic]/audirs6emsfire/stream/audirs6emsfire.yft"
     },
     {
       "id": "stream_emsbmwm7",
@@ -5136,7 +5475,8 @@
       "hasYtd": true,
       "hasGlb": false,
       "brand": "Medic",
-      "pack": "600-debadged-02"
+      "pack": "600-debadged-02",
+      "yftRel": "600-debadged-02/stream/[Medic]/emsbmwm7/stream/emsbmwm7.yft"
     },
     {
       "id": "stream_RoyalDodgeRAMems",
@@ -5151,7 +5491,8 @@
       "hasYtd": true,
       "hasGlb": false,
       "brand": "Medic",
-      "pack": "600-debadged-02"
+      "pack": "600-debadged-02",
+      "yftRel": "600-debadged-02/stream/[Medic]/RoyalDodgeRAMems/stream/RoyalDodgeRAMems.yft"
     },
     {
       "id": "stream_RoyalG30Medic",
@@ -5166,7 +5507,8 @@
       "hasYtd": true,
       "hasGlb": false,
       "brand": "Medic",
-      "pack": "600-debadged-02"
+      "pack": "600-debadged-02",
+      "yftRel": "600-debadged-02/stream/[Medic]/RoyalG30Medic/stream/RoyalG30Medic.yft"
     },
     {
       "id": "stream_g63g800bo",
@@ -5181,7 +5523,8 @@
       "hasYtd": true,
       "hasGlb": false,
       "brand": "Mercedes",
-      "pack": "600-debadged-13"
+      "pack": "600-debadged-13",
+      "yftRel": "600-debadged-13/stream/[Mercedes]/g63g800bo/stream/g63g800bo.yft"
     },
     {
       "id": "stream_G65",
@@ -5196,7 +5539,8 @@
       "hasYtd": true,
       "hasGlb": false,
       "brand": "Mercedes",
-      "pack": "600-debadged-27"
+      "pack": "600-debadged-27",
+      "yftRel": "600-debadged-27/stream/[Mercedes]/G65/stream/G65.yft"
     },
     {
       "id": "stream_s500w222",
@@ -5211,7 +5555,8 @@
       "hasYtd": true,
       "hasGlb": false,
       "brand": "Mercedes",
-      "pack": "600-debadged-12"
+      "pack": "600-debadged-12",
+      "yftRel": "600-debadged-12/stream/[Mercedes]/s500w222/stream/s500w222.yft"
     },
     {
       "id": "stream_mercec63s",
@@ -5226,7 +5571,8 @@
       "hasYtd": true,
       "hasGlb": false,
       "brand": "Mercedes",
-      "pack": "600-debadged-29"
+      "pack": "600-debadged-29",
+      "yftRel": "600-debadged-29/stream/[Mercedes]/mercec63s/stream/mercec63s.yft"
     },
     {
       "id": "stream_mans65",
@@ -5241,7 +5587,8 @@
       "hasYtd": true,
       "hasGlb": false,
       "brand": "Mercedes",
-      "pack": "600-debadged-24"
+      "pack": "600-debadged-24",
+      "yftRel": "600-debadged-24/stream/[Mercedes]/mans65/stream/mans65.yft"
     },
     {
       "id": "stream_g63amg6x6",
@@ -5256,7 +5603,8 @@
       "hasYtd": true,
       "hasGlb": false,
       "brand": "Mercedes",
-      "pack": "600-debadged-11"
+      "pack": "600-debadged-11",
+      "yftRel": "600-debadged-11/stream/[Mercedes]/g63amg6x6/stream/g63amg6x6.yft"
     },
     {
       "id": "stream_g63c",
@@ -5271,7 +5619,8 @@
       "hasYtd": true,
       "hasGlb": false,
       "brand": "Mercedes",
-      "pack": "600-debadged-16"
+      "pack": "600-debadged-16",
+      "yftRel": "600-debadged-16/stream/[Mercedes]/g63c/stream/g63c.yft"
     },
     {
       "id": "stream_rtruck",
@@ -5286,7 +5635,8 @@
       "hasYtd": true,
       "hasGlb": false,
       "brand": "Others",
-      "pack": "600-debadged-17"
+      "pack": "600-debadged-17",
+      "yftRel": "600-debadged-17/stream/[Others]/rtruck/stream/rtruck.yft"
     },
     {
       "id": "stream_amggtbs",
@@ -5301,7 +5651,8 @@
       "hasYtd": true,
       "hasGlb": false,
       "brand": "Mercedes",
-      "pack": "600-debadged-31"
+      "pack": "600-debadged-31",
+      "yftRel": "600-debadged-31/stream/[Mercedes]/amggtbs/stream/amggtbs.yft"
     },
     {
       "id": "stream_benze55",
@@ -5316,7 +5667,8 @@
       "hasYtd": true,
       "hasGlb": false,
       "brand": "Mercedes",
-      "pack": "600-debadged-13"
+      "pack": "600-debadged-13",
+      "yftRel": "600-debadged-13/stream/[Mercedes]/benze55/stream/benze55.yft"
     },
     {
       "id": "stream_c63scpd",
@@ -5331,7 +5683,8 @@
       "hasYtd": true,
       "hasGlb": false,
       "brand": "Mercedes",
-      "pack": "600-debadged-16"
+      "pack": "600-debadged-16",
+      "yftRel": "600-debadged-16/stream/[Mercedes]/c63scpd/stream/c63scpd.yft"
     },
     {
       "id": "stream_g632019",
@@ -5346,7 +5699,8 @@
       "hasYtd": true,
       "hasGlb": false,
       "brand": "Mercedes",
-      "pack": "600-debadged-20"
+      "pack": "600-debadged-20",
+      "yftRel": "600-debadged-20/stream/[Mercedes]/g632019/stream/g632019.yft"
     },
     {
       "id": "stream_mayg600p",
@@ -5361,7 +5715,8 @@
       "hasYtd": true,
       "hasGlb": false,
       "brand": "Mercedes",
-      "pack": "600-debadged-15"
+      "pack": "600-debadged-15",
+      "yftRel": "600-debadged-15/stream/[Mercedes]/mayg600p/stream/mayg600p.yft"
     },
     {
       "id": "stream_sw_sprinter",
@@ -5376,7 +5731,8 @@
       "hasYtd": true,
       "hasGlb": false,
       "brand": "Police",
-      "pack": "600-debadged-21"
+      "pack": "600-debadged-21",
+      "yftRel": "600-debadged-21/stream/[Police]/sw_sprinter/stream/sw_sprinter.yft"
     },
     {
       "id": "stream_w222wald",
@@ -5391,7 +5747,8 @@
       "hasYtd": true,
       "hasGlb": false,
       "brand": "Mercedes",
-      "pack": "600-debadged-17"
+      "pack": "600-debadged-17",
+      "yftRel": "600-debadged-17/stream/[Mercedes]/w222wald/stream/w222wald.yft"
     },
     {
       "id": "stream_waldw222",
@@ -5406,7 +5763,8 @@
       "hasYtd": true,
       "hasGlb": false,
       "brand": "Mercedes",
-      "pack": "600-debadged-15"
+      "pack": "600-debadged-15",
+      "yftRel": "600-debadged-15/stream/[Mercedes]/waldw222/stream/waldw222.yft"
     },
     {
       "id": "stream_rmode63s",
@@ -5421,7 +5779,8 @@
       "hasYtd": true,
       "hasGlb": false,
       "brand": "Mercedes",
-      "pack": "600-debadged-23"
+      "pack": "600-debadged-23",
+      "yftRel": "600-debadged-23/stream/[Mercedes]/rmode63s/stream/rmode63s.yft"
     },
     {
       "id": "stream_rmodgt63",
@@ -5436,7 +5795,8 @@
       "hasYtd": true,
       "hasGlb": false,
       "brand": "Mercedes",
-      "pack": "600-debadged-27"
+      "pack": "600-debadged-27",
+      "yftRel": "600-debadged-27/stream/[Mercedes]/rmodgt63/stream/rmodgt63.yft"
     },
     {
       "id": "stream_rmodgt63police",
@@ -5451,7 +5811,8 @@
       "hasYtd": true,
       "hasGlb": false,
       "brand": "Police",
-      "pack": "600-debadged-25"
+      "pack": "600-debadged-25",
+      "yftRel": "600-debadged-25/stream/[Police]/rmodgt63police/stream/rmodgt63police.yft"
     },
     {
       "id": "stream_topcargt63",
@@ -5466,7 +5827,8 @@
       "hasYtd": true,
       "hasGlb": false,
       "brand": "Mercedes",
-      "pack": "600-debadged-11"
+      "pack": "600-debadged-11",
+      "yftRel": "600-debadged-11/stream/[Mercedes]/topcargt63/stream/topcargt63.yft"
     },
     {
       "id": "stream_f190e",
@@ -5481,7 +5843,8 @@
       "hasYtd": true,
       "hasGlb": false,
       "brand": "Mercedes",
-      "pack": "600-debadged-32"
+      "pack": "600-debadged-32",
+      "yftRel": "600-debadged-32/stream/[Mercedes]/f190e/stream/f190e.yft"
     },
     {
       "id": "stream_gl63",
@@ -5496,7 +5859,8 @@
       "hasYtd": true,
       "hasGlb": false,
       "brand": "Mercedes",
-      "pack": "600-debadged-14"
+      "pack": "600-debadged-14",
+      "yftRel": "600-debadged-14/stream/[Mercedes]/gl63/stream/gl63.yft"
     },
     {
       "id": "stream_rmodg65",
@@ -5511,7 +5875,8 @@
       "hasYtd": true,
       "hasGlb": false,
       "brand": "Mercedes",
-      "pack": "600-debadged-28"
+      "pack": "600-debadged-28",
+      "yftRel": "600-debadged-28/stream/[Mercedes]/rmodg65/stream/rmodg65.yft"
     },
     {
       "id": "stream_benzc32",
@@ -5526,7 +5891,8 @@
       "hasYtd": true,
       "hasGlb": false,
       "brand": "Mercedes",
-      "pack": "600-debadged-32"
+      "pack": "600-debadged-32",
+      "yftRel": "600-debadged-32/stream/[Mercedes]/benzc32/stream/benzc32.yft"
     },
     {
       "id": "stream_a45",
@@ -5541,7 +5907,8 @@
       "hasYtd": true,
       "hasGlb": false,
       "brand": "Mercedes",
-      "pack": "600-debadged-13"
+      "pack": "600-debadged-13",
+      "yftRel": "600-debadged-13/stream/[Mercedes]/a45/stream/a45.yft"
     },
     {
       "id": "stream_g700brabusretuned",
@@ -5556,7 +5923,8 @@
       "hasYtd": true,
       "hasGlb": false,
       "brand": "Mercedes",
-      "pack": "600-debadged-22"
+      "pack": "600-debadged-22",
+      "yftRel": "600-debadged-22/stream/[Mercedes]/g700brabusretuned/stream/g700brabusretuned.yft"
     },
     {
       "id": "stream_msls",
@@ -5571,7 +5939,8 @@
       "hasYtd": true,
       "hasGlb": false,
       "brand": "Mercedes",
-      "pack": "600-debadged-27"
+      "pack": "600-debadged-27",
+      "yftRel": "600-debadged-27/stream/[Mercedes]/msls/stream/msls.yft"
     },
     {
       "id": "stream_2018s650p",
@@ -5586,7 +5955,8 @@
       "hasYtd": true,
       "hasGlb": false,
       "brand": "Mercedes",
-      "pack": "600-debadged-24"
+      "pack": "600-debadged-24",
+      "yftRel": "600-debadged-24/stream/[Mercedes]/2018s650p/stream/2018s650p.yft"
     },
     {
       "id": "stream_bmw8mm",
@@ -5601,7 +5971,8 @@
       "hasYtd": true,
       "hasGlb": false,
       "brand": "BMW",
-      "pack": "600-debadged-14"
+      "pack": "600-debadged-14",
+      "yftRel": "600-debadged-14/stream/[BMW]/bmw8mm/stream/bmw8mm.yft"
     },
     {
       "id": "stream_c8p1",
@@ -5616,7 +5987,8 @@
       "hasYtd": true,
       "hasGlb": false,
       "brand": "Chevrolet",
-      "pack": "600-debadged-05"
+      "pack": "600-debadged-05",
+      "yftRel": "600-debadged-05/stream/[Chevrolet]/c8p1/stream/c8p1.yft"
     },
     {
       "id": "stream_kln",
@@ -5631,7 +6003,8 @@
       "hasYtd": true,
       "hasGlb": false,
       "brand": "Rolls Royce",
-      "pack": "600-debadged-06"
+      "pack": "600-debadged-06",
+      "yftRel": "600-debadged-06/stream/[Rolls Royce]/kln/stream/kln.yft"
     },
     {
       "id": "stream_M4CC",
@@ -5646,7 +6019,8 @@
       "hasYtd": true,
       "hasGlb": false,
       "brand": "BMW",
-      "pack": "600-debadged-21"
+      "pack": "600-debadged-21",
+      "yftRel": "600-debadged-21/stream/[BMW]/M4CC/stream/M4CC.yft"
     },
     {
       "id": "stream_e63s",
@@ -5661,7 +6035,8 @@
       "hasYtd": true,
       "hasGlb": false,
       "brand": "Mercedes",
-      "pack": "600-debadged-21"
+      "pack": "600-debadged-21",
+      "yftRel": "600-debadged-21/stream/[Mercedes]/e63s/stream/e63s.yft"
     },
     {
       "id": "stream_s550kev",
@@ -5676,7 +6051,8 @@
       "hasYtd": true,
       "hasGlb": false,
       "brand": "Mercedes",
-      "pack": "600-debadged-15"
+      "pack": "600-debadged-15",
+      "yftRel": "600-debadged-15/stream/[Mercedes]/s550kev/stream/s550kev.yft"
     },
     {
       "id": "stream_merse63",
@@ -5691,7 +6067,8 @@
       "hasYtd": true,
       "hasGlb": false,
       "brand": "Mercedes",
-      "pack": "600-debadged-29"
+      "pack": "600-debadged-29",
+      "yftRel": "600-debadged-29/stream/[Mercedes]/merse63/stream/merse63.yft"
     },
     {
       "id": "stream_mi8",
@@ -5706,7 +6083,8 @@
       "hasYtd": true,
       "hasGlb": false,
       "brand": "BMW",
-      "pack": "600-debadged-15"
+      "pack": "600-debadged-15",
+      "yftRel": "600-debadged-15/stream/[BMW]/mi8/stream/mi8.yft"
     },
     {
       "id": "stream_jcwc",
@@ -5721,7 +6099,8 @@
       "hasYtd": true,
       "hasGlb": false,
       "brand": "Mini",
-      "pack": "600-debadged-11"
+      "pack": "600-debadged-11",
+      "yftRel": "600-debadged-11/stream/[Mini]/jcwc/stream/jcwc.yft"
     },
     {
       "id": "stream_evo9mr",
@@ -5736,7 +6115,8 @@
       "hasYtd": true,
       "hasGlb": false,
       "brand": "Mitsubishi",
-      "pack": "600-debadged-04"
+      "pack": "600-debadged-04",
+      "yftRel": "600-debadged-04/stream/[Mitsubishi]/evo9mr/stream/evo9mr.yft"
     },
     {
       "id": "stream_GODz95GSX",
@@ -5751,7 +6131,8 @@
       "hasYtd": true,
       "hasGlb": false,
       "brand": "BMW",
-      "pack": "600-debadged-28"
+      "pack": "600-debadged-28",
+      "yftRel": "600-debadged-28/stream/[BMW]/GODz95GSX/stream/GODz95GSX.yft"
     },
     {
       "id": "stream_cp9a",
@@ -5766,7 +6147,8 @@
       "hasYtd": true,
       "hasGlb": false,
       "brand": "Mitsubishi",
-      "pack": "600-debadged-04"
+      "pack": "600-debadged-04",
+      "yftRel": "600-debadged-04/stream/[Mitsubishi]/cp9a/stream/cp9a.yft"
     },
     {
       "id": "stream_gt86trust",
@@ -5781,7 +6163,8 @@
       "hasYtd": true,
       "hasGlb": false,
       "brand": "Toyota",
-      "pack": "600-debadged-03"
+      "pack": "600-debadged-03",
+      "yftRel": "600-debadged-03/stream/[Toyota]/gt86trust/stream/gt86trust.yft"
     },
     {
       "id": "stream_hycadeevo",
@@ -5796,7 +6179,8 @@
       "hasYtd": true,
       "hasGlb": false,
       "brand": "Mitsubishi",
-      "pack": "600-debadged-04"
+      "pack": "600-debadged-04",
+      "yftRel": "600-debadged-04/stream/[Mitsubishi]/hycadeevo/stream/hycadeevo.yft"
     },
     {
       "id": "stream_mlbrabus",
@@ -5811,7 +6195,8 @@
       "hasYtd": true,
       "hasGlb": false,
       "brand": "Mercedes",
-      "pack": "600-debadged-30"
+      "pack": "600-debadged-30",
+      "yftRel": "600-debadged-30/stream/[Mercedes]/mlbrabus/stream/mlbrabus.yft"
     },
     {
       "id": "stream_fanpounder",
@@ -5826,7 +6211,8 @@
       "hasYtd": true,
       "hasGlb": false,
       "brand": "Gang Vehicles",
-      "pack": "600-debadged-09"
+      "pack": "600-debadged-09",
+      "yftRel": "600-debadged-09/stream/[Gang Vehicles]/fanpounder/stream/fanpounder.yft"
     },
     {
       "id": "stream_tieens",
@@ -5841,7 +6227,8 @@
       "hasYtd": true,
       "hasGlb": false,
       "brand": "Others",
-      "pack": "600-debadged-33"
+      "pack": "600-debadged-33",
+      "yftRel": "600-debadged-33/stream/[Others]/tieens/stream/tieens.yft"
     },
     {
       "id": "stream_mustang65",
@@ -5856,7 +6243,8 @@
       "hasYtd": true,
       "hasGlb": false,
       "brand": "Ford",
-      "pack": "600-debadged-32"
+      "pack": "600-debadged-32",
+      "yftRel": "600-debadged-32/stream/[Ford]/mustang65/stream/mustang65.yft"
     },
     {
       "id": "stream_kart",
@@ -5871,7 +6259,8 @@
       "hasYtd": true,
       "hasGlb": false,
       "brand": "Others",
-      "pack": "600-debadged-14"
+      "pack": "600-debadged-14",
+      "yftRel": "600-debadged-14/stream/[Others]/kart/stream/kart.yft"
     },
     {
       "id": "stream_neonp1",
@@ -5886,7 +6275,8 @@
       "hasYtd": true,
       "hasGlb": false,
       "brand": "McLaren",
-      "pack": "600-debadged-07"
+      "pack": "600-debadged-07",
+      "yftRel": "600-debadged-07/stream/[McLaren]/neonp1/stream/neonp1.yft"
     },
     {
       "id": "stream_s15",
@@ -5901,7 +6291,8 @@
       "hasYtd": true,
       "hasGlb": false,
       "brand": "Nissan",
-      "pack": "600-debadged-31"
+      "pack": "600-debadged-31",
+      "yftRel": "600-debadged-31/stream/[Nissan]/s15/stream/s15.yft"
     },
     {
       "id": "stream_fprotozwb",
@@ -5916,7 +6307,8 @@
       "hasYtd": true,
       "hasGlb": false,
       "brand": "Others",
-      "pack": "600-debadged-29"
+      "pack": "600-debadged-29",
+      "yftRel": "600-debadged-29/stream/[Others]/fprotozwb/stream/fprotozwb.yft"
     },
     {
       "id": "stream_lbwk35",
@@ -5931,7 +6323,8 @@
       "hasYtd": true,
       "hasGlb": false,
       "brand": "Nissan",
-      "pack": "600-debadged-21"
+      "pack": "600-debadged-21",
+      "yftRel": "600-debadged-21/stream/[Nissan]/lbwk35/stream/lbwk35.yft"
     },
     {
       "id": "stream_nismo20",
@@ -5946,7 +6339,8 @@
       "hasYtd": true,
       "hasGlb": false,
       "brand": "Nissan",
-      "pack": "600-debadged-19"
+      "pack": "600-debadged-19",
+      "yftRel": "600-debadged-19/stream/[Nissan]/nismo20/stream/nismo20.yft"
     },
     {
       "id": "stream_nissanr36",
@@ -5961,7 +6355,8 @@
       "hasYtd": true,
       "hasGlb": false,
       "brand": "Nissan",
-      "pack": "600-debadged-28"
+      "pack": "600-debadged-28",
+      "yftRel": "600-debadged-28/stream/[Nissan]/nissanr36/stream/nissanr36.yft"
     },
     {
       "id": "stream_r33ptnc",
@@ -5976,7 +6371,8 @@
       "hasYtd": true,
       "hasGlb": false,
       "brand": "Nissan",
-      "pack": "600-debadged-15"
+      "pack": "600-debadged-15",
+      "yftRel": "600-debadged-15/stream/[Nissan]/r33ptnc/stream/r33ptnc.yft"
     },
     {
       "id": "stream_r35secret",
@@ -5991,7 +6387,8 @@
       "hasYtd": true,
       "hasGlb": false,
       "brand": "Nissan",
-      "pack": "600-debadged-19"
+      "pack": "600-debadged-19",
+      "yftRel": "600-debadged-19/stream/[Nissan]/r35secret/stream/r35secret.yft"
     },
     {
       "id": "stream_rmod240sx",
@@ -6006,7 +6403,8 @@
       "hasYtd": true,
       "hasGlb": false,
       "brand": "Nissan",
-      "pack": "600-debadged-29"
+      "pack": "600-debadged-29",
+      "yftRel": "600-debadged-29/stream/[Nissan]/rmod240sx/stream/rmod240sx.yft"
     },
     {
       "id": "stream_rmodgtr",
@@ -6021,7 +6419,8 @@
       "hasYtd": true,
       "hasGlb": false,
       "brand": "Nissan",
-      "pack": "600-debadged-28"
+      "pack": "600-debadged-28",
+      "yftRel": "600-debadged-28/stream/[Nissan]/rmodgtr/stream/rmodgtr.yft"
     },
     {
       "id": "stream_rmodskyline34",
@@ -6036,7 +6435,8 @@
       "hasYtd": true,
       "hasGlb": false,
       "brand": "Nissan",
-      "pack": "600-debadged-29"
+      "pack": "600-debadged-29",
+      "yftRel": "600-debadged-29/stream/[Nissan]/rmodskyline34/stream/rmodskyline34.yft"
     },
     {
       "id": "stream_scubieblob",
@@ -6051,7 +6451,8 @@
       "hasYtd": true,
       "hasGlb": false,
       "brand": "Others",
-      "pack": "600-debadged-30"
+      "pack": "600-debadged-30",
+      "yftRel": "600-debadged-30/stream/[Others]/scubieblob/stream/scubieblob.yft"
     },
     {
       "id": "stream_skyline",
@@ -6066,7 +6467,8 @@
       "hasYtd": true,
       "hasGlb": false,
       "brand": "Nissan",
-      "pack": "600-debadged-22"
+      "pack": "600-debadged-22",
+      "yftRel": "600-debadged-22/stream/[Nissan]/skyline/stream/skyline.yft"
     },
     {
       "id": "stream_ToraGTRWBMega",
@@ -6081,7 +6483,8 @@
       "hasYtd": true,
       "hasGlb": false,
       "brand": "Nissan",
-      "pack": "600-debadged-30"
+      "pack": "600-debadged-30",
+      "yftRel": "600-debadged-30/stream/[Nissan]/ToraGTRWBMega/stream/ToraGTRWBMega.yft"
     },
     {
       "id": "stream_nm_ctsv",
@@ -6096,7 +6499,8 @@
       "hasYtd": true,
       "hasGlb": false,
       "brand": "Police",
-      "pack": "600-debadged-28"
+      "pack": "600-debadged-28",
+      "yftRel": "600-debadged-28/stream/[Police]/nm_ctsv/stream/nm_ctsv.yft"
     },
     {
       "id": "stream_488mishasp",
@@ -6111,7 +6515,8 @@
       "hasYtd": true,
       "hasGlb": false,
       "brand": "Ferrari",
-      "pack": "600-debadged-01"
+      "pack": "600-debadged-01",
+      "yftRel": "600-debadged-01/stream/[Ferrari]/488mishasp/stream/488mishasp.yft"
     },
     {
       "id": "stream_mlnovitec",
@@ -6126,7 +6531,8 @@
       "hasYtd": true,
       "hasGlb": false,
       "brand": "Maserati",
-      "pack": "600-debadged-12"
+      "pack": "600-debadged-12",
+      "yftRel": "600-debadged-12/stream/[Maserati]/mlnovitec/stream/mlnovitec.yft"
     },
     {
       "id": "stream_gt17",
@@ -6141,7 +6547,8 @@
       "hasYtd": true,
       "hasGlb": false,
       "brand": "Ford",
-      "pack": "600-debadged-33"
+      "pack": "600-debadged-33",
+      "yftRel": "600-debadged-33/stream/[Ford]/gt17/stream/gt17.yft"
     },
     {
       "id": "stream_gt2rs",
@@ -6156,7 +6563,8 @@
       "hasYtd": true,
       "hasGlb": false,
       "brand": "Porsche",
-      "pack": "600-debadged-30"
+      "pack": "600-debadged-30",
+      "yftRel": "600-debadged-30/stream/[Porsche]/gt2rs/stream/gt2rs.yft"
     },
     {
       "id": "stream_firebirdwz",
@@ -6171,7 +6579,8 @@
       "hasYtd": true,
       "hasGlb": false,
       "brand": "Others",
-      "pack": "600-debadged-33"
+      "pack": "600-debadged-33",
+      "yftRel": "600-debadged-33/stream/[Others]/firebirdwz/stream/firebirdwz.yft"
     },
     {
       "id": "stream_rroctane",
@@ -6186,7 +6595,8 @@
       "hasYtd": true,
       "hasGlb": false,
       "brand": "Others",
-      "pack": "600-debadged-33"
+      "pack": "600-debadged-33",
+      "yftRel": "600-debadged-33/stream/[Others]/rroctane/stream/rroctane.yft"
     },
     {
       "id": "stream_SHEL",
@@ -6201,7 +6611,8 @@
       "hasYtd": true,
       "hasGlb": false,
       "brand": "Others",
-      "pack": "600-debadged-27"
+      "pack": "600-debadged-27",
+      "yftRel": "600-debadged-27/stream/[Others]/SHEL/stream/SHEL.yft"
     },
     {
       "id": "stream_vanzwb06",
@@ -6216,7 +6627,8 @@
       "hasYtd": true,
       "hasGlb": false,
       "brand": "Others",
-      "pack": "600-debadged-25"
+      "pack": "600-debadged-25",
+      "yftRel": "600-debadged-25/stream/[Others]/vanzwb06/stream/vanzwb06.yft"
     },
     {
       "id": "stream_owlbelair2",
@@ -6231,7 +6643,8 @@
       "hasYtd": true,
       "hasGlb": false,
       "brand": "Others",
-      "pack": "600-debadged-27"
+      "pack": "600-debadged-27",
+      "yftRel": "600-debadged-27/stream/[Others]/owlbelair2/stream/owlbelair2.yft"
     },
     {
       "id": "stream_p1lbwk",
@@ -6246,7 +6659,8 @@
       "hasYtd": true,
       "hasGlb": false,
       "brand": "McLaren",
-      "pack": "600-debadged-07"
+      "pack": "600-debadged-07",
+      "yftRel": "600-debadged-07/stream/[McLaren]/p1lbwk/stream/p1lbwk.yft"
     },
     {
       "id": "stream_rmodpagani",
@@ -6261,7 +6675,8 @@
       "hasYtd": true,
       "hasGlb": false,
       "brand": "Pagani",
-      "pack": "600-debadged-03"
+      "pack": "600-debadged-03",
+      "yftRel": "600-debadged-03/stream/[Pagani]/rmodpagani/stream/rmodpagani.yft"
     },
     {
       "id": "stream_TCZjc",
@@ -6276,7 +6691,8 @@
       "hasYtd": true,
       "hasGlb": false,
       "brand": "Pagani",
-      "pack": "600-debadged-03"
+      "pack": "600-debadged-03",
+      "yftRel": "600-debadged-03/stream/[Pagani]/TCZjc/stream/TCZjc.yft"
     },
     {
       "id": "stream_pagani_zonda_cinque",
@@ -6291,7 +6707,8 @@
       "hasYtd": true,
       "hasGlb": false,
       "brand": "Pagani",
-      "pack": "600-debadged-03"
+      "pack": "600-debadged-03",
+      "yftRel": "600-debadged-03/stream/[Pagani]/pagani_zonda_cinque/stream/pagani_zonda_cinque.yft"
     },
     {
       "id": "stream_18performante",
@@ -6306,7 +6723,8 @@
       "hasYtd": true,
       "hasGlb": false,
       "brand": "Lamborghini",
-      "pack": "600-debadged-23"
+      "pack": "600-debadged-23",
+      "yftRel": "600-debadged-23/stream/[Lamborghini]/18performante/stream/18performante.yft"
     },
     {
       "id": "stream_bati901",
@@ -6321,7 +6739,8 @@
       "hasYtd": true,
       "hasGlb": false,
       "brand": "Bikes",
-      "pack": "600-debadged-32"
+      "pack": "600-debadged-32",
+      "yftRel": "600-debadged-32/stream/[Bikes]/bati901/stream/bati901.yft"
     },
     {
       "id": "stream_choilambo",
@@ -6336,7 +6755,8 @@
       "hasYtd": true,
       "hasGlb": false,
       "brand": "Lamborghini",
-      "pack": "600-debadged-31"
+      "pack": "600-debadged-31",
+      "yftRel": "600-debadged-31/stream/[Lamborghini]/choilambo/stream/choilambo.yft"
     },
     {
       "id": "stream_por911gt3",
@@ -6351,7 +6771,8 @@
       "hasYtd": true,
       "hasGlb": false,
       "brand": "Porsche",
-      "pack": "600-debadged-27"
+      "pack": "600-debadged-27",
+      "yftRel": "600-debadged-27/stream/[Porsche]/por911gt3/stream/por911gt3.yft"
     },
     {
       "id": "stream_playaturbozr1",
@@ -6366,7 +6787,8 @@
       "hasYtd": true,
       "hasGlb": false,
       "brand": "Chevrolet",
-      "pack": "600-debadged-05"
+      "pack": "600-debadged-05",
+      "yftRel": "600-debadged-05/stream/[Chevrolet]/playaturbozr1/stream/playaturbozr1.yft"
     },
     {
       "id": "stream_GODzRZRPROLFTD",
@@ -6381,7 +6803,8 @@
       "hasYtd": true,
       "hasGlb": false,
       "brand": "Others",
-      "pack": "600-debadged-18"
+      "pack": "600-debadged-18",
+      "yftRel": "600-debadged-18/stream/[Others]/GODzRZRPROLFTD/stream/GODzRZRPROLFTD.yft"
     },
     {
       "id": "stream_22m5sal",
@@ -6396,7 +6819,8 @@
       "hasYtd": true,
       "hasGlb": false,
       "brand": "Police",
-      "pack": "600-debadged-29"
+      "pack": "600-debadged-29",
+      "yftRel": "600-debadged-29/stream/[Police]/22m5sal/stream/22m5sal.yft"
     },
     {
       "id": "stream_ACTRPavant",
@@ -6411,7 +6835,8 @@
       "hasYtd": true,
       "hasGlb": false,
       "brand": "Police",
-      "pack": "600-debadged-03"
+      "pack": "600-debadged-03",
+      "yftRel": "600-debadged-03/stream/[Police]/ACTRPavant/stream/ACTRPavant.yft"
     },
     {
       "id": "stream_ACTRPavantum",
@@ -6426,7 +6851,8 @@
       "hasYtd": true,
       "hasGlb": false,
       "brand": "Police",
-      "pack": "600-debadged-31"
+      "pack": "600-debadged-31",
+      "yftRel": "600-debadged-31/stream/[Police]/ACTRPavantum/stream/ACTRPavantum.yft"
     },
     {
       "id": "stream_polbike",
@@ -6441,7 +6867,8 @@
       "hasYtd": true,
       "hasGlb": false,
       "brand": "Police",
-      "pack": "600-debadged-33"
+      "pack": "600-debadged-33",
+      "yftRel": "600-debadged-33/stream/[Police]/polbike/stream/polbike.yft"
     },
     {
       "id": "stream_polbmwm7",
@@ -6456,7 +6883,8 @@
       "hasYtd": true,
       "hasGlb": false,
       "brand": "Police",
-      "pack": "600-debadged-14"
+      "pack": "600-debadged-14",
+      "yftRel": "600-debadged-14/stream/[Police]/polbmwm7/stream/polbmwm7.yft"
     },
     {
       "id": "stream_polboat1",
@@ -6471,7 +6899,8 @@
       "hasYtd": true,
       "hasGlb": false,
       "brand": "Police",
-      "pack": "600-debadged-18"
+      "pack": "600-debadged-18",
+      "yftRel": "600-debadged-18/stream/[Police]/polboat1/stream/polboat1.yft"
     },
     {
       "id": "stream_polboat2",
@@ -6486,7 +6915,8 @@
       "hasYtd": true,
       "hasGlb": false,
       "brand": "Police",
-      "pack": "600-debadged-14"
+      "pack": "600-debadged-14",
+      "yftRel": "600-debadged-14/stream/[Police]/polboat2/stream/polboat2.yft"
     },
     {
       "id": "stream_polcharger18",
@@ -6501,7 +6931,8 @@
       "hasYtd": true,
       "hasGlb": false,
       "brand": "Police",
-      "pack": "600-debadged-31"
+      "pack": "600-debadged-31",
+      "yftRel": "600-debadged-31/stream/[Police]/polcharger18/stream/polcharger18.yft"
     },
     {
       "id": "stream_polcoach",
@@ -6516,7 +6947,8 @@
       "hasYtd": true,
       "hasGlb": false,
       "brand": "Police",
-      "pack": "600-debadged-33"
+      "pack": "600-debadged-33",
+      "yftRel": "600-debadged-33/stream/[Police]/polcoach/stream/polcoach.yft"
     },
     {
       "id": "stream_polkawasaki",
@@ -6531,7 +6963,8 @@
       "hasYtd": true,
       "hasGlb": false,
       "brand": "Police",
-      "pack": "600-debadged-28"
+      "pack": "600-debadged-28",
+      "yftRel": "600-debadged-28/stream/[Police]/polkawasaki/stream/polkawasaki.yft"
     },
     {
       "id": "stream_polmav",
@@ -6546,7 +6979,8 @@
       "hasYtd": true,
       "hasGlb": false,
       "brand": "Police",
-      "pack": "600-debadged-29"
+      "pack": "600-debadged-29",
+      "yftRel": "600-debadged-29/stream/[Police]/polmav/stream/polmav.yft"
     },
     {
       "id": "stream_polmustang",
@@ -6561,7 +6995,8 @@
       "hasYtd": true,
       "hasGlb": false,
       "brand": "Police",
-      "pack": "600-debadged-19"
+      "pack": "600-debadged-19",
+      "yftRel": "600-debadged-19/stream/[Police]/polmustang/stream/polmustang.yft"
     },
     {
       "id": "stream_polsilverado19",
@@ -6576,7 +7011,8 @@
       "hasYtd": true,
       "hasGlb": false,
       "brand": "Police",
-      "pack": "600-debadged-17"
+      "pack": "600-debadged-17",
+      "yftRel": "600-debadged-17/stream/[Police]/polsilverado19/stream/polsilverado19.yft"
     },
     {
       "id": "stream_RoyalCustom_R34Marked",
@@ -6591,7 +7027,8 @@
       "hasYtd": true,
       "hasGlb": false,
       "brand": "Police",
-      "pack": "600-debadged-32"
+      "pack": "600-debadged-32",
+      "yftRel": "600-debadged-32/stream/[Police]/RoyalCustom_R34Marked/stream/RoyalCustom_R34Marked.yft"
     },
     {
       "id": "stream_unmarkedjl",
@@ -6606,7 +7043,8 @@
       "hasYtd": true,
       "hasGlb": false,
       "brand": "Police",
-      "pack": "600-debadged-28"
+      "pack": "600-debadged-28",
+      "yftRel": "600-debadged-28/stream/[Police]/unmarkedjl/stream/unmarkedjl.yft"
     },
     {
       "id": "stream_policeboat",
@@ -6621,7 +7059,8 @@
       "hasYtd": true,
       "hasGlb": false,
       "brand": "Sheriff",
-      "pack": "600-debadged-04"
+      "pack": "600-debadged-04",
+      "yftRel": "600-debadged-04/stream/[Sheriff]/policeboat/stream/policeboat.yft"
     },
     {
       "id": "stream_polo2018",
@@ -6636,7 +7075,8 @@
       "hasYtd": true,
       "hasGlb": false,
       "brand": "VW",
-      "pack": "600-debadged-05"
+      "pack": "600-debadged-05",
+      "yftRel": "600-debadged-05/stream/[VW]/polo2018/stream/polo2018.yft"
     },
     {
       "id": "stream_singer",
@@ -6651,7 +7091,8 @@
       "hasYtd": true,
       "hasGlb": false,
       "brand": "Others",
-      "pack": "600-debadged-21"
+      "pack": "600-debadged-21",
+      "yftRel": "600-debadged-21/stream/[Others]/singer/stream/singer.yft"
     },
     {
       "id": "stream_panamturs21",
@@ -6666,7 +7107,8 @@
       "hasYtd": true,
       "hasGlb": false,
       "brand": "Porsche",
-      "pack": "600-debadged-31"
+      "pack": "600-debadged-31",
+      "yftRel": "600-debadged-31/stream/[Porsche]/panamturs21/stream/panamturs21.yft"
     },
     {
       "id": "stream_taycan",
@@ -6681,7 +7123,8 @@
       "hasYtd": true,
       "hasGlb": false,
       "brand": "Others",
-      "pack": "600-debadged-29"
+      "pack": "600-debadged-29",
+      "yftRel": "600-debadged-29/stream/[Others]/taycan/stream/taycan.yft"
     },
     {
       "id": "stream_GODzDUKESGT2RSV2",
@@ -6696,7 +7139,8 @@
       "hasYtd": true,
       "hasGlb": false,
       "brand": "Porsche",
-      "pack": "600-debadged-15"
+      "pack": "600-debadged-15",
+      "yftRel": "600-debadged-15/stream/[Porsche]/GODzDUKESGT2RSV2/stream/GODzDUKESGT2RSV2.yft"
     },
     {
       "id": "stream_gt3demon",
@@ -6711,7 +7155,8 @@
       "hasYtd": true,
       "hasGlb": false,
       "brand": "Porsche",
-      "pack": "600-debadged-18"
+      "pack": "600-debadged-18",
+      "yftRel": "600-debadged-18/stream/[Porsche]/gt3demon/stream/gt3demon.yft"
     },
     {
       "id": "stream_gt3hycade",
@@ -6726,7 +7171,8 @@
       "hasYtd": true,
       "hasGlb": false,
       "brand": "Porsche",
-      "pack": "600-debadged-24"
+      "pack": "600-debadged-24",
+      "yftRel": "600-debadged-24/stream/[Porsche]/gt3hycade/stream/gt3hycade.yft"
     },
     {
       "id": "stream_gt4hycade",
@@ -6741,7 +7187,8 @@
       "hasYtd": true,
       "hasGlb": false,
       "brand": "Porsche",
-      "pack": "600-debadged-29"
+      "pack": "600-debadged-29",
+      "yftRel": "600-debadged-29/stream/[Porsche]/gt4hycade/stream/gt4hycade.yft"
     },
     {
       "id": "stream_porche911speedhunter",
@@ -6756,7 +7203,8 @@
       "hasYtd": true,
       "hasGlb": false,
       "brand": "Porsche",
-      "pack": "600-debadged-28"
+      "pack": "600-debadged-28",
+      "yftRel": "600-debadged-28/stream/[Porsche]/porche911speedhunter/stream/porche911speedhunter.yft"
     },
     {
       "id": "stream_venuum911",
@@ -6771,7 +7219,8 @@
       "hasYtd": true,
       "hasGlb": false,
       "brand": "Porsche",
-      "pack": "600-debadged-16"
+      "pack": "600-debadged-16",
+      "yftRel": "600-debadged-16/stream/[Porsche]/venuum911/stream/venuum911.yft"
     },
     {
       "id": "stream_911turbos",
@@ -6786,7 +7235,8 @@
       "hasYtd": true,
       "hasGlb": false,
       "brand": "Porsche",
-      "pack": "600-debadged-30"
+      "pack": "600-debadged-30",
+      "yftRel": "600-debadged-30/stream/[Porsche]/911turbos/stream/911turbos.yft"
     },
     {
       "id": "stream_carrera19",
@@ -6801,7 +7251,8 @@
       "hasYtd": true,
       "hasGlb": false,
       "brand": "Porsche",
-      "pack": "600-debadged-15"
+      "pack": "600-debadged-15",
+      "yftRel": "600-debadged-15/stream/[Porsche]/carrera19/stream/carrera19.yft"
     },
     {
       "id": "stream_techart17",
@@ -6816,7 +7267,8 @@
       "hasYtd": true,
       "hasGlb": false,
       "brand": "Porsche",
-      "pack": "600-debadged-26"
+      "pack": "600-debadged-26",
+      "yftRel": "600-debadged-26/stream/[Porsche]/techart17/stream/techart17.yft"
     },
     {
       "id": "stream_priorgt63s",
@@ -6831,7 +7283,8 @@
       "hasYtd": true,
       "hasGlb": false,
       "brand": "Mercedes",
-      "pack": "600-debadged-21"
+      "pack": "600-debadged-21",
+      "yftRel": "600-debadged-21/stream/[Mercedes]/priorgt63s/stream/priorgt63s.yft"
     },
     {
       "id": "stream_Prisonvan2rb",
@@ -6846,7 +7299,8 @@
       "hasYtd": true,
       "hasGlb": false,
       "brand": "Sheriff",
-      "pack": "600-debadged-04"
+      "pack": "600-debadged-04",
+      "yftRel": "600-debadged-04/stream/[Sheriff]/Prisonvan2rb/stream/Prisonvan2rb.yft"
     },
     {
       "id": "stream_project8",
@@ -6861,7 +7315,8 @@
       "hasYtd": true,
       "hasGlb": false,
       "brand": "Jaguar",
-      "pack": "600-debadged-10"
+      "pack": "600-debadged-10",
+      "yftRel": "600-debadged-10/stream/[Jaguar]/project8/stream/project8.yft"
     },
     {
       "id": "stream_cayennemecqq",
@@ -6876,7 +7331,8 @@
       "hasYtd": true,
       "hasGlb": false,
       "brand": "Porsche",
-      "pack": "600-debadged-14"
+      "pack": "600-debadged-14",
+      "yftRel": "600-debadged-14/stream/[Porsche]/cayennemecqq/stream/cayennemecqq.yft"
     },
     {
       "id": "stream_r355",
@@ -6891,7 +7347,8 @@
       "hasYtd": true,
       "hasGlb": false,
       "brand": "Nissan",
-      "pack": "600-debadged-30"
+      "pack": "600-debadged-30",
+      "yftRel": "600-debadged-30/stream/[Nissan]/r355/stream/r355.yft"
     },
     {
       "id": "stream_r6d",
@@ -6906,7 +7363,8 @@
       "hasYtd": true,
       "hasGlb": false,
       "brand": "Bikes",
-      "pack": "600-debadged-30"
+      "pack": "600-debadged-30",
+      "yftRel": "600-debadged-30/stream/[Bikes]/r6d/stream/r6d.yft"
     },
     {
       "id": "stream_r8beastedit",
@@ -6921,7 +7379,8 @@
       "hasYtd": true,
       "hasGlb": false,
       "brand": "Audi",
-      "pack": "600-debadged-19"
+      "pack": "600-debadged-19",
+      "yftRel": "600-debadged-19/stream/[Audi]/r8beastedit/stream/r8beastedit.yft"
     },
     {
       "id": "stream_ramtrx6x6",
@@ -6936,7 +7395,8 @@
       "hasYtd": true,
       "hasGlb": false,
       "brand": "Ram",
-      "pack": "600-debadged-08"
+      "pack": "600-debadged-08",
+      "yftRel": "600-debadged-08/stream/[Ram]/ramtrx6x6/stream/ramtrx6x6.yft"
     },
     {
       "id": "stream_suv_triaden",
@@ -6951,7 +7411,8 @@
       "hasYtd": true,
       "hasGlb": false,
       "brand": "Gang Vehicles",
-      "pack": "600-debadged-23"
+      "pack": "600-debadged-23",
+      "yftRel": "600-debadged-23/stream/[Gang Vehicles]/suv_triaden/stream/suv_triaden.yft"
     },
     {
       "id": "stream_f1",
@@ -6966,7 +7427,8 @@
       "hasYtd": true,
       "hasGlb": false,
       "brand": "Others",
-      "pack": "600-debadged-27"
+      "pack": "600-debadged-27",
+      "yftRel": "600-debadged-27/stream/[Others]/f1/stream/f1.yft"
     },
     {
       "id": "stream_revueltobeast",
@@ -6981,7 +7443,8 @@
       "hasYtd": true,
       "hasGlb": false,
       "brand": "Lamborghini",
-      "pack": "600-debadged-31"
+      "pack": "600-debadged-31",
+      "yftRel": "600-debadged-31/stream/[Lamborghini]/revueltobeast/stream/revueltobeast.yft"
     },
     {
       "id": "stream_rmodbentley1",
@@ -6996,7 +7459,8 @@
       "hasYtd": true,
       "hasGlb": false,
       "brand": "Bentley",
-      "pack": "600-debadged-02"
+      "pack": "600-debadged-02",
+      "yftRel": "600-debadged-02/stream/[Bentley]/rmodbentley1/stream/rmodbentley1.yft"
     },
     {
       "id": "stream_rmodr8c",
@@ -7011,7 +7475,8 @@
       "hasYtd": true,
       "hasGlb": false,
       "brand": "Audi",
-      "pack": "600-debadged-32"
+      "pack": "600-debadged-32",
+      "yftRel": "600-debadged-32/stream/[Audi]/rmodr8c/stream/rmodr8c.yft"
     },
     {
       "id": "stream_rocket",
@@ -7026,7 +7491,8 @@
       "hasYtd": true,
       "hasGlb": false,
       "brand": "Gang Vehicles",
-      "pack": "600-debadged-14"
+      "pack": "600-debadged-14",
+      "yftRel": "600-debadged-14/stream/[Gang Vehicles]/rocket/stream/rocket.yft"
     },
     {
       "id": "stream_dawn",
@@ -7041,7 +7507,8 @@
       "hasYtd": true,
       "hasGlb": false,
       "brand": "Rolls Royce",
-      "pack": "600-debadged-06"
+      "pack": "600-debadged-06",
+      "yftRel": "600-debadged-06/stream/[Rolls Royce]/dawn/stream/dawn.yft"
     },
     {
       "id": "stream_rculi",
@@ -7056,7 +7523,8 @@
       "hasYtd": true,
       "hasGlb": false,
       "brand": "Rolls Royce",
-      "pack": "600-debadged-06"
+      "pack": "600-debadged-06",
+      "yftRel": "600-debadged-06/stream/[Rolls Royce]/rculi/stream/rculi.yft"
     },
     {
       "id": "stream_Rolls6x6",
@@ -7071,7 +7539,8 @@
       "hasYtd": true,
       "hasGlb": false,
       "brand": "Rolls Royce",
-      "pack": "600-debadged-06"
+      "pack": "600-debadged-06",
+      "yftRel": "600-debadged-06/stream/[Rolls Royce]/Rolls6x6/stream/Rolls6x6.yft"
     },
     {
       "id": "stream_autobio",
@@ -7086,7 +7555,8 @@
       "hasYtd": true,
       "hasGlb": false,
       "brand": "Range Rover",
-      "pack": "600-debadged-11"
+      "pack": "600-debadged-11",
+      "yftRel": "600-debadged-11/stream/[Range Rover]/autobio/stream/autobio.yft"
     },
     {
       "id": "stream_rrwraith",
@@ -7101,7 +7571,8 @@
       "hasYtd": true,
       "hasGlb": false,
       "brand": "Rolls Royce",
-      "pack": "600-debadged-06"
+      "pack": "600-debadged-06",
+      "yftRel": "600-debadged-06/stream/[Rolls Royce]/rrwraith/stream/rrwraith.yft"
     },
     {
       "id": "stream_dawnonyx",
@@ -7116,7 +7587,8 @@
       "hasYtd": true,
       "hasGlb": false,
       "brand": "Rolls Royce",
-      "pack": "600-debadged-06"
+      "pack": "600-debadged-06",
+      "yftRel": "600-debadged-06/stream/[Rolls Royce]/dawnonyx/stream/dawnonyx.yft"
     },
     {
       "id": "stream_wraith",
@@ -7131,7 +7603,8 @@
       "hasYtd": true,
       "hasGlb": false,
       "brand": "Rolls Royce",
-      "pack": "600-debadged-06"
+      "pack": "600-debadged-06",
+      "yftRel": "600-debadged-06/stream/[Rolls Royce]/wraith/stream/wraith.yft"
     },
     {
       "id": "stream_rr21shelbystreet",
@@ -7146,7 +7619,8 @@
       "hasYtd": true,
       "hasGlb": false,
       "brand": "Others",
-      "pack": "600-debadged-16"
+      "pack": "600-debadged-16",
+      "yftRel": "600-debadged-16/stream/[Others]/rr21shelbystreet/stream/rr21shelbystreet.yft"
     },
     {
       "id": "stream_rrphantom",
@@ -7161,7 +7635,8 @@
       "hasYtd": true,
       "hasGlb": false,
       "brand": "Rolls Royce",
-      "pack": "600-debadged-06"
+      "pack": "600-debadged-06",
+      "yftRel": "600-debadged-06/stream/[Rolls Royce]/rrphantom/stream/rrphantom.yft"
     },
     {
       "id": "stream_rs5mans",
@@ -7176,7 +7651,8 @@
       "hasYtd": true,
       "hasGlb": false,
       "brand": "Audi",
-      "pack": "600-debadged-23"
+      "pack": "600-debadged-23",
+      "yftRel": "600-debadged-23/stream/[Audi]/rs5mans/stream/rs5mans.yft"
     },
     {
       "id": "stream_rs615",
@@ -7191,7 +7667,8 @@
       "hasYtd": true,
       "hasGlb": false,
       "brand": "Audi",
-      "pack": "600-debadged-19"
+      "pack": "600-debadged-19",
+      "yftRel": "600-debadged-19/stream/[Audi]/rs615/stream/rs615.yft"
     },
     {
       "id": "stream_rs6rabt20",
@@ -7206,7 +7683,8 @@
       "hasYtd": true,
       "hasGlb": false,
       "brand": "Audi",
-      "pack": "600-debadged-17"
+      "pack": "600-debadged-17",
+      "yftRel": "600-debadged-17/stream/[Audi]/rs6rabt20/stream/rs6rabt20.yft"
     },
     {
       "id": "stream_rs721",
@@ -7221,7 +7699,8 @@
       "hasYtd": true,
       "hasGlb": false,
       "brand": "Audi",
-      "pack": "600-debadged-12"
+      "pack": "600-debadged-12",
+      "yftRel": "600-debadged-12/stream/[Audi]/rs721/stream/rs721.yft"
     },
     {
       "id": "stream_rs7c821",
@@ -7236,7 +7715,8 @@
       "hasYtd": true,
       "hasGlb": false,
       "brand": "Audi",
-      "pack": "600-debadged-23"
+      "pack": "600-debadged-23",
+      "yftRel": "600-debadged-23/stream/[Audi]/rs7c821/stream/rs7c821.yft"
     },
     {
       "id": "stream_rs7mans",
@@ -7251,7 +7731,8 @@
       "hasYtd": true,
       "hasGlb": false,
       "brand": "Gang Vehicles",
-      "pack": "600-debadged-13"
+      "pack": "600-debadged-13",
+      "yftRel": "600-debadged-13/stream/[Gang Vehicles]/rs7mans/stream/rs7mans.yft"
     },
     {
       "id": "stream_RYGBus",
@@ -7266,7 +7747,8 @@
       "hasYtd": true,
       "hasGlb": false,
       "brand": "Others",
-      "pack": "600-debadged-11"
+      "pack": "600-debadged-11",
+      "yftRel": "600-debadged-11/stream/[Others]/RYGBus/stream/RYGBus.yft"
     },
     {
       "id": "stream_s1",
@@ -7281,7 +7763,8 @@
       "hasYtd": true,
       "hasGlb": false,
       "brand": "Audi",
-      "pack": "600-debadged-32"
+      "pack": "600-debadged-32",
+      "yftRel": "600-debadged-32/stream/[Audi]/s1/stream/s1.yft"
     },
     {
       "id": "stream_s63coupe",
@@ -7296,7 +7779,8 @@
       "hasYtd": true,
       "hasGlb": false,
       "brand": "Mercedes",
-      "pack": "600-debadged-31"
+      "pack": "600-debadged-31",
+      "yftRel": "600-debadged-31/stream/[Mercedes]/s63coupe/stream/s63coupe.yft"
     },
     {
       "id": "stream_s8d4",
@@ -7311,7 +7795,8 @@
       "hasYtd": true,
       "hasGlb": false,
       "brand": "Audi",
-      "pack": "600-debadged-15"
+      "pack": "600-debadged-15",
+      "yftRel": "600-debadged-15/stream/[Audi]/s8d4/stream/s8d4.yft"
     },
     {
       "id": "stream_sjdodge",
@@ -7326,7 +7811,8 @@
       "hasYtd": true,
       "hasGlb": false,
       "brand": "Dodge",
-      "pack": "600-debadged-32"
+      "pack": "600-debadged-32",
+      "yftRel": "600-debadged-32/stream/[Dodge]/sjdodge/stream/sjdodge.yft"
     },
     {
       "id": "stream_sf90",
@@ -7341,7 +7827,8 @@
       "hasYtd": true,
       "hasGlb": false,
       "brand": "Ferrari",
-      "pack": "600-debadged-01"
+      "pack": "600-debadged-01",
+      "yftRel": "600-debadged-01/stream/[Ferrari]/sf90/stream/sf90.yft"
     },
     {
       "id": "stream_manssupersnake",
@@ -7356,7 +7843,8 @@
       "hasYtd": true,
       "hasGlb": false,
       "brand": "Ford",
-      "pack": "600-debadged-29"
+      "pack": "600-debadged-29",
+      "yftRel": "600-debadged-29/stream/[Ford]/manssupersnake/stream/manssupersnake.yft"
     },
     {
       "id": "stream_24mss",
@@ -7371,7 +7859,8 @@
       "hasYtd": true,
       "hasGlb": false,
       "brand": "Ford",
-      "pack": "600-debadged-17"
+      "pack": "600-debadged-17",
+      "yftRel": "600-debadged-17/stream/[Ford]/24mss/stream/24mss.yft"
     },
     {
       "id": "stream_17silvk9rb",
@@ -7386,7 +7875,8 @@
       "hasYtd": true,
       "hasGlb": false,
       "brand": "Sheriff",
-      "pack": "600-debadged-04"
+      "pack": "600-debadged-04",
+      "yftRel": "600-debadged-04/stream/[Sheriff]/17silvk9rb/stream/17silvk9rb.yft"
     },
     {
       "id": "stream_eheli",
@@ -7401,7 +7891,8 @@
       "hasYtd": true,
       "hasGlb": false,
       "brand": "Sheriff",
-      "pack": "600-debadged-04"
+      "pack": "600-debadged-04",
+      "yftRel": "600-debadged-04/stream/[Sheriff]/eheli/stream/eheli.yft"
     },
     {
       "id": "stream_speeddemonrb",
@@ -7416,7 +7907,8 @@
       "hasYtd": true,
       "hasGlb": false,
       "brand": "Sheriff",
-      "pack": "600-debadged-04"
+      "pack": "600-debadged-04",
+      "yftRel": "600-debadged-04/stream/[Sheriff]/speeddemonrb/stream/speeddemonrb.yft"
     },
     {
       "id": "stream_valor12rb",
@@ -7431,7 +7923,8 @@
       "hasYtd": true,
       "hasGlb": false,
       "brand": "Sheriff",
-      "pack": "600-debadged-04"
+      "pack": "600-debadged-04",
+      "yftRel": "600-debadged-04/stream/[Sheriff]/valor12rb/stream/valor12rb.yft"
     },
     {
       "id": "stream_valor13rb",
@@ -7446,7 +7939,8 @@
       "hasYtd": true,
       "hasGlb": false,
       "brand": "Sheriff",
-      "pack": "600-debadged-04"
+      "pack": "600-debadged-04",
+      "yftRel": "600-debadged-04/stream/[Sheriff]/valor13rb/stream/valor13rb.yft"
     },
     {
       "id": "stream_valor15rb",
@@ -7461,7 +7955,8 @@
       "hasYtd": true,
       "hasGlb": false,
       "brand": "Sheriff",
-      "pack": "600-debadged-04"
+      "pack": "600-debadged-04",
+      "yftRel": "600-debadged-04/stream/[Sheriff]/valor15rb/stream/valor15rb.yft"
     },
     {
       "id": "stream_valor3rb",
@@ -7476,7 +7971,8 @@
       "hasYtd": true,
       "hasGlb": false,
       "brand": "Sheriff",
-      "pack": "600-debadged-04"
+      "pack": "600-debadged-04",
+      "yftRel": "600-debadged-04/stream/[Sheriff]/valor3rb/stream/valor3rb.yft"
     },
     {
       "id": "stream_valor5rb",
@@ -7491,7 +7987,8 @@
       "hasYtd": true,
       "hasGlb": false,
       "brand": "Sheriff",
-      "pack": "600-debadged-04"
+      "pack": "600-debadged-04",
+      "yftRel": "600-debadged-04/stream/[Sheriff]/valor5rb/stream/valor5rb.yft"
     },
     {
       "id": "stream_valor6rb",
@@ -7506,7 +8003,8 @@
       "hasYtd": true,
       "hasGlb": false,
       "brand": "Sheriff",
-      "pack": "600-debadged-04"
+      "pack": "600-debadged-04",
+      "yftRel": "600-debadged-04/stream/[Sheriff]/valor6rb/stream/valor6rb.yft"
     },
     {
       "id": "stream_valorharley",
@@ -7521,7 +8019,8 @@
       "hasYtd": true,
       "hasGlb": false,
       "brand": "Sheriff",
-      "pack": "600-debadged-04"
+      "pack": "600-debadged-04",
+      "yftRel": "600-debadged-04/stream/[Sheriff]/valorharley/stream/valorharley.yft"
     },
     {
       "id": "stream_21sierra",
@@ -7536,7 +8035,8 @@
       "hasYtd": true,
       "hasGlb": false,
       "brand": "GMC",
-      "pack": "600-debadged-10"
+      "pack": "600-debadged-10",
+      "yftRel": "600-debadged-10/stream/[GMC]/21sierra/stream/21sierra.yft"
     },
     {
       "id": "stream_silviagd",
@@ -7551,7 +8051,8 @@
       "hasYtd": true,
       "hasGlb": false,
       "brand": "Nissan",
-      "pack": "600-debadged-25"
+      "pack": "600-debadged-25",
+      "yftRel": "600-debadged-25/stream/[Nissan]/silviagd/stream/silviagd.yft"
     },
     {
       "id": "stream_specialtf",
@@ -7566,7 +8067,8 @@
       "hasYtd": true,
       "hasGlb": false,
       "brand": "Gang Vehicles",
-      "pack": "600-debadged-14"
+      "pack": "600-debadged-14",
+      "yftRel": "600-debadged-14/stream/[Gang Vehicles]/specialtf/stream/specialtf.yft"
     },
     {
       "id": "stream_lbperfs",
@@ -7581,7 +8083,8 @@
       "hasYtd": true,
       "hasGlb": false,
       "brand": "Lamborghini",
-      "pack": "600-debadged-31"
+      "pack": "600-debadged-31",
+      "yftRel": "600-debadged-31/stream/[Lamborghini]/lbperfs/stream/lbperfs.yft"
     },
     {
       "id": "stream_hycadesti",
@@ -7596,7 +8099,8 @@
       "hasYtd": true,
       "hasGlb": false,
       "brand": "Subaru",
-      "pack": "600-debadged-09"
+      "pack": "600-debadged-09",
+      "yftRel": "600-debadged-09/stream/[Subaru]/hycadesti/stream/hycadesti.yft"
     },
     {
       "id": "stream_subisti08",
@@ -7611,7 +8115,8 @@
       "hasYtd": true,
       "hasGlb": false,
       "brand": "Subaru",
-      "pack": "600-debadged-09"
+      "pack": "600-debadged-09",
+      "yftRel": "600-debadged-09/stream/[Subaru]/subisti08/stream/subisti08.yft"
     },
     {
       "id": "stream_bmwe39",
@@ -7626,7 +8131,8 @@
       "hasYtd": true,
       "hasGlb": false,
       "brand": "BMW",
-      "pack": "600-debadged-24"
+      "pack": "600-debadged-24",
+      "yftRel": "600-debadged-24/stream/[BMW]/bmwe39/stream/bmwe39.yft"
     },
     {
       "id": "stream_brz13varis",
@@ -7641,7 +8147,8 @@
       "hasYtd": true,
       "hasGlb": false,
       "brand": "Varis",
-      "pack": "600-debadged-30"
+      "pack": "600-debadged-30",
+      "yftRel": "600-debadged-30/stream/[Varis]/brz13varis/stream/brz13varis.yft"
     },
     {
       "id": "stream_Shelbytacoma4x4",
@@ -7656,7 +8163,8 @@
       "hasYtd": true,
       "hasGlb": false,
       "brand": "Ford",
-      "pack": "600-debadged-12"
+      "pack": "600-debadged-12",
+      "yftRel": "600-debadged-12/stream/[Ford]/Shelbytacoma4x4/stream/Shelbytacoma4x4.yft"
     },
     {
       "id": "stream_taycanani",
@@ -7671,7 +8179,8 @@
       "hasYtd": true,
       "hasGlb": false,
       "brand": "Porsche",
-      "pack": "600-debadged-33"
+      "pack": "600-debadged-33",
+      "yftRel": "600-debadged-33/stream/[Porsche]/taycanani/stream/taycanani.yft"
     },
     {
       "id": "stream_model3",
@@ -7686,7 +8195,8 @@
       "hasYtd": true,
       "hasGlb": false,
       "brand": "Tesla",
-      "pack": "600-debadged-09"
+      "pack": "600-debadged-09",
+      "yftRel": "600-debadged-09/stream/[Tesla]/model/stream/model3.yft"
     },
     {
       "id": "stream_models",
@@ -7701,7 +8211,8 @@
       "hasYtd": true,
       "hasGlb": false,
       "brand": "Tesla",
-      "pack": "600-debadged-09"
+      "pack": "600-debadged-09",
+      "yftRel": "600-debadged-09/stream/[Tesla]/models/stream/models.yft"
     },
     {
       "id": "stream_teslaroad",
@@ -7716,7 +8227,8 @@
       "hasYtd": true,
       "hasGlb": false,
       "brand": "Tesla",
-      "pack": "600-debadged-09"
+      "pack": "600-debadged-09",
+      "yftRel": "600-debadged-09/stream/[Tesla]/teslaroad/stream/teslaroad.yft"
     },
     {
       "id": "stream_teslapd",
@@ -7731,7 +8243,8 @@
       "hasYtd": true,
       "hasGlb": false,
       "brand": "Tesla",
-      "pack": "600-debadged-09"
+      "pack": "600-debadged-09",
+      "yftRel": "600-debadged-09/stream/[Tesla]/teslapd/stream/teslapd.yft"
     },
     {
       "id": "stream_thewolftruck",
@@ -7746,7 +8259,8 @@
       "hasYtd": true,
       "hasGlb": false,
       "brand": "Others",
-      "pack": "600-debadged-33"
+      "pack": "600-debadged-33",
+      "yftRel": "600-debadged-33/stream/[Others]/thewolftruck/stream/thewolftruck.yft"
     },
     {
       "id": "stream_variszupra",
@@ -7761,7 +8275,8 @@
       "hasYtd": true,
       "hasGlb": false,
       "brand": "Toyota",
-      "pack": "600-debadged-03"
+      "pack": "600-debadged-03",
+      "yftRel": "600-debadged-03/stream/[Toyota]/variszupra/stream/variszupra.yft"
     },
     {
       "id": "stream_evox",
@@ -7776,7 +8291,8 @@
       "hasYtd": true,
       "hasGlb": false,
       "brand": "Mitsubishi",
-      "pack": "600-debadged-04"
+      "pack": "600-debadged-04",
+      "yftRel": "600-debadged-04/stream/[Mitsubishi]/evox/stream/evox.yft"
     },
     {
       "id": "stream_mk4hycade",
@@ -7791,7 +8307,8 @@
       "hasYtd": true,
       "hasGlb": false,
       "brand": "Toyota",
-      "pack": "600-debadged-03"
+      "pack": "600-debadged-03",
+      "yftRel": "600-debadged-03/stream/[Toyota]/mk4hycade/stream/mk4hycade.yft"
     },
     {
       "id": "stream_mkivsupra",
@@ -7806,7 +8323,8 @@
       "hasYtd": true,
       "hasGlb": false,
       "brand": "Toyota",
-      "pack": "600-debadged-03"
+      "pack": "600-debadged-03",
+      "yftRel": "600-debadged-03/stream/[Toyota]/mkivsupra/stream/mkivsupra.yft"
     },
     {
       "id": "stream_gfuckedsupra",
@@ -7821,7 +8339,8 @@
       "hasYtd": true,
       "hasGlb": false,
       "brand": "Toyota",
-      "pack": "600-debadged-03"
+      "pack": "600-debadged-03",
+      "yftRel": "600-debadged-03/stream/[Toyota]/gfuckedsupra/stream/gfuckedsupra.yft"
     },
     {
       "id": "stream_GODzHYCADEMK4V2",
@@ -7836,7 +8355,8 @@
       "hasYtd": true,
       "hasGlb": false,
       "brand": "Toyota",
-      "pack": "600-debadged-03"
+      "pack": "600-debadged-03",
+      "yftRel": "600-debadged-03/stream/[Toyota]/GODzHYCADEMK4V2/stream/GODzHYCADEMK4V2.yft"
     },
     {
       "id": "stream_m8benzo",
@@ -7851,7 +8371,8 @@
       "hasYtd": true,
       "hasGlb": false,
       "brand": "BMW",
-      "pack": "600-debadged-18"
+      "pack": "600-debadged-18",
+      "yftRel": "600-debadged-18/stream/[BMW]/m8benzo/stream/m8benzo.yft"
     },
     {
       "id": "stream_suprapandem",
@@ -7866,7 +8387,8 @@
       "hasYtd": true,
       "hasGlb": false,
       "brand": "Toyota",
-      "pack": "600-debadged-03"
+      "pack": "600-debadged-03",
+      "yftRel": "600-debadged-03/stream/[Toyota]/suprapandem/stream/suprapandem.yft"
     },
     {
       "id": "stream_trhawk",
@@ -7881,7 +8403,8 @@
       "hasYtd": true,
       "hasGlb": false,
       "brand": "Police",
-      "pack": "600-debadged-30"
+      "pack": "600-debadged-30",
+      "yftRel": "600-debadged-30/stream/[Police]/trhawk/stream/trhawk.yft"
     },
     {
       "id": "stream_terzo",
@@ -7896,7 +8419,8 @@
       "hasYtd": true,
       "hasGlb": false,
       "brand": "Lamborghini",
-      "pack": "600-debadged-23"
+      "pack": "600-debadged-23",
+      "yftRel": "600-debadged-23/stream/[Lamborghini]/terzo/stream/terzo.yft"
     },
     {
       "id": "stream_ddcemperor",
@@ -7911,7 +8435,8 @@
       "hasYtd": true,
       "hasGlb": false,
       "brand": "Mercedes",
-      "pack": "600-debadged-26"
+      "pack": "600-debadged-26",
+      "yftRel": "600-debadged-26/stream/[Mercedes]/ddcemperor/stream/ddcemperor.yft"
     },
     {
       "id": "stream_ugc765lt",
@@ -7926,7 +8451,8 @@
       "hasYtd": true,
       "hasGlb": false,
       "brand": "McLaren",
-      "pack": "600-debadged-07"
+      "pack": "600-debadged-07",
+      "yftRel": "600-debadged-07/stream/[McLaren]/ugc765lt/stream/ugc765lt.yft"
     },
     {
       "id": "stream_Urus_Stretch_6",
@@ -7941,7 +8467,8 @@
       "hasYtd": true,
       "hasGlb": false,
       "brand": "Lamborghini",
-      "pack": "600-debadged-26"
+      "pack": "600-debadged-26",
+      "yftRel": "600-debadged-26/stream/[Lamborghini]/Urus_Stretch_6/stream/Urus_Stretch_6.yft"
     },
     {
       "id": "stream_urusbeastedit",
@@ -7956,7 +8483,8 @@
       "hasYtd": true,
       "hasGlb": false,
       "brand": "Lamborghini",
-      "pack": "600-debadged-18"
+      "pack": "600-debadged-18",
+      "yftRel": "600-debadged-18/stream/[Lamborghini]/urusbeastedit/stream/urusbeastedit.yft"
     },
     {
       "id": "stream_valor10rb",
@@ -7971,7 +8499,8 @@
       "hasYtd": true,
       "hasGlb": false,
       "brand": "Sheriff",
-      "pack": "600-debadged-04"
+      "pack": "600-debadged-04",
+      "yftRel": "600-debadged-04/stream/[Sheriff]/valor10rb/stream/valor10rb.yft"
     },
     {
       "id": "stream_valor1rb",
@@ -7986,7 +8515,8 @@
       "hasYtd": true,
       "hasGlb": false,
       "brand": "Sheriff",
-      "pack": "600-debadged-04"
+      "pack": "600-debadged-04",
+      "yftRel": "600-debadged-04/stream/[Sheriff]/valor1rb/stream/valor1rb.yft"
     },
     {
       "id": "stream_van_acieecorps",
@@ -8001,7 +8531,8 @@
       "hasYtd": true,
       "hasGlb": false,
       "brand": "Gang Vehicles",
-      "pack": "600-debadged-33"
+      "pack": "600-debadged-33",
+      "yftRel": "600-debadged-33/stream/[Gang Vehicles]/van_acieecorps/stream/van_acieecorps.yft"
     },
     {
       "id": "stream_van_anarchy",
@@ -8016,7 +8547,8 @@
       "hasYtd": true,
       "hasGlb": false,
       "brand": "Gang Vehicles",
-      "pack": "600-debadged-33"
+      "pack": "600-debadged-33",
+      "yftRel": "600-debadged-33/stream/[Gang Vehicles]/van_anarchy/stream/van_anarchy.yft"
     },
     {
       "id": "stream_van_ballas",
@@ -8031,7 +8563,8 @@
       "hasYtd": true,
       "hasGlb": false,
       "brand": "Gang Vehicles",
-      "pack": "600-debadged-33"
+      "pack": "600-debadged-33",
+      "yftRel": "600-debadged-33/stream/[Gang Vehicles]/van_ballas/stream/van_ballas.yft"
     },
     {
       "id": "stream_van_blackjackets",
@@ -8046,7 +8579,8 @@
       "hasYtd": true,
       "hasGlb": false,
       "brand": "Gang Vehicles",
-      "pack": "600-debadged-33"
+      "pack": "600-debadged-33",
+      "yftRel": "600-debadged-33/stream/[Gang Vehicles]/van_blackjackets/stream/van_blackjackets.yft"
     },
     {
       "id": "stream_van_blacklions",
@@ -8061,7 +8595,8 @@
       "hasYtd": true,
       "hasGlb": false,
       "brand": "Gang Vehicles",
-      "pack": "600-debadged-33"
+      "pack": "600-debadged-33",
+      "yftRel": "600-debadged-33/stream/[Gang Vehicles]/van_blacklions/stream/van_blacklions.yft"
     },
     {
       "id": "stream_van_bloods",
@@ -8076,7 +8611,8 @@
       "hasYtd": true,
       "hasGlb": false,
       "brand": "Gang Vehicles",
-      "pack": "600-debadged-33"
+      "pack": "600-debadged-33",
+      "yftRel": "600-debadged-33/stream/[Gang Vehicles]/van_bloods/stream/van_bloods.yft"
     },
     {
       "id": "stream_van_bratwa",
@@ -8091,7 +8627,8 @@
       "hasYtd": true,
       "hasGlb": false,
       "brand": "Gang Vehicles",
-      "pack": "600-debadged-33"
+      "pack": "600-debadged-33",
+      "yftRel": "600-debadged-33/stream/[Gang Vehicles]/van_bratwa/stream/van_bratwa.yft"
     },
     {
       "id": "stream_van_brigada",
@@ -8106,7 +8643,8 @@
       "hasYtd": true,
       "hasGlb": false,
       "brand": "Gang Vehicles",
-      "pack": "600-debadged-33"
+      "pack": "600-debadged-33",
+      "yftRel": "600-debadged-33/stream/[Gang Vehicles]/van_brigada/stream/van_brigada.yft"
     },
     {
       "id": "stream_van_cali",
@@ -8121,7 +8659,8 @@
       "hasYtd": true,
       "hasGlb": false,
       "brand": "Gang Vehicles",
-      "pack": "600-debadged-33"
+      "pack": "600-debadged-33",
+      "yftRel": "600-debadged-33/stream/[Gang Vehicles]/van_cali/stream/van_cali.yft"
     },
     {
       "id": "stream_van_camorra",
@@ -8136,7 +8675,8 @@
       "hasYtd": true,
       "hasGlb": false,
       "brand": "Gang Vehicles",
-      "pack": "600-debadged-33"
+      "pack": "600-debadged-33",
+      "yftRel": "600-debadged-33/stream/[Gang Vehicles]/van_camorra/stream/van_camorra.yft"
     },
     {
       "id": "stream_van_club77",
@@ -8151,7 +8691,8 @@
       "hasYtd": true,
       "hasGlb": false,
       "brand": "Gang Vehicles",
-      "pack": "600-debadged-33"
+      "pack": "600-debadged-33",
+      "yftRel": "600-debadged-33/stream/[Gang Vehicles]/van_club77/stream/van_club77.yft"
     },
     {
       "id": "stream_van_criminals",
@@ -8166,7 +8707,8 @@
       "hasYtd": true,
       "hasGlb": false,
       "brand": "Gang Vehicles",
-      "pack": "600-debadged-33"
+      "pack": "600-debadged-33",
+      "yftRel": "600-debadged-33/stream/[Gang Vehicles]/van_criminals/stream/van_criminals.yft"
     },
     {
       "id": "stream_van_crips",
@@ -8181,7 +8723,8 @@
       "hasYtd": true,
       "hasGlb": false,
       "brand": "Gang Vehicles",
-      "pack": "600-debadged-33"
+      "pack": "600-debadged-33",
+      "yftRel": "600-debadged-33/stream/[Gang Vehicles]/van_crips/stream/van_crips.yft"
     },
     {
       "id": "stream_van_deparis",
@@ -8196,7 +8739,8 @@
       "hasYtd": true,
       "hasGlb": false,
       "brand": "Gang Vehicles",
-      "pack": "600-debadged-33"
+      "pack": "600-debadged-33",
+      "yftRel": "600-debadged-33/stream/[Gang Vehicles]/van_deparis/stream/van_deparis.yft"
     },
     {
       "id": "stream_van_galaxy",
@@ -8211,7 +8755,8 @@
       "hasYtd": true,
       "hasGlb": false,
       "brand": "Gang Vehicles",
-      "pack": "600-debadged-33"
+      "pack": "600-debadged-33",
+      "yftRel": "600-debadged-33/stream/[Gang Vehicles]/van_galaxy/stream/van_galaxy.yft"
     },
     {
       "id": "stream_van_gmbh",
@@ -8226,7 +8771,8 @@
       "hasYtd": true,
       "hasGlb": false,
       "brand": "Gang Vehicles",
-      "pack": "600-debadged-33"
+      "pack": "600-debadged-33",
+      "yftRel": "600-debadged-33/stream/[Gang Vehicles]/van_gmbh/stream/van_gmbh.yft"
     },
     {
       "id": "stream_van_gonzales",
@@ -8241,7 +8787,8 @@
       "hasYtd": true,
       "hasGlb": false,
       "brand": "Gang Vehicles",
-      "pack": "600-debadged-33"
+      "pack": "600-debadged-33",
+      "yftRel": "600-debadged-33/stream/[Gang Vehicles]/van_gonzales/stream/van_gonzales.yft"
     },
     {
       "id": "stream_van_grove",
@@ -8256,7 +8803,8 @@
       "hasYtd": true,
       "hasGlb": false,
       "brand": "Gang Vehicles",
-      "pack": "600-debadged-33"
+      "pack": "600-debadged-33",
+      "yftRel": "600-debadged-33/stream/[Gang Vehicles]/van_grove/stream/van_grove.yft"
     },
     {
       "id": "stream_van_hoover",
@@ -8271,7 +8819,8 @@
       "hasYtd": true,
       "hasGlb": false,
       "brand": "Gang Vehicles",
-      "pack": "600-debadged-33"
+      "pack": "600-debadged-33",
+      "yftRel": "600-debadged-33/stream/[Gang Vehicles]/van_hoover/stream/van_hoover.yft"
     },
     {
       "id": "stream_van_kadir",
@@ -8286,7 +8835,8 @@
       "hasYtd": true,
       "hasGlb": false,
       "brand": "Gang Vehicles",
-      "pack": "600-debadged-33"
+      "pack": "600-debadged-33",
+      "yftRel": "600-debadged-33/stream/[Gang Vehicles]/van_kadir/stream/van_kadir.yft"
     },
     {
       "id": "stream_van_lcn",
@@ -8301,7 +8851,8 @@
       "hasYtd": true,
       "hasGlb": false,
       "brand": "Gang Vehicles",
-      "pack": "600-debadged-33"
+      "pack": "600-debadged-33",
+      "yftRel": "600-debadged-33/stream/[Gang Vehicles]/van_lcn/stream/van_lcn.yft"
     },
     {
       "id": "stream_van_lostmc",
@@ -8316,7 +8867,8 @@
       "hasYtd": true,
       "hasGlb": false,
       "brand": "Gang Vehicles",
-      "pack": "600-debadged-33"
+      "pack": "600-debadged-33",
+      "yftRel": "600-debadged-33/stream/[Gang Vehicles]/van_lostmc/stream/van_lostmc.yft"
     },
     {
       "id": "stream_van_medelin",
@@ -8331,7 +8883,8 @@
       "hasYtd": true,
       "hasGlb": false,
       "brand": "Gang Vehicles",
-      "pack": "600-debadged-33"
+      "pack": "600-debadged-33",
+      "yftRel": "600-debadged-33/stream/[Gang Vehicles]/van_medelin/stream/van_medelin.yft"
     },
     {
       "id": "stream_van_mg13",
@@ -8346,7 +8899,8 @@
       "hasYtd": true,
       "hasGlb": false,
       "brand": "Gang Vehicles",
-      "pack": "600-debadged-33"
+      "pack": "600-debadged-33",
+      "yftRel": "600-debadged-33/stream/[Gang Vehicles]/van_mg13/stream/van_mg13.yft"
     },
     {
       "id": "stream_van_midnight",
@@ -8361,7 +8915,8 @@
       "hasYtd": true,
       "hasGlb": false,
       "brand": "Gang Vehicles",
-      "pack": "600-debadged-33"
+      "pack": "600-debadged-33",
+      "yftRel": "600-debadged-33/stream/[Gang Vehicles]/van_midnight/stream/van_midnight.yft"
     },
     {
       "id": "stream_van_narcos",
@@ -8376,7 +8931,8 @@
       "hasYtd": true,
       "hasGlb": false,
       "brand": "Gang Vehicles",
-      "pack": "600-debadged-33"
+      "pack": "600-debadged-33",
+      "yftRel": "600-debadged-33/stream/[Gang Vehicles]/van_narcos/stream/van_narcos.yft"
     },
     {
       "id": "stream_van_ogs",
@@ -8391,7 +8947,8 @@
       "hasYtd": true,
       "hasGlb": false,
       "brand": "Gang Vehicles",
-      "pack": "600-debadged-33"
+      "pack": "600-debadged-33",
+      "yftRel": "600-debadged-33/stream/[Gang Vehicles]/van_ogs/stream/van_ogs.yft"
     },
     {
       "id": "stream_van_orga",
@@ -8406,7 +8963,8 @@
       "hasYtd": true,
       "hasGlb": false,
       "brand": "Gang Vehicles",
-      "pack": "600-debadged-33"
+      "pack": "600-debadged-33",
+      "yftRel": "600-debadged-33/stream/[Gang Vehicles]/van_orga/stream/van_orga.yft"
     },
     {
       "id": "stream_van_osmanen",
@@ -8421,7 +8979,8 @@
       "hasYtd": true,
       "hasGlb": false,
       "brand": "Gang Vehicles",
-      "pack": "600-debadged-33"
+      "pack": "600-debadged-33",
+      "yftRel": "600-debadged-33/stream/[Gang Vehicles]/van_osmanen/stream/van_osmanen.yft"
     },
     {
       "id": "stream_van_peakyblinders",
@@ -8436,7 +8995,8 @@
       "hasYtd": true,
       "hasGlb": false,
       "brand": "Gang Vehicles",
-      "pack": "600-debadged-33"
+      "pack": "600-debadged-33",
+      "yftRel": "600-debadged-33/stream/[Gang Vehicles]/van_peakyblinders/stream/van_peakyblinders.yft"
     },
     {
       "id": "stream_van_redlight",
@@ -8451,7 +9011,8 @@
       "hasYtd": true,
       "hasGlb": false,
       "brand": "Gang Vehicles",
-      "pack": "600-debadged-33"
+      "pack": "600-debadged-33",
+      "yftRel": "600-debadged-33/stream/[Gang Vehicles]/van_redlight/stream/van_redlight.yft"
     },
     {
       "id": "stream_van_santasofia",
@@ -8466,7 +9027,8 @@
       "hasYtd": true,
       "hasGlb": false,
       "brand": "Gang Vehicles",
-      "pack": "600-debadged-33"
+      "pack": "600-debadged-33",
+      "yftRel": "600-debadged-33/stream/[Gang Vehicles]/van_santasofia/stream/van_santasofia.yft"
     },
     {
       "id": "stream_van_st187",
@@ -8481,7 +9043,8 @@
       "hasYtd": true,
       "hasGlb": false,
       "brand": "Gang Vehicles",
-      "pack": "600-debadged-25"
+      "pack": "600-debadged-25",
+      "yftRel": "600-debadged-25/stream/[Gang Vehicles]/van_st187/stream/van_st187.yft"
     },
     {
       "id": "stream_van_syndicate",
@@ -8496,7 +9059,8 @@
       "hasYtd": true,
       "hasGlb": false,
       "brand": "Gang Vehicles",
-      "pack": "600-debadged-33"
+      "pack": "600-debadged-33",
+      "yftRel": "600-debadged-33/stream/[Gang Vehicles]/van_syndicate/stream/van_syndicate.yft"
     },
     {
       "id": "stream_van_triaden",
@@ -8511,7 +9075,8 @@
       "hasYtd": true,
       "hasGlb": false,
       "brand": "Gang Vehicles",
-      "pack": "600-debadged-33"
+      "pack": "600-debadged-33",
+      "yftRel": "600-debadged-33/stream/[Gang Vehicles]/van_triaden/stream/van_triaden.yft"
     },
     {
       "id": "stream_van_tschetschenen",
@@ -8526,7 +9091,8 @@
       "hasYtd": true,
       "hasGlb": false,
       "brand": "Gang Vehicles",
-      "pack": "600-debadged-33"
+      "pack": "600-debadged-33",
+      "yftRel": "600-debadged-33/stream/[Gang Vehicles]/van_tschetschenen/stream/van_tschetschenen.yft"
     },
     {
       "id": "stream_van_vagos",
@@ -8541,7 +9107,8 @@
       "hasYtd": true,
       "hasGlb": false,
       "brand": "Gang Vehicles",
-      "pack": "600-debadged-33"
+      "pack": "600-debadged-33",
+      "yftRel": "600-debadged-33/stream/[Gang Vehicles]/van_vagos/stream/van_vagos.yft"
     },
     {
       "id": "stream_van_woo",
@@ -8556,7 +9123,8 @@
       "hasYtd": true,
       "hasGlb": false,
       "brand": "Gang Vehicles",
-      "pack": "600-debadged-33"
+      "pack": "600-debadged-33",
+      "yftRel": "600-debadged-33/stream/[Gang Vehicles]/van_woo/stream/van_woo.yft"
     },
     {
       "id": "stream_van_yakuza",
@@ -8571,7 +9139,8 @@
       "hasYtd": true,
       "hasGlb": false,
       "brand": "Gang Vehicles",
-      "pack": "600-debadged-33"
+      "pack": "600-debadged-33",
+      "yftRel": "600-debadged-33/stream/[Gang Vehicles]/van_yakuza/stream/van_yakuza.yft"
     },
     {
       "id": "stream_vanzkrc",
@@ -8586,7 +9155,8 @@
       "hasYtd": true,
       "hasGlb": false,
       "brand": "Nissan",
-      "pack": "600-debadged-20"
+      "pack": "600-debadged-20",
+      "yftRel": "600-debadged-20/stream/[Nissan]/vanzkrc/stream/vanzkrc.yft"
     },
     {
       "id": "stream_vanztt",
@@ -8601,7 +9171,8 @@
       "hasYtd": true,
       "hasGlb": false,
       "brand": "Lamborghini",
-      "pack": "600-debadged-16"
+      "pack": "600-debadged-16",
+      "yftRel": "600-debadged-16/stream/[Lamborghini]/vanztt/stream/vanztt.yft"
     },
     {
       "id": "stream_vanzur",
@@ -8616,7 +9187,8 @@
       "hasYtd": true,
       "hasGlb": false,
       "brand": "Lamborghini",
-      "pack": "600-debadged-22"
+      "pack": "600-debadged-22",
+      "yftRel": "600-debadged-22/stream/[Lamborghini]/vanzur/stream/vanzur.yft"
     },
     {
       "id": "stream_venatus",
@@ -8631,7 +9203,8 @@
       "hasYtd": true,
       "hasGlb": false,
       "brand": "Lamborghini",
-      "pack": "600-debadged-27"
+      "pack": "600-debadged-27",
+      "yftRel": "600-debadged-27/stream/[Lamborghini]/venatus/stream/venatus.yft"
     },
     {
       "id": "stream_vironmichalski",
@@ -8646,7 +9219,8 @@
       "hasYtd": true,
       "hasGlb": false,
       "brand": "Gang Vehicles",
-      "pack": "600-debadged-20"
+      "pack": "600-debadged-20",
+      "yftRel": "600-debadged-20/stream/[Gang Vehicles]/vironmichalski/stream/vironmichalski.yft"
     },
     {
       "id": "stream_viron",
@@ -8661,7 +9235,8 @@
       "hasYtd": true,
       "hasGlb": false,
       "brand": "Gang Vehicles",
-      "pack": "600-debadged-20"
+      "pack": "600-debadged-20",
+      "yftRel": "600-debadged-20/stream/[Gang Vehicles]/viron/stream/viron.yft"
     },
     {
       "id": "stream_passat",
@@ -8676,7 +9251,8 @@
       "hasYtd": true,
       "hasGlb": false,
       "brand": "VW",
-      "pack": "600-debadged-05"
+      "pack": "600-debadged-05",
+      "yftRel": "600-debadged-05/stream/[VW]/passat/stream/passat.yft"
     },
     {
       "id": "stream_golf75r",
@@ -8691,7 +9267,8 @@
       "hasYtd": true,
       "hasGlb": false,
       "brand": "VW",
-      "pack": "600-debadged-05"
+      "pack": "600-debadged-05",
+      "yftRel": "600-debadged-05/stream/[VW]/golf75r/stream/golf75r.yft"
     },
     {
       "id": "stream_fbv60pole",
@@ -8706,7 +9283,8 @@
       "hasYtd": true,
       "hasGlb": false,
       "brand": "Others",
-      "pack": "600-debadged-06"
+      "pack": "600-debadged-06",
+      "yftRel": "600-debadged-06/stream/[Others]/fbv60pole/stream/fbv60pole.yft"
     },
     {
       "id": "stream_polestar1",
@@ -8721,7 +9299,8 @@
       "hasYtd": true,
       "hasGlb": false,
       "brand": "PoleStar",
-      "pack": "600-debadged-32"
+      "pack": "600-debadged-32",
+      "yftRel": "600-debadged-32/stream/[PoleStar]/polestar1/stream/polestar1.yft"
     },
     {
       "id": "stream_xc90",
@@ -8736,7 +9315,8 @@
       "hasYtd": true,
       "hasGlb": false,
       "brand": "Gang Vehicles",
-      "pack": "600-debadged-32"
+      "pack": "600-debadged-32",
+      "yftRel": "600-debadged-32/stream/[Gang Vehicles]/xc90/stream/xc90.yft"
     },
     {
       "id": "stream_v60hr",
@@ -8751,7 +9331,8 @@
       "hasYtd": true,
       "hasGlb": false,
       "brand": "Volvo",
-      "pack": "600-debadged-12"
+      "pack": "600-debadged-12",
+      "yftRel": "600-debadged-12/stream/[Volvo]/v60hr/stream/v60hr.yft"
     },
     {
       "id": "stream_amarok",
@@ -8766,7 +9347,8 @@
       "hasYtd": true,
       "hasGlb": false,
       "brand": "Toyota",
-      "pack": "600-debadged-03"
+      "pack": "600-debadged-03",
+      "yftRel": "600-debadged-03/stream/[Toyota]/amarok/stream/amarok.yft"
     },
     {
       "id": "stream_golf7",
@@ -8781,7 +9363,8 @@
       "hasYtd": true,
       "hasGlb": false,
       "brand": "VW",
-      "pack": "600-debadged-05"
+      "pack": "600-debadged-05",
+      "yftRel": "600-debadged-05/stream/[VW]/golf7/stream/golf7.yft"
     },
     {
       "id": "stream_golf91wideprzemo",
@@ -8796,7 +9379,8 @@
       "hasYtd": true,
       "hasGlb": false,
       "brand": "VW",
-      "pack": "600-debadged-05"
+      "pack": "600-debadged-05",
+      "yftRel": "600-debadged-05/stream/[VW]/golf91wideprzemo/stream/golf91wideprzemo.yft"
     },
     {
       "id": "stream_rmodmk7",
@@ -8811,7 +9395,8 @@
       "hasYtd": true,
       "hasGlb": false,
       "brand": "VW",
-      "pack": "600-debadged-05"
+      "pack": "600-debadged-05",
+      "yftRel": "600-debadged-05/stream/[VW]/rmodmk7/stream/rmodmk7.yft"
     },
     {
       "id": "stream_rmodr50",
@@ -8826,7 +9411,8 @@
       "hasYtd": true,
       "hasGlb": false,
       "brand": "Others",
-      "pack": "600-debadged-28"
+      "pack": "600-debadged-28",
+      "yftRel": "600-debadged-28/stream/[Others]/rmodr50/stream/rmodr50.yft"
     },
     {
       "id": "stream_GODz61BUS",
@@ -8841,7 +9427,8 @@
       "hasYtd": true,
       "hasGlb": false,
       "brand": "Others",
-      "pack": "600-debadged-30"
+      "pack": "600-debadged-30",
+      "yftRel": "600-debadged-30/stream/[Others]/GODz61BUS/stream/GODz61BUS.yft"
     },
     {
       "id": "stream_a80vygasaleem",
@@ -8856,7 +9443,8 @@
       "hasYtd": true,
       "hasGlb": false,
       "brand": "Toyota",
-      "pack": "600-debadged-03"
+      "pack": "600-debadged-03",
+      "yftRel": "600-debadged-03/stream/[Toyota]/a80vygasaleem/stream/a80vygasaleem.yft"
     },
     {
       "id": "stream_cooperworks",
@@ -8871,7 +9459,8 @@
       "hasYtd": true,
       "hasGlb": false,
       "brand": "Mini",
-      "pack": "600-debadged-11"
+      "pack": "600-debadged-11",
+      "yftRel": "600-debadged-11/stream/[Mini]/cooperworks/stream/cooperworks.yft"
     },
     {
       "id": "stream_204sPetro",
@@ -8886,7 +9475,8 @@
       "hasYtd": true,
       "hasGlb": false,
       "brand": "Others",
-      "pack": "600-debadged-28"
+      "pack": "600-debadged-28",
+      "yftRel": "600-debadged-28/stream/[Others]/204spetro/stream/204sPetro.yft"
     },
     {
       "id": "stream_rs666",
@@ -8901,7 +9491,8 @@
       "hasYtd": true,
       "hasGlb": false,
       "brand": "Audi",
-      "pack": "600-debadged-25"
+      "pack": "600-debadged-25",
+      "yftRel": "600-debadged-25/stream/[Audi]/rs666/stream/rs666.yft"
     },
     {
       "id": "stream_wmfenyr",
@@ -8916,7 +9507,8 @@
       "hasYtd": true,
       "hasGlb": false,
       "brand": "W Motors",
-      "pack": "600-debadged-26"
+      "pack": "600-debadged-26",
+      "yftRel": "600-debadged-26/stream/[W Motors]/wmfenyr/stream/wmfenyr.yft"
     },
     {
       "id": "stream_GODzYAMR1",
@@ -8931,7 +9523,8 @@
       "hasYtd": true,
       "hasGlb": false,
       "brand": "Bikes",
-      "pack": "600-debadged-24"
+      "pack": "600-debadged-24",
+      "yftRel": "600-debadged-24/stream/[Bikes]/GODzYAMR1/stream/GODzYAMR1.yft"
     },
     {
       "id": "stream_RoyalYamahaEMS_white",
@@ -8946,7 +9539,8 @@
       "hasYtd": true,
       "hasGlb": false,
       "brand": "Medic",
-      "pack": "600-debadged-02"
+      "pack": "600-debadged-02",
+      "yftRel": "600-debadged-02/stream/[Medic]/RoyalYamahaEMS_white/stream/RoyalYamahaEMS_white.yft"
     },
     {
       "id": "stream_yzfr7",
@@ -8961,7 +9555,8 @@
       "hasYtd": true,
       "hasGlb": false,
       "brand": "Bikes",
-      "pack": "600-debadged-23"
+      "pack": "600-debadged-23",
+      "yftRel": "600-debadged-23/stream/[Bikes]/yzfr7/stream/yzfr7.yft"
     },
     {
       "id": "stream_esr1m",
@@ -8976,7 +9571,8 @@
       "hasYtd": true,
       "hasGlb": false,
       "brand": "Bikes",
-      "pack": "600-debadged-24"
+      "pack": "600-debadged-24",
+      "yftRel": "600-debadged-24/stream/[Bikes]/esr1m/stream/esr1m.yft"
     },
     {
       "id": "stream_aerox155",
@@ -8991,7 +9587,8 @@
       "hasYtd": true,
       "hasGlb": false,
       "brand": "Bikes",
-      "pack": "600-debadged-33"
+      "pack": "600-debadged-33",
+      "yftRel": "600-debadged-33/stream/[Bikes]/aerox155/stream/aerox155.yft"
     },
     {
       "id": "stream_senna",
@@ -9006,7 +9603,8 @@
       "hasYtd": true,
       "hasGlb": false,
       "brand": "McLaren",
-      "pack": "600-debadged-07"
+      "pack": "600-debadged-07",
+      "yftRel": "600-debadged-07/stream/[McLaren]/senna/stream/senna.yft"
     },
     {
       "id": "stream_gsthoonitruck1",
@@ -9021,7 +9619,8 @@
       "hasYtd": true,
       "hasGlb": false,
       "brand": "Others",
-      "pack": "600-debadged-26"
+      "pack": "600-debadged-26",
+      "yftRel": "600-debadged-26/stream/[Others]/gsthoonitruck1/stream/gsthoonitruck1.yft"
     },
     {
       "id": "stream_yoti",
@@ -9036,7 +9635,8 @@
       "hasYtd": true,
       "hasGlb": false,
       "brand": "Others",
-      "pack": "600-debadged-20"
+      "pack": "600-debadged-20",
+      "yftRel": "600-debadged-20/stream/[Others]/yoti/stream/yoti.yft"
     },
     {
       "id": "stream_zl1",
@@ -9051,7 +9651,8 @@
       "hasYtd": true,
       "hasGlb": false,
       "brand": "Camaro",
-      "pack": "600-debadged-10"
+      "pack": "600-debadged-10",
+      "yftRel": "600-debadged-10/stream/[Camaro]/zl1/stream/zl1.yft"
     },
     {
       "id": "stream_gtz34be",
@@ -9066,7 +9667,8 @@
       "hasYtd": true,
       "hasGlb": false,
       "brand": "Nissan",
-      "pack": "600-debadged-12"
+      "pack": "600-debadged-12",
+      "yftRel": "600-debadged-12/stream/[Nissan]/gtz34be/stream/gtz34be.yft"
     },
     {
       "id": "stream_zm_s500",
@@ -9081,7 +9683,8 @@
       "hasYtd": true,
       "hasGlb": false,
       "brand": "Police",
-      "pack": "600-debadged-30"
+      "pack": "600-debadged-30",
+      "yftRel": "600-debadged-30/stream/[Police]/zm_s500/stream/zm_s500.yft"
     }
   ]
 }

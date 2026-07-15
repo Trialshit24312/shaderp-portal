@@ -8,3 +8,6 @@ data/sessions.json
 Thumbs.db
 # Local-only sync secrets (optional file some users create)
 portal-sync.local.json
+# Converted FiveM vehicle meshes (large / copyrighted — keep local or on host disk)
+owned-static/livery/vehicles/*.glb
+owned-static/livery/vehicles/*.gltf

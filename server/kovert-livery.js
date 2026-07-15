@@ -5,6 +5,14 @@
 import path from 'path';
 import fs from 'fs';
 import express from 'express';
+import {
+  catalogPath,
+  ensureVehicleGlb,
+  glbPath,
+  loadCatalog,
+  scanServerVehicles,
+  writeCatalog,
+} from './vehicle-stream.js';
 
 const SYSTEM_PROMPT = `You are KOVERT Livery Services' AI bench tech for FiveM.
 You help with vehicle wraps AND freemode clothing (jackets, pants, shoes, badges).
@@ -73,6 +81,106 @@ function parseActions(content) {
 
 export function registerKovertLiveryRoutes(app, { requireRole, requireOwnerPage, ROOT }) {
   const liveryRoot = path.join(ROOT, 'owned-static', 'livery');
+  const vehiclesDir = path.join(liveryRoot, 'vehicles');
+
+  app.get('/api/livery/vehicles', requireRole('owner'), (req, res) => {
+    try {
+      const force = String(req.query.refresh || '') === '1';
+      let catalog = !force ? loadCatalog(liveryRoot) : null;
+      if (!catalog || force) {
+        const scan = scanServerVehicles();
+        if (scan.vehicles.length) {
+          catalog = writeCatalog(liveryRoot, scan);
+        } else {
+          catalog = loadCatalog(liveryRoot) || {
+            generatedAt: new Date().toISOString(),
+            count: 0,
+            vehicles: [],
+            error: scan.error || 'No stream vehicles found',
+            root: scan.root,
+          };
+        }
+      }
+      // Annotate which GLBs are cached on disk
+      catalog.vehicles = (catalog.vehicles || []).map((v) => ({
+        ...v,
+        hasGlb: fs.existsSync(glbPath(liveryRoot, v.spawnName)),
+        modelUrl: `/api/livery/vehicles/${encodeURIComponent(v.spawnName)}/model.glb`,
+      }));
+      catalog.count = catalog.vehicles.length;
+      catalog.cacheDir = vehiclesDir;
+      res.json(catalog);
+    } catch (err) {
+      console.error('[kovert vehicles]', err);
+      res.status(500).json({ error: err.message || 'Vehicle scan failed' });
+    }
+  });
+
+  app.post('/api/livery/vehicles/scan', requireRole('owner'), (_req, res) => {
+    try {
+      const scan = scanServerVehicles();
+      const catalog = writeCatalog(liveryRoot, scan);
+      res.json({ ok: true, ...catalog, error: scan.error });
+    } catch (err) {
+      res.status(500).json({ error: err.message || 'Scan failed' });
+    }
+  });
+
+  app.post('/api/livery/vehicles/:spawn/convert', requireRole('owner'), async (req, res) => {
+    try {
+      const spawn = String(req.params.spawn || '').replace(/[^\w\-]/g, '');
+      if (!spawn) return res.status(400).json({ error: 'spawn required' });
+      const force = Boolean(req.body?.force);
+      const result = await ensureVehicleGlb(liveryRoot, spawn, {
+        force,
+        paint: req.body?.paint,
+        lod: req.body?.lod || 'medium',
+      });
+      // refresh hasGlb flag in catalog
+      const catalog = loadCatalog(liveryRoot);
+      if (catalog) {
+        const v = catalog.vehicles.find((x) => x.spawnName === spawn);
+        if (v) v.hasGlb = true;
+        fs.writeFileSync(catalogPath(liveryRoot), JSON.stringify(catalog, null, 2));
+      }
+      res.json({
+        ok: true,
+        spawn,
+        cached: result.cached,
+        bytes: result.bytes,
+        modelUrl: `/api/livery/vehicles/${encodeURIComponent(spawn)}/model.glb`,
+      });
+    } catch (err) {
+      console.error('[kovert convert]', err);
+      res.status(500).json({
+        error: err.message || 'Conversion failed',
+        hint: 'Needs FIVEM_RESOURCES_ROOT with .yft/.ytd on this machine, plus gtax API (optional V_DRAWABLE_TO_GLB_API_KEY).',
+      });
+    }
+  });
+
+  app.get('/api/livery/vehicles/:spawn/model.glb', requireRole('owner'), async (req, res) => {
+    try {
+      const spawn = String(req.params.spawn || '').replace(/[^\w\-]/g, '');
+      const out = glbPath(liveryRoot, spawn);
+      if (!fs.existsSync(out)) {
+        if (String(req.query.convert || '') === '1') {
+          await ensureVehicleGlb(liveryRoot, spawn, { lod: 'medium' });
+        } else {
+          return res.status(404).json({
+            error: `No GLB for ${spawn}`,
+            hint: `POST /api/livery/vehicles/${spawn}/convert or add ?convert=1`,
+          });
+        }
+      }
+      res.setHeader('Content-Type', 'model/gltf-binary');
+      res.setHeader('Cache-Control', 'private, max-age=3600');
+      res.sendFile(out);
+    } catch (err) {
+      console.error('[kovert model]', err);
+      res.status(500).json({ error: err.message || 'Model unavailable' });
+    }
+  });
 
   app.get('/api/health', requireRole('owner'), async (_req, res) => {
     try {
@@ -86,9 +194,19 @@ export function registerKovertLiveryRoutes(app, { requireRole, requireOwnerPage,
         hasChat: models.some((m) => m.includes('llama')),
         hasVision: models.some((m) => m.includes('llava') || m.includes('vision')),
         kovert: true,
+        vehicles: loadCatalog(liveryRoot)?.count || 0,
+        resourcesRoot: process.env.FIVEM_RESOURCES_ROOT || null,
       });
     } catch {
-      res.json({ ok: true, ollama: false, models: [], hasChat: false, hasVision: false, kovert: true });
+      res.json({
+        ok: true,
+        ollama: false,
+        models: [],
+        hasChat: false,
+        hasVision: false,
+        kovert: true,
+        vehicles: loadCatalog(liveryRoot)?.count || 0,
+      });
     }
   });
 

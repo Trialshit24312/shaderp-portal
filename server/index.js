@@ -105,10 +105,15 @@ function requireRole(minRole) {
 
 function requireOwnerPage(req, res, next) {
   const user = getUser(req);
+  const asset =
+    /\.(glb|gltf|bin|png|jpe?g|webp|js|css|wasm|svg|map)$/i.test(req.path || '') ||
+    (req.headers.accept || '').includes('model/gltf');
   if (!user) {
+    if (asset) return res.status(401).json({ error: 'Login required' });
     return res.redirect(`/auth/discord?returnTo=${encodeURIComponent(req.originalUrl || '/livery/')}`);
   }
   if (!hasMinRole(user.appRole, 'owner')) {
+    if (asset) return res.status(403).json({ error: 'Owner access only' });
     return res.status(403).send('Owner access only — KOVERT Livery Services is restricted to portal owners.');
   }
   next();

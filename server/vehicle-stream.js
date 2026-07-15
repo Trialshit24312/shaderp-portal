@@ -68,8 +68,32 @@ function walkDir(dir, out = []) {
   return out;
 }
 
+/** Skip spoilers, bumpers, liveries-as-yft, wheels — only full driveable models. */
+function isExtraOrLodYft(spawn) {
+  const s = String(spawn || '');
+  if (/_hi$/i.test(s)) return true;
+  if (/_livery\d*$/i.test(s)) return true;
+  return /_(bon|boot|bumf|bumr|bump|exh|exhaust|grill|grille|spoiler|wing[lr]?|roof|mir|mirror|split|cage|rollcage|chassis|int|interior|door|seat|steer|wheel|rim|tyre|tire|light|lamp|kit|mod|diff|col\d)/i.test(
+    s,
+  );
+}
+
+function isPrimaryVehicleYft(spawn, yftPath, meta) {
+  if (isExtraOrLodYft(spawn)) return false;
+  const streamDir = path.dirname(yftPath);
+  const vehicleFolder = path.basename(path.dirname(streamDir));
+  const spawnL = spawn.toLowerCase();
+  const folderL = vehicleFolder.toLowerCase();
+  const modelL = (meta.modelName || '').toLowerCase();
+
+  if (modelL && spawnL === modelL) return true;
+  if (spawnL === folderL) return true;
+  if (folderL.endsWith(spawnL) || spawnL.endsWith(folderL)) return true;
+  return false;
+}
+
 /**
- * Find vehicle stream roots: folders containing `{name}.yft` (not `_hi.yft`).
+ * Find primary vehicle .yft files (not mods/extras) under 600-debadged packs.
  */
 export function scanServerVehicles(opts = {}) {
   const root = opts.root || resourcesRoot();
@@ -91,7 +115,6 @@ export function scanServerVehicles(opts = {}) {
     return { root, vehicles, error: err.message };
   }
 
-  // Also allow scanning a single pack path or the full standalone root for any *.yft
   const searchRoots = packs.length ? packs : [root];
 
   for (const packPath of searchRoots) {
@@ -106,7 +129,6 @@ export function scanServerVehicles(opts = {}) {
 
       const streamDir = path.dirname(file);
       const ytdPath = path.join(streamDir, `${spawn}.ytd`);
-      // vehicles.meta is often one or two levels up from stream/
       let metaPath = '';
       let brand = '';
       let cursor = streamDir;
@@ -115,7 +137,6 @@ export function scanServerVehicles(opts = {}) {
         const candidate = path.join(parent, 'vehicles.meta');
         if (fs.existsSync(candidate)) {
           metaPath = candidate;
-          // brand folder often like [Ferrari]
           const brandDir = path.basename(path.dirname(parent));
           const m = brandDir.match(/^\[(.+)\]$/);
           brand = m ? m[1] : brandDir.replace(/^\[|\]$/g, '');
@@ -125,9 +146,13 @@ export function scanServerVehicles(opts = {}) {
       }
 
       const meta = metaPath ? parseVehiclesMeta(metaPath) : {};
+      if (!isPrimaryVehicleYft(spawn, file, meta)) continue;
+      if (!fs.existsSync(ytdPath)) continue;
+
       const category = (meta.vehicleMakeName || brand || 'Addon').replace(/_/g, ' ');
       const bodyType = layoutToBodyType(meta.layout);
-      const display = meta.gameName && meta.gameName.toLowerCase() !== 'null' ? meta.gameName : spawn;
+      const rawName = meta.gameName && meta.gameName.toLowerCase() !== 'null' ? meta.gameName : spawn;
+      const display = rawName === spawn && brand ? `${brand} · ${spawn}` : rawName;
 
       seen.add(spawn.toLowerCase());
       vehicles.push({
@@ -144,10 +169,10 @@ export function scanServerVehicles(opts = {}) {
           pack: packName,
           brand: brand || category,
           yft: file,
-          ytd: fs.existsSync(ytdPath) ? ytdPath : null,
+          ytd: ytdPath,
           meta: metaPath || null,
         },
-        hasYtd: fs.existsSync(ytdPath),
+        hasYtd: true,
         hasGlb: false,
       });
     }
@@ -211,7 +236,7 @@ export function loadCatalog(liveryRoot) {
   }
 }
 
-export async function convertYftToGlb({ yftPath, ytdPath, spawn, outPath, paint, lod = 'medium' }) {
+export async function convertYftToGlb({ yftPath, ytdPath, spawn, outPath, paint, lod = 'high' }) {
   const yftBuf = fs.readFileSync(yftPath);
   const form = new FormData();
   form.append('yft', new Blob([yftBuf]), path.basename(yftPath));
@@ -270,12 +295,11 @@ export async function ensureVehicleGlb(liveryRoot, spawn, opts = {}) {
     spawn: hit.spawnName,
     outPath: out,
     paint: opts.paint,
-    lod: opts.lod || 'medium',
+    lod: opts.lod || 'high',
   });
   return { cached: false, ...result, path: out };
 }
 
-/** CLI: node server/vehicle-stream.js scan|convert [spawn] */
 const isMain = process.argv[1] && path.resolve(process.argv[1]) === fileURLToPath(import.meta.url);
 if (isMain) {
   const cmd = process.argv[2] || 'scan';

@@ -134,7 +134,7 @@ export function registerKovertLiveryRoutes(app, { requireRole, requireOwnerPage,
       const result = await ensureVehicleGlb(liveryRoot, spawn, {
         force,
         paint: req.body?.paint,
-        lod: req.body?.lod || 'medium',
+        lod: req.body?.lod || 'high',
       });
       // refresh hasGlb flag in catalog
       const catalog = loadCatalog(liveryRoot);

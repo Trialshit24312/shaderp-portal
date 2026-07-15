@@ -41,6 +41,7 @@ import {
   clearAuthCookie,
   refreshUserRoles,
 } from './auth.js';
+import { registerKovertLiveryRoutes } from './kovert-livery.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const ROOT = path.join(__dirname, '..');
@@ -75,7 +76,7 @@ const isProd = process.env.NODE_ENV === 'production';
 
 app.set('trust proxy', 1);
 app.use(cookieParser());
-app.use(express.json({ limit: '8mb' }));
+app.use(express.json({ limit: '25mb' }));
 app.use(
   session({
     secret: portalEnv.SESSION_SECRET || 'dev-only-change-me',
@@ -100,6 +101,17 @@ function requireRole(minRole) {
     }
     next();
   };
+}
+
+function requireOwnerPage(req, res, next) {
+  const user = getUser(req);
+  if (!user) {
+    return res.redirect(`/auth/discord?returnTo=${encodeURIComponent(req.originalUrl || '/livery/')}`);
+  }
+  if (!hasMinRole(user.appRole, 'owner')) {
+    return res.status(403).send('Owner access only — KOVERT Livery Services is restricted to portal owners.');
+  }
+  next();
 }
 
 app.get('/health', (_req, res) => res.json({ ok: true, service: 'shaderp-portal' }));
@@ -496,15 +508,16 @@ registerTicketRoutes(app, {
 });
 registerAuditRoutes(app, { auditManager, requireRole });
 registerGuildMonitorRoutes(app, { guildMonitor, requireRole, portalEnv });
+registerKovertLiveryRoutes(app, { requireRole, requireOwnerPage, ROOT });
 
 app.get('/api/portal/version', (_req, res) => {
   res.setHeader('Cache-Control', 'no-cache, must-revalidate');
   res.json({
-    version: '4.8.1',
+    version: '4.9.0',
     acEnabled: acManager.isEnabled(),
     dbMode: getDbMode(),
     redisMode: getRedisMode(),
-    features: ['anticheat', 'multi-watch', 'webrtc-live', 'trust-redis', 'threat-ml', 'economy-forensics', 'evidence-replay', 'tickets-web', 'discord-hub', 'multi-guild-setup', 'guild-monitors', 'v4-theme', 'persistent-auth', 'command-center', 'webrtc-signaling', 'postgres-optional', 'turn-ice', 'ollama-optional', 'pvs-culling', 'ghost-honeypot', 'movement-sim', 'physics-validator', 'event-tarpit', 'fragment-bridge', 'unified-ac-logs', 'dom-poison'],
+    features: ['anticheat', 'multi-watch', 'webrtc-live', 'trust-redis', 'threat-ml', 'economy-forensics', 'evidence-replay', 'tickets-web', 'discord-hub', 'multi-guild-setup', 'guild-monitors', 'v4-theme', 'persistent-auth', 'command-center', 'webrtc-signaling', 'postgres-optional', 'turn-ice', 'ollama-optional', 'pvs-culling', 'ghost-honeypot', 'movement-sim', 'physics-validator', 'event-tarpit', 'fragment-bridge', 'unified-ac-logs', 'dom-poison', 'kovert-livery-owner'],
   });
 });
 
@@ -527,6 +540,14 @@ if (portalEnv.AC_ENABLED && process.env.AC_ML_AUTO_BAN !== '0') {
     }
   }, mlInterval);
 }
+
+app.use((req, res, next) => {
+  // Never fall through to public static / SPA for /livery (owner gate lives in kovert-livery.js)
+  if (req.path === '/livery' || req.path.startsWith('/livery/')) {
+    return res.status(404).send('KOVERT studio unavailable');
+  }
+  next();
+});
 
 app.use((req, res, next) => {
   if (/\.(js|css|html)$/.test(req.path)) {

@@ -36,6 +36,7 @@ export const PANEL_ACCESS = {
   settings: 6,
   logs: 3,
   discord: 3,
+  livery: 7, // KOVERT Livery Services — owner only
 };
 
 export function parseRoleMap(envStr) {

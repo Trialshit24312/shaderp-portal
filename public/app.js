@@ -55,6 +55,8 @@ const NAV = [
   { id: 'blocked', label: 'Blocked', min: 'admin' },
   { id: 'settings', label: 'Settings', min: 'admin' },
   { id: 'logs', label: 'Server Logs', min: 'staff' },
+  { section: 'Owner' },
+  { id: 'livery', label: 'KOVERT Livery', min: 'owner', highlight: true },
 ];
 
 const ROLE_LEVEL = { guest: 0, member: 1, moderator: 2, staff: 3, manager: 4, developer: 5, admin: 6, owner: 7 };
@@ -368,8 +370,27 @@ function showPanel(id) {
   if (id === 'team') renderTeam();
   if (id === 'queue' || id === 'connect' || id === 'home') renderQueueWidgets();
   if (id === 'connect') renderConnect();
+  if (id === 'livery' && hasRole('owner')) mountLiveryStudio();
   if (panelEl) initRevealAnimations(panelEl);
   el('sidebar')?.classList.remove('open');
+}
+
+function mountLiveryStudio() {
+  const frame = el('livery-frame');
+  if (!frame) return;
+  if (!frame.dataset.loaded) {
+    frame.src = `/livery/?embed=1&_=${Date.now()}`;
+    frame.dataset.loaded = '1';
+  }
+  const reloadBtn = el('livery-reload');
+  if (reloadBtn && !reloadBtn.dataset.bound) {
+    reloadBtn.dataset.bound = '1';
+    reloadBtn.addEventListener('click', () => {
+      frame.src = `/livery/?embed=1&_=${Date.now()}`;
+      frame.dataset.loaded = '1';
+      showToast('Studio reloaded');
+    });
+  }
 }
 
 window.showPanel = showPanel;
@@ -381,6 +402,7 @@ function renderHub() {
   const q = QUEUE?.config || {};
   const actions = [
     { id: 'bans', icon: '⛔', title: 'Ban Manager', desc: 'Moderator, AC, hardware bans, IP & platform flags', min: 'moderator' },
+    { id: 'livery', icon: '🎨', title: 'KOVERT Livery', desc: 'Owner-only wrap & apparel studio', min: 'owner' },
     { id: 'anticheat', icon: '◉', title: 'Sentinel AC', desc: 'Live ops, detections, intel & shield config' },
     { id: 'tickets', icon: '🎫', title: 'Tickets', desc: 'Support threads linked to Discord' },
     { id: 'discord', icon: '🌐', title: 'Discord Hub', desc: 'All 5 servers — status, setup, bots' },

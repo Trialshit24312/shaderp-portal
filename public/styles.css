@@ -1807,3 +1807,21 @@ kbd {
 .hub-stream-stat-ok strong { color: var(--ok, #22c55e); }
 .hub-stream-stat-warn strong { color: var(--warn, #f0a030); }
 .hub-stream-stat-danger strong { color: var(--danger, #e85d5d); }
+
+/* ===== KOVERT Livery (owner-only) ===== */
+.livery-page .vx-hero-actions { display: flex; flex-wrap: wrap; gap: 0.65rem; margin-top: 1rem; }
+.livery-frame-wrap {
+  padding: 0;
+  overflow: hidden;
+  border-radius: var(--radius);
+  border: 1px solid rgba(212, 255, 79, 0.2);
+  background: #0a0a0a;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.45);
+}
+.livery-frame {
+  display: block;
+  width: 100%;
+  height: min(78vh, 900px);
+  border: 0;
+  background: #0a0a0a;
+}

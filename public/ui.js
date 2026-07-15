@@ -111,6 +111,7 @@ const NAV_ICONS = {
   blocked: '🚫',
   settings: '⚙️',
   logs: '📋',
+  livery: '🎨',
 };
 
 export function navIcon(id) {

@@ -1,9 +1,10 @@
-# Scan 600-debadged (and similar) stream packs into KOVERT, optionally convert .yft → .glb
+# Scan 600-debadged packs + optional / automatic YFT → GLB conversion for KOVERT
 param(
     [string]$ResourcesRoot = 'F:\txData\QBCore_A9FD7A.base\resources\[standalone]',
     [string]$PortalRoot = '',
     [string]$ConvertSpawn = '',
     [int]$ConvertLimit = 0,
+    [switch]$Auto,
     [switch]$Force
 )
 
@@ -13,6 +14,7 @@ if (-not $PortalRoot) {
 }
 
 $env:FIVEM_RESOURCES_ROOT = $ResourcesRoot
+$env:KOVERT_AUTO_CONVERT = '1'
 Write-Host "FIVEM_RESOURCES_ROOT = $ResourcesRoot"
 
 Push-Location $PortalRoot
@@ -26,23 +28,16 @@ try {
         node @args
         if ($LASTEXITCODE -ne 0) { throw "convert $ConvertSpawn failed" }
     }
-    elseif ($ConvertLimit -gt 0) {
-        $catalogPath = Join-Path $PortalRoot 'owned-static\livery\vehicles\catalog.json'
-        $catalog = Get-Content -LiteralPath $catalogPath -Raw | ConvertFrom-Json
-        $n = 0
-        foreach ($v in $catalog.vehicles) {
-            if ($n -ge $ConvertLimit) { break }
-            Write-Host "Converting $($v.spawnName) ($($n+1)/$ConvertLimit)…"
-            $args = @('server/vehicle-stream.js', 'convert', $v.spawnName)
-            if ($Force) { $args += '--force' }
-            node @args
-            if ($LASTEXITCODE -ne 0) {
-                Write-Warning "Skip $($v.spawnName)"
-                continue
-            }
-            $n++
-            Start-Sleep -Seconds 2
+    elseif ($Auto -or $ConvertLimit -gt 0) {
+        $limit = if ($ConvertLimit -gt 0) { $ConvertLimit } else { 0 }
+        Write-Host "Starting auto-converter$(if ($limit) { " (limit $limit)" } else { ' (all missing)' })…"
+        if ($limit -gt 0) {
+            node server/vehicle-auto-convert.js $limit
+        } else {
+            # Run until queue empty — press Ctrl+C to stop
+            node server/vehicle-auto-convert.js
         }
+        if ($LASTEXITCODE -ne 0) { throw "auto-convert failed ($LASTEXITCODE)" }
     }
 } finally {
     Pop-Location
@@ -50,5 +45,7 @@ try {
 
 Write-Host ''
 Write-Host 'Catalog: owned-static\livery\vehicles\catalog.json'
-Write-Host 'Convert more: .\Sync-ServerVehicles.ps1 -ConvertSpawn 488animated'
-Write-Host 'Or in KOVERT: pick a stream vehicle → Load .yft → 3D'
+Write-Host 'Auto all:  .\Sync-ServerVehicles.ps1 -Auto'
+Write-Host 'Auto 20:   .\Sync-ServerVehicles.ps1 -ConvertLimit 20'
+Write-Host 'One car:   .\Sync-ServerVehicles.ps1 -ConvertSpawn 350z'
+Write-Host 'Portal also auto-converts when FIVEM_RESOURCES_ROOT is set (KOVERT_AUTO_CONVERT=1).'

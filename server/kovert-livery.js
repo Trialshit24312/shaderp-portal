@@ -13,6 +13,7 @@ import {
   scanServerVehicles,
   writeCatalog,
 } from './vehicle-stream.js';
+import { createAutoConverter } from './vehicle-auto-convert.js';
 
 const SYSTEM_PROMPT = `You are KOVERT Livery Services' AI bench tech for FiveM.
 You help with vehicle wraps AND freemode clothing (jackets, pants, shoes, badges).
@@ -82,6 +83,9 @@ function parseActions(content) {
 export function registerKovertLiveryRoutes(app, { requireRole, requireOwnerPage, ROOT }) {
   const liveryRoot = path.join(ROOT, 'owned-static', 'livery');
   const vehiclesDir = path.join(liveryRoot, 'vehicles');
+  const autoConvert = createAutoConverter(liveryRoot);
+  // Start background convert when resources path is configured
+  setTimeout(() => autoConvert.maybeAutostart(), 1500);
 
   app.get('/api/livery/vehicles', requireRole('owner'), (req, res) => {
     try {
@@ -109,6 +113,7 @@ export function registerKovertLiveryRoutes(app, { requireRole, requireOwnerPage,
       }));
       catalog.count = catalog.vehicles.length;
       catalog.cacheDir = vehiclesDir;
+      catalog.autoConvert = autoConvert.snapshot();
       res.json(catalog);
     } catch (err) {
       console.error('[kovert vehicles]', err);
@@ -116,11 +121,46 @@ export function registerKovertLiveryRoutes(app, { requireRole, requireOwnerPage,
     }
   });
 
+  app.get('/api/livery/convert/status', requireRole('owner'), (_req, res) => {
+    res.json(autoConvert.snapshot());
+  });
+
+  app.post('/api/livery/convert/start', requireRole('owner'), (req, res) => {
+    try {
+      const force = Boolean(req.body?.force);
+      const status = autoConvert.start({ force });
+      res.json({ ok: true, ...status });
+    } catch (err) {
+      res.status(500).json({ error: err.message || 'Failed to start auto-convert' });
+    }
+  });
+
+  app.post('/api/livery/convert/stop', requireRole('owner'), (_req, res) => {
+    res.json({ ok: true, ...autoConvert.stop() });
+  });
+
+  app.post('/api/livery/convert/pause', requireRole('owner'), (_req, res) => {
+    res.json({ ok: true, ...autoConvert.pause() });
+  });
+
+  app.post('/api/livery/convert/resume', requireRole('owner'), (_req, res) => {
+    res.json({ ok: true, ...autoConvert.resume() });
+  });
+
+  app.post('/api/livery/convert/prioritize', requireRole('owner'), (req, res) => {
+    const spawn = String(req.body?.spawn || '').replace(/[^\w\-]/g, '');
+    if (!spawn) return res.status(400).json({ error: 'spawn required' });
+    res.json({ ok: true, ...autoConvert.prioritize(spawn) });
+  });
+
   app.post('/api/livery/vehicles/scan', requireRole('owner'), (_req, res) => {
     try {
       const scan = scanServerVehicles();
       const catalog = writeCatalog(liveryRoot, scan);
-      res.json({ ok: true, ...catalog, error: scan.error });
+      // Resume/start queue for any newly missing meshes
+      if (autoConvert.snapshot().running) autoConvert.rebuildQueue();
+      else autoConvert.maybeAutostart();
+      res.json({ ok: true, ...catalog, error: scan.error, autoConvert: autoConvert.snapshot() });
     } catch (err) {
       res.status(500).json({ error: err.message || 'Scan failed' });
     }
@@ -131,12 +171,13 @@ export function registerKovertLiveryRoutes(app, { requireRole, requireOwnerPage,
       const spawn = String(req.params.spawn || '').replace(/[^\w\-]/g, '');
       if (!spawn) return res.status(400).json({ error: 'spawn required' });
       const force = Boolean(req.body?.force);
+      // Jump this car to front of auto queue AND convert now for immediate preview
+      autoConvert.prioritize(spawn);
       const result = await ensureVehicleGlb(liveryRoot, spawn, {
         force,
         paint: req.body?.paint,
         lod: req.body?.lod || 'high',
       });
-      // refresh hasGlb flag in catalog
       const catalog = loadCatalog(liveryRoot);
       if (catalog) {
         const v = catalog.vehicles.find((x) => x.spawnName === spawn);
@@ -149,12 +190,14 @@ export function registerKovertLiveryRoutes(app, { requireRole, requireOwnerPage,
         cached: result.cached,
         bytes: result.bytes,
         modelUrl: `/api/livery/vehicles/${encodeURIComponent(spawn)}/model.glb`,
+        autoConvert: autoConvert.snapshot(),
       });
     } catch (err) {
       console.error('[kovert convert]', err);
       res.status(500).json({
         error: err.message || 'Conversion failed',
         hint: 'Needs FIVEM_RESOURCES_ROOT with .yft/.ytd on this machine, plus gtax API (optional V_DRAWABLE_TO_GLB_API_KEY).',
+        autoConvert: autoConvert.snapshot(),
       });
     }
   });
@@ -165,11 +208,14 @@ export function registerKovertLiveryRoutes(app, { requireRole, requireOwnerPage,
       const out = glbPath(liveryRoot, spawn);
       if (!fs.existsSync(out)) {
         if (String(req.query.convert || '') === '1') {
-          await ensureVehicleGlb(liveryRoot, spawn, { lod: 'medium' });
+          autoConvert.prioritize(spawn);
+          await ensureVehicleGlb(liveryRoot, spawn, { lod: 'high' });
         } else {
+          autoConvert.prioritize(spawn);
           return res.status(404).json({
             error: `No GLB for ${spawn}`,
-            hint: `POST /api/livery/vehicles/${spawn}/convert or add ?convert=1`,
+            hint: `Queued for auto-convert. POST /api/livery/vehicles/${spawn}/convert for immediate.`,
+            autoConvert: autoConvert.snapshot(),
           });
         }
       }
@@ -196,6 +242,7 @@ export function registerKovertLiveryRoutes(app, { requireRole, requireOwnerPage,
         kovert: true,
         vehicles: loadCatalog(liveryRoot)?.count || 0,
         resourcesRoot: process.env.FIVEM_RESOURCES_ROOT || null,
+        autoConvert: autoConvert.snapshot(),
       });
     } catch {
       res.json({
@@ -206,6 +253,7 @@ export function registerKovertLiveryRoutes(app, { requireRole, requireOwnerPage,
         hasVision: false,
         kovert: true,
         vehicles: loadCatalog(liveryRoot)?.count || 0,
+        autoConvert: autoConvert.snapshot(),
       });
     }
   });

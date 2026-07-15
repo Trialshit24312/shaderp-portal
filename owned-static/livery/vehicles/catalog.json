@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-07-15T04:50:11.350Z",
+  "generatedAt": "2026-07-15T04:55:13.631Z",
   "root": "F:\\txData\\QBCore_A9FD7A.base\\resources\\[standalone]",
   "count": 603,
   "packs": [
@@ -49,7 +49,7 @@
       "description": "1016rwdevo · 600-debadged-17",
       "silhouette": "M55 355 C70 300 120 265 180 250 L280 220 L400 185 L540 170 L680 185 L800 230 C880 265 930 310 955 350 L965 380 L900 395 L840 375 L200 375 L140 395 L80 380 Z",
       "hasYtd": true,
-      "hasGlb": false,
+      "hasGlb": true,
       "brand": "Lamborghini",
       "pack": "600-debadged-17"
     },

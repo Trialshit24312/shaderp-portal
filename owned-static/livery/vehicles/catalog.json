@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-07-15T04:55:13.631Z",
+  "generatedAt": "2026-07-15T04:55:14.308Z",
   "root": "F:\\txData\\QBCore_A9FD7A.base\\resources\\[standalone]",
   "count": 603,
   "packs": [
@@ -64,7 +64,7 @@
       "description": "17m760i · 600-debadged-14",
       "silhouette": "M55 355 C70 300 120 265 180 250 L280 220 L400 185 L540 170 L680 185 L800 230 C880 265 930 310 955 350 L965 380 L900 395 L840 375 L200 375 L140 395 L80 380 Z",
       "hasYtd": true,
-      "hasGlb": false,
+      "hasGlb": true,
       "brand": "BMW",
       "pack": "600-debadged-14"
     },
@@ -79,7 +79,7 @@
       "description": "2016 Mercedes C63 Hachi · 600-debadged-17",
       "silhouette": "M55 355 C70 300 120 265 180 250 L280 220 L400 185 L540 170 L680 185 L800 230 C880 265 930 310 955 350 L965 380 L900 395 L840 375 L200 375 L140 395 L80 380 Z",
       "hasYtd": true,
-      "hasGlb": false,
+      "hasGlb": true,
       "brand": "Mercedes",
       "pack": "600-debadged-17"
     },
@@ -94,7 +94,7 @@
       "description": "2018 Chevrolet Impala · 600-debadged-05",
       "silhouette": "M55 355 C70 300 120 265 180 250 L280 220 L400 185 L540 170 L680 185 L800 230 C880 265 930 310 955 350 L965 380 L900 395 L840 375 L200 375 L140 395 L80 380 Z",
       "hasYtd": true,
-      "hasGlb": false,
+      "hasGlb": true,
       "brand": "Chevrolet",
       "pack": "600-debadged-05"
     },
@@ -109,7 +109,7 @@
       "description": "2019 Mercedes-Benz CLS · 600-debadged-14",
       "silhouette": "M55 355 C70 300 120 265 180 250 L280 220 L400 185 L540 170 L680 185 L800 230 C880 265 930 310 955 350 L965 380 L900 395 L840 375 L200 375 L140 395 L80 380 Z",
       "hasYtd": true,
-      "hasGlb": false,
+      "hasGlb": true,
       "brand": "Mercedes",
       "pack": "600-debadged-14"
     },
@@ -124,7 +124,7 @@
       "description": "2019tundrac · 600-debadged-03",
       "silhouette": "M55 355 C70 300 120 265 180 250 L280 220 L400 185 L540 170 L680 185 L800 230 C880 265 930 310 955 350 L965 380 L900 395 L840 375 L200 375 L140 395 L80 380 Z",
       "hasYtd": true,
-      "hasGlb": false,
+      "hasGlb": true,
       "brand": "Toyota",
       "pack": "600-debadged-03"
     },
@@ -139,7 +139,7 @@
       "description": "2020CLA45s · 600-debadged-16",
       "silhouette": "M55 355 C70 300 120 265 180 250 L280 220 L400 185 L540 170 L680 185 L800 230 C880 265 930 310 955 350 L965 380 L900 395 L840 375 L200 375 L140 395 L80 380 Z",
       "hasYtd": true,
-      "hasGlb": false,
+      "hasGlb": true,
       "brand": "Mercedes",
       "pack": "600-debadged-16"
     },
@@ -154,7 +154,7 @@
       "description": "2021 SUBURBAN · 600-debadged-22",
       "silhouette": "M55 355 C70 300 120 265 180 250 L280 220 L400 185 L540 170 L680 185 L800 230 C880 265 930 310 955 350 L965 380 L900 395 L840 375 L200 375 L140 395 L80 380 Z",
       "hasYtd": true,
-      "hasGlb": false,
+      "hasGlb": true,
       "brand": "Police",
       "pack": "600-debadged-22"
     },

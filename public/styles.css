@@ -1813,15 +1813,15 @@ kbd {
 .livery-frame-wrap {
   padding: 0;
   overflow: hidden;
-  border-radius: var(--radius);
-  border: 1px solid rgba(212, 255, 79, 0.2);
-  background: #0a0a0a;
-  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.45);
+  border-radius: var(--radius-lg, 24px);
+  border: 1px solid var(--glass-border, rgba(255, 255, 255, 0.06));
+  background: linear-gradient(155deg, rgba(15, 15, 22, 0.95), rgba(8, 8, 12, 0.98));
+  box-shadow: var(--shadow-lg, 0 28px 56px rgba(0, 0, 0, 0.55));
 }
 .livery-frame {
   display: block;
   width: 100%;
   height: min(78vh, 900px);
   border: 0;
-  background: #0a0a0a;
+  background: #040406;
 }

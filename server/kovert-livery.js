@@ -8,12 +8,14 @@ import express from 'express';
 import {
   catalogPath,
   ensureVehicleGlb,
+  findVehicleSource,
   glbPath,
   loadCatalog,
   scanServerVehicles,
   writeCatalog,
 } from './vehicle-stream.js';
 import { createAutoConverter } from './vehicle-auto-convert.js';
+import { aiStatus, kovertChat } from './kovert-ai.js';
 
 const SYSTEM_PROMPT = `You are KOVERT Livery Services' AI bench tech for FiveM.
 You help with vehicle wraps AND freemode clothing (jackets, pants, shoes, badges).
@@ -48,23 +50,6 @@ Rules:
 - Ignore background, wheels, windows, chrome — only the painted body graphics
 - Keep 4–12 actions max
 - Reply with a short description of what you saw, then an ACTIONS block`;
-
-function ollamaUrl() {
-  return process.env.OLLAMA_URL || 'http://127.0.0.1:11434';
-}
-
-async function ollamaChat({ model, messages }) {
-  const res = await fetch(`${ollamaUrl()}/api/chat`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ model, messages, stream: false }),
-  });
-  if (!res.ok) {
-    const text = await res.text();
-    throw new Error(`Ollama error ${res.status}: ${text}`);
-  }
-  return res.json();
-}
 
 function parseActions(content) {
   const match = content.match(/```actions\s*([\s\S]*?)```/i);
@@ -202,6 +187,23 @@ export function registerKovertLiveryRoutes(app, { requireRole, requireOwnerPage,
     }
   });
 
+  /** Serve original .yft for in-browser Cortex MIT parser (no convert step). */
+  app.get('/api/livery/vehicles/:spawn/raw.yft', requireRole('owner'), (req, res) => {
+    try {
+      const spawn = String(req.params.spawn || '').replace(/[^\w\-]/g, '');
+      const hit = findVehicleSource(spawn);
+      if (!hit?.source?.yft || !fs.existsSync(hit.source.yft)) {
+        return res.status(404).json({ error: `No .yft for ${spawn}` });
+      }
+      res.setHeader('Content-Type', 'application/octet-stream');
+      res.setHeader('Content-Disposition', `inline; filename="${spawn}.yft"`);
+      res.setHeader('Cache-Control', 'private, max-age=300');
+      res.sendFile(path.resolve(hit.source.yft));
+    } catch (err) {
+      res.status(500).json({ error: err.message || 'YFT unavailable' });
+    }
+  });
+
   app.get('/api/livery/vehicles/:spawn/model.glb', requireRole('owner'), async (req, res) => {
     try {
       const spawn = String(req.params.spawn || '').replace(/[^\w\-]/g, '');
@@ -230,23 +232,25 @@ export function registerKovertLiveryRoutes(app, { requireRole, requireOwnerPage,
 
   app.get('/api/health', requireRole('owner'), async (_req, res) => {
     try {
-      const r = await fetch(`${ollamaUrl()}/api/tags`);
-      const data = await r.json();
-      const models = (data.models || []).map((m) => m.name);
+      const ai = await aiStatus();
       res.json({
         ok: true,
-        ollama: true,
-        models,
-        hasChat: models.some((m) => m.includes('llama')),
-        hasVision: models.some((m) => m.includes('llava') || m.includes('vision')),
+        ...ai,
+        aiReady: ai.ready,
+        aiProvider: ai.provider,
+        aiLabel: ai.label,
         kovert: true,
         vehicles: loadCatalog(liveryRoot)?.count || 0,
         resourcesRoot: process.env.FIVEM_RESOURCES_ROOT || null,
         autoConvert: autoConvert.snapshot(),
       });
-    } catch {
+    } catch (err) {
       res.json({
         ok: true,
+        ready: false,
+        aiReady: false,
+        aiProvider: 'none',
+        aiLabel: 'Offline',
         ollama: false,
         models: [],
         hasChat: false,
@@ -254,6 +258,7 @@ export function registerKovertLiveryRoutes(app, { requireRole, requireOwnerPage,
         kovert: true,
         vehicles: loadCatalog(liveryRoot)?.count || 0,
         autoConvert: autoConvert.snapshot(),
+        error: err.message,
       });
     }
   });
@@ -266,7 +271,6 @@ export function registerKovertLiveryRoutes(app, { requireRole, requireOwnerPage,
       }
 
       const useVision = Boolean(canvasPng) && /look|review|critique|see|current|what do you think|improve|analyze/i.test(message);
-      const model = useVision ? 'llava:latest' : 'llama3.2:latest';
       const isCloth = context === 'clothing';
       const contextLines = [
         isCloth ? 'Studio: apparel / freemode clothing UV sheet' : 'Studio: vehicle wrap / livery',
@@ -289,15 +293,15 @@ export function registerKovertLiveryRoutes(app, { requireRole, requireOwnerPage,
         },
       ];
 
-      const data = await ollamaChat({ model, messages });
-      const content = data.message?.content || '';
-      const parsed = parseActions(content);
-      res.json({ reply: parsed.reply, actions: parsed.actions, model });
+      const data = await kovertChat({ messages, useVision });
+      const parsed = parseActions(data.content);
+      const status = await aiStatus();
+      res.json({ reply: parsed.reply, actions: parsed.actions, model: data.model, provider: status.provider });
     } catch (err) {
       console.error('[kovert]', err);
       res.status(500).json({
         error: err.message || 'AI request failed',
-        hint: 'Ollama must be reachable from the portal host (OLLAMA_URL).',
+        hint: 'Set KOVERT_AI_API_KEY on Render, or OLLAMA_URL for local Ollama.',
       });
     }
   });
@@ -311,16 +315,14 @@ Style: ${style || 'custom'}
 Brief: ${prompt || 'bold modern racing wrap'}
 Return a short description AND an ACTIONS block that builds the full design from a clean slate (start with clearDesign then setBaseColor and shapes/text).`;
 
-      const data = await ollamaChat({
-        model: 'llama3.2:latest',
+      const data = await kovertChat({
         messages: [
           { role: 'system', content: SYSTEM_PROMPT },
           { role: 'user', content: message },
         ],
       });
-      const content = data.message?.content || '';
-      const parsed = parseActions(content);
-      res.json({ reply: parsed.reply, actions: parsed.actions, model: 'llama3.2:latest' });
+      const parsed = parseActions(data.content);
+      res.json({ reply: parsed.reply, actions: parsed.actions, model: data.model });
     } catch (err) {
       console.error('[kovert]', err);
       res.status(500).json({ error: err.message || 'Design generation failed' });
@@ -337,8 +339,7 @@ Return a short description AND an ACTIONS block that builds the full design from
       const paletteHint = Array.isArray(palette) && palette.length ? `Detected palette: ${palette.join(', ')}` : '';
       const baseHint = baseGuess ? `Likely base color: ${baseGuess}` : '';
 
-      const data = await ollamaChat({
-        model: 'llava:latest',
+      const data = await kovertChat({
         messages: [
           { role: 'system', content: SYSTEM_PROMPT + '\n\n' + STRIP_PROMPT },
           {
@@ -347,15 +348,15 @@ Return a short description AND an ACTIONS block that builds the full design from
             images: [b64],
           },
         ],
+        useVision: true,
       });
-      const content = data.message?.content || '';
-      const parsed = parseActions(content);
-      res.json({ reply: parsed.reply, actions: parsed.actions, model: 'llava:latest' });
+      const parsed = parseActions(data.content);
+      res.json({ reply: parsed.reply, actions: parsed.actions, model: data.model });
     } catch (err) {
       console.error('[kovert]', err);
       res.status(500).json({
         error: err.message || 'Strip failed',
-        hint: 'Ensure Ollama is running with llava pulled.',
+        hint: 'Set KOVERT_AI_API_KEY for vision strip, or run Ollama with llava.',
       });
     }
   });

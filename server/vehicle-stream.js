@@ -275,14 +275,28 @@ export async function convertYftToGlb({ yftPath, ytdPath, spawn, outPath, paint,
   return { bytes: buf.length, outPath };
 }
 
+let scanCache = { at: 0, data: null };
+
+export function getCachedScan(opts = {}, maxAgeMs = 60_000) {
+  const now = Date.now();
+  if (!scanCache.data || now - scanCache.at > maxAgeMs || opts.force) {
+    scanCache = { at: now, data: scanServerVehicles(opts) };
+  }
+  return scanCache.data;
+}
+
+export function findVehicleSource(spawn, opts = {}) {
+  const scan = getCachedScan(opts);
+  return scan.vehicles.find((v) => v.spawnName.toLowerCase() === String(spawn).toLowerCase()) || null;
+}
+
 export async function ensureVehicleGlb(liveryRoot, spawn, opts = {}) {
   const out = glbPath(liveryRoot, spawn);
   if (fs.existsSync(out) && !opts.force) {
     return { cached: true, path: out };
   }
 
-  const scan = scanServerVehicles(opts.scanOpts);
-  const hit = scan.vehicles.find((v) => v.spawnName.toLowerCase() === String(spawn).toLowerCase());
+  const hit = findVehicleSource(spawn, opts.scanOpts);
   if (!hit?.source?.yft) {
     throw new Error(
       `No .yft found for "${spawn}". Set FIVEM_RESOURCES_ROOT and re-scan, or place ${spawn}.glb in vehicles/.`,

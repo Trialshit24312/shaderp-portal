@@ -379,14 +379,14 @@ function mountLiveryStudio() {
   const frame = el('livery-frame');
   if (!frame) return;
   if (!frame.dataset.loaded) {
-    frame.src = `/livery/?embed=1&_=${Date.now()}`;
+    frame.src = `/livery/?embed=1&v=2.1&_=${Date.now()}`;
     frame.dataset.loaded = '1';
   }
   const reloadBtn = el('livery-reload');
   if (reloadBtn && !reloadBtn.dataset.bound) {
     reloadBtn.dataset.bound = '1';
     reloadBtn.addEventListener('click', () => {
-      frame.src = `/livery/?embed=1&_=${Date.now()}`;
+      frame.src = `/livery/?embed=1&v=2.1&_=${Date.now()}`;
       frame.dataset.loaded = '1';
       showToast('Studio reloaded');
     });

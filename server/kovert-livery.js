@@ -91,14 +91,23 @@ export function registerKovertLiveryRoutes(app, { requireRole, requireOwnerPage,
         }
       }
       // Annotate which GLBs are cached on disk
+      const root = process.env.FIVEM_RESOURCES_ROOT || process.env.FIVEM_STANDALONE_ROOT || null;
+      const canServeYft = Boolean(root && fs.existsSync(root));
       catalog.vehicles = (catalog.vehicles || []).map((v) => ({
         ...v,
         hasGlb: fs.existsSync(glbPath(liveryRoot, v.spawnName)),
         modelUrl: `/api/livery/vehicles/${encodeURIComponent(v.spawnName)}/model.glb`,
+        canServeYft,
       }));
       catalog.count = catalog.vehicles.length;
       catalog.cacheDir = vehiclesDir;
       catalog.autoConvert = autoConvert.snapshot();
+      catalog.canServeYft = canServeYft;
+      catalog.resourcesRoot = root;
+      if (!canServeYft) {
+        catalog.previewNote =
+          'Real .yft meshes need a local portal with FIVEM_RESOURCES_ROOT. Website uses preview meshes for painting.';
+      }
       res.json(catalog);
     } catch (err) {
       console.error('[kovert vehicles]', err);

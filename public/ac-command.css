@@ -846,6 +846,22 @@
   border-left-color: var(--danger);
 }
 
+.ac-syn-svg {
+  width: 100%;
+  height: 280px;
+  background: rgba(0, 0, 0, 0.25);
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--ac-border);
+}
+.ac-syn-node text { font-size: 10px; fill: var(--text); }
+.ac-syn-edge { stroke: var(--ac-border); stroke-width: 1.2; }
+.ac-syn-edge.discord { stroke: #7aa2ff; }
+.ac-syn-edge.webgl, .ac-syn-edge.wasm { stroke: #c084fc; }
+.ac-syn-edge.ip24 { stroke: #fbbf24; }
+.ac-syn-edge.economy { stroke: #34d399; }
+.ac-syn-edge.fingerprint, .ac-syn-edge.license { stroke: #f87171; }
+.ac-syn-actions { display: flex; gap: 0.5rem; margin-top: 0.65rem; flex-wrap: wrap; }
+
 /* ── Intelligence ── */
 .ac-intel-grid {
   display: grid;

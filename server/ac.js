@@ -15,6 +15,7 @@ import { hasMinRole } from './roles.js';
 import { updateTrustFromSync, updateTrustOnDetection } from './trust-cache.js';
 import { ingestPlayerSync } from './threat-ml.js';
 import { acApiKeyValid, resolveAcApiKey } from './ac-auth.js';
+import { buildSyndicateGraph, highlightFromCv, subnet24 } from './syndicate.js';
 
 export { acApiKeyValid, resolveAcApiKey } from './ac-auth.js';
 
@@ -95,6 +96,7 @@ function defaultState() {
     economyAlerts: [],
     evidence: {},
     tamperAlerts: [],
+    syndicates: {},
   };
 }
 
@@ -116,6 +118,9 @@ function fpRecord(playerId, entry) {
     license: fp.license || entry.license || null,
     discord: fp.discord || entry.discord || null,
     steam: fp.steam || entry.steam || null,
+    ip: fp.ip || entry.ip || null,
+    ip24: subnet24(fp.ip || entry.ip || null),
+    wasmHash: fp.wasmHash || entry.wasmHash || null,
     at: entry.at || now(),
     banned: !!entry.banned,
     banId: entry.banId || null,
@@ -152,6 +157,8 @@ function buildAltClusters(state) {
   const byWebgl = new Map();
   const byLicense = new Map();
   const byDiscord = new Map();
+  const byIp24 = new Map();
+  const byWasm = new Map();
 
   for (const e of entries) {
     if (e.hash) {
@@ -171,6 +178,14 @@ function buildAltClusters(state) {
     if (disc) {
       if (!byDiscord.has(disc)) byDiscord.set(disc, []);
       byDiscord.get(disc).push(e);
+    }
+    if (e.ip24) {
+      if (!byIp24.has(e.ip24)) byIp24.set(e.ip24, []);
+      byIp24.get(e.ip24).push(e);
+    }
+    if (e.wasmHash) {
+      if (!byWasm.has(e.wasmHash)) byWasm.set(e.wasmHash, []);
+      byWasm.get(e.wasmHash).push(e);
     }
   }
 
@@ -212,6 +227,8 @@ function buildAltClusters(state) {
   for (const [hash, members] of byWebgl) pushCluster('webgl', hash, members);
   for (const [lic, members] of byLicense) if (members.length > 1) pushCluster('license', lic, members);
   for (const [disc, members] of byDiscord) if (members.length > 1) pushCluster('discord', disc, members);
+  for (const [net, members] of byIp24) if (members.length > 1 && members.length <= 12) pushCluster('ip24', net, members);
+  for (const [hash, members] of byWasm) if (members.length > 1) pushCluster('wasm', hash, members);
 
   return clusters.sort((a, b) => {
     if (a.risk === b.risk) return b.members.length - a.members.length;
@@ -1146,6 +1163,37 @@ export function createAcManager({ enabled = true, auditManager, logManager, init
       return buildAltClusters(state).slice(0, limit);
     },
 
+    getSyndicate(playerId) {
+      return buildSyndicateGraph(state, playerId);
+    },
+
+    highlightSyndicate(playerId, reason = 'cv_overlay') {
+      if (playerId == null) return null;
+      const graph = highlightFromCv(state, playerId, reason);
+      persist();
+      return graph;
+    },
+
+    listSyndicates(limit = 12) {
+      const rows = Object.values(state.syndicates || {}).sort((a, b) => (b.at || 0) - (a.at || 0));
+      return rows.slice(0, limit);
+    },
+
+    queueSyndicateSilent(playerIds, requestedBy, seedId) {
+      const ids = [...new Set((playerIds || []).map((id) => Number(id)).filter((id) => Number.isFinite(id)))];
+      state.commands.push({
+        id: `cmd_${now()}`,
+        type: 'player_action',
+        action: 'syndicate_silent',
+        playerId: Number(seedId) || ids[0] || 0,
+        params: { playerIds: ids },
+        requestedBy: requestedBy || 'staff',
+        createdAt: now(),
+      });
+      persist();
+      return { ok: true, queued: ids.length };
+    },
+
     whitelistEvent(eventName, requestedBy) {
       const name = String(eventName || '').trim();
       if (!name || name.length > 120) return false;
@@ -2023,6 +2071,25 @@ export function registerAcRoutes(app, { acManager, portalEnv, requireRole }) {
 
   app.get('/api/ac/admin/alt-clusters', requireRole('staff'), (req, res) => {
     res.json({ clusters: acManager.getAltClusters(parseInt(req.query.limit, 10) || 25) });
+  });
+
+  app.get('/api/ac/admin/syndicate/:playerId', requireRole('staff'), (req, res) => {
+    res.json(acManager.getSyndicate(req.params.playerId));
+  });
+
+  app.get('/api/ac/admin/syndicates', requireRole('staff'), (req, res) => {
+    res.json({ syndicates: acManager.listSyndicates(parseInt(req.query.limit, 10) || 12) });
+  });
+
+  app.post('/api/ac/admin/syndicate/quarantine', requireRole('staff'), (req, res) => {
+    const { playerId, playerIds } = req.body || {};
+    const graph = playerId != null ? acManager.getSyndicate(playerId) : null;
+    const ids = Array.isArray(playerIds) && playerIds.length
+      ? playerIds
+      : (graph?.nodes || []).map((n) => n.id).filter((id) => /^\d+$/.test(String(id)));
+    const user = req.session?.user;
+    const result = acManager.queueSyndicateSilent(ids, user?.username || user?.id || 'staff', playerId);
+    res.json({ ok: true, ...result, memberCount: ids.length, risk: graph?.risk });
   });
 
   app.post('/api/ac/admin/whitelist-event', requireRole('staff'), (req, res) => {

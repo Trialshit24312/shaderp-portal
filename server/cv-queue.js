@@ -62,6 +62,13 @@ export function enqueueCvJob({ sessionId, playerId, image, acManager }) {
             jobId: id,
           },
         });
+        if (acManager.highlightSyndicate) {
+          const graph = acManager.highlightSyndicate(playerId, 'cv_overlay');
+          job.syndicate = {
+            memberCount: graph?.memberCount || 0,
+            risk: graph?.risk || 'low',
+          };
+        }
       }
     })
     .catch((err) => {

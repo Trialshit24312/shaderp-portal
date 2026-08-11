@@ -525,7 +525,7 @@ app.get('/api/portal/version', (_req, res) => {
     acEnabled: acManager.isEnabled(),
     dbMode: getDbMode(),
     redisMode: getRedisMode(),
-    features: ['anticheat', 'multi-watch', 'webrtc-live', 'trust-redis', 'threat-ml', 'economy-forensics', 'evidence-replay', 'tickets-web', 'discord-hub', 'multi-guild-setup', 'guild-monitors', 'v4-theme', 'persistent-auth', 'command-center', 'webrtc-signaling', 'postgres-optional', 'turn-ice', 'ollama-optional', 'pvs-culling', 'ghost-honeypot', 'movement-sim', 'physics-validator', 'event-tarpit', 'fragment-bridge', 'unified-ac-logs', 'dom-poison', 'kovert-livery-owner'],
+    features: ['anticheat', 'multi-watch', 'webrtc-live', 'trust-redis', 'threat-ml', 'economy-forensics', 'evidence-replay', 'tickets-web', 'discord-hub', 'multi-guild-setup', 'guild-monitors', 'v4-theme', 'persistent-auth', 'command-center', 'webrtc-signaling', 'postgres-optional', 'turn-ice', 'ollama-optional', 'pvs-culling', 'ghost-honeypot', 'movement-sim', 'physics-validator', 'event-tarpit', 'fragment-bridge', 'unified-ac-logs', 'dom-poison', 'kovert-livery-owner', 'wasm-core', 'syndicate-graph', 'audio-esp', 'poly-tarpit'],
   });
 });
 

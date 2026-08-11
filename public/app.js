@@ -3270,10 +3270,120 @@ async function loadAcThreatMl() {
   }
 }
 
+function renderSyndicateGraph(graph) {
+  const wrap = el('ac-syndicate-wrap');
+  if (!wrap || !graph) return;
+  const nodes = graph.nodes || [];
+  const edges = graph.edges || [];
+  if (!nodes.length) {
+    wrap.innerHTML = '<p class="hint">No linked identities for that player yet.</p>';
+    return;
+  }
+  const w = 640;
+  const h = 260;
+  const cx = w / 2;
+  const cy = h / 2;
+  const seed = String(graph.seed);
+  const others = nodes.filter((n) => String(n.id) !== seed);
+  const pos = { [seed]: { x: cx, y: cy } };
+  others.forEach((n, i) => {
+    const a = (Math.PI * 2 * i) / Math.max(others.length, 1) - Math.PI / 2;
+    const r = 95;
+    pos[String(n.id)] = { x: cx + Math.cos(a) * r, y: cy + Math.sin(a) * r };
+  });
+  const lines = edges.map((e) => {
+    const a = pos[String(e.from)];
+    const b = pos[String(e.to)];
+    if (!a || !b) return '';
+    return `<line class="ac-syn-edge ${esc(e.type || '')}" x1="${a.x}" y1="${a.y}" x2="${b.x}" y2="${b.y}" />`;
+  }).join('');
+  const dots = nodes.map((n) => {
+    const p = pos[String(n.id)] || { x: cx, y: cy };
+    const fill = n.banned ? '#f87171' : String(n.id) === seed ? '#34d399' : n.online ? '#7aa2ff' : '#94a3b8';
+    return `<g class="ac-syn-node">
+      <circle cx="${p.x}" cy="${p.y}" r="${String(n.id) === seed ? 9 : 6}" fill="${fill}" />
+      <text x="${p.x + 10}" y="${p.y + 4}">${esc((n.playerName || n.id).toString().slice(0, 18))}</text>
+    </g>`;
+  }).join('');
+  wrap.innerHTML = `
+    <p class="hint">${nodes.length} nodes · ${edges.length} links · risk <strong>${esc(graph.risk || 'low')}</strong>${graph.reason ? ` · ${esc(graph.reason)}` : ''}</p>
+    <svg class="ac-syn-svg" viewBox="0 0 ${w} ${h}" preserveAspectRatio="xMidYMid meet">${lines}${dots}</svg>
+    <div class="ac-syn-actions">
+      <button type="button" class="btn danger btn-sm" id="ac-syn-quarantine" data-seed="${esc(seed)}">Silent-mitigate syndicate</button>
+      <span class="hint">HWID / WebGL / Wasm / Discord / IP/24 / economy. Does not ban.</span>
+    </div>`;
+  const btn = el('ac-syn-quarantine');
+  if (btn) {
+    btn.onclick = async () => {
+      if (!confirm(`Drop ${nodes.length} linked identities into silent mitigation?`)) return;
+      try {
+        const ids = nodes.map((n) => n.id).filter((id) => /^\d+$/.test(String(id)));
+        const res = await fetch('/api/ac/admin/syndicate/quarantine', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ playerId: seed, playerIds: ids }),
+        });
+        if (!res.ok) throw new Error(await res.text());
+        toast(`Syndicate silent queued (${ids.length})`);
+      } catch (err) {
+        console.error(err);
+        toast('Syndicate quarantine failed');
+      }
+    };
+  }
+}
+
+function renderSyndicateList(rows) {
+  const wrap = el('ac-syndicate-wrap');
+  if (!wrap) return;
+  if (wrap.dataset.locked === '1') return;
+  if (!rows.length) {
+    wrap.innerHTML = '<p class="hint">CV overlay hits auto-expand linked HWID / Discord / IP / economy nodes here.</p>';
+    return;
+  }
+  wrap.innerHTML = rows.map((g) =>
+    `<div class="ac-alt-cluster${g.risk === 'high' ? ' high' : ''}">
+      <strong>Seed ${esc(g.seed)}</strong>
+      <span class="ac-trust ${g.risk === 'high' ? 'ac-trust-low' : 'ac-trust-mid'}">${esc(g.risk || 'low')}</span>
+      <small class="hint">${g.memberCount || (g.nodes || []).length} members · ${esc(g.reason || '')}</small>
+      <button type="button" class="btn ghost btn-sm ac-syn-open" data-seed="${esc(g.seed)}">Open</button>
+    </div>`
+  ).join('');
+  wrap.querySelectorAll('.ac-syn-open').forEach((btn) => {
+    btn.addEventListener('click', () => loadSyndicate(btn.dataset.seed));
+  });
+}
+
+async function loadSyndicate(playerId) {
+  const wrap = el('ac-syndicate-wrap');
+  if (!wrap || !playerId) return;
+  wrap.dataset.locked = '1';
+  wrap.innerHTML = '<p class="hint">Mapping syndicate…</p>';
+  try {
+    const res = await fetch(`/api/ac/admin/syndicate/${encodeURIComponent(playerId)}`);
+    const graph = res.ok ? await res.json() : null;
+    renderSyndicateGraph(graph);
+  } catch (err) {
+    console.error(err);
+    wrap.innerHTML = '<p class="hint">Syndicate map failed.</p>';
+  }
+}
+
+function bindSyndicateLookup() {
+  const btn = el('ac-syn-load');
+  if (!btn || btn.dataset.init === '1') return;
+  btn.dataset.init = '1';
+  btn.addEventListener('click', () => {
+    const id = (el('ac-syn-id')?.value || '').trim();
+    if (!id) return;
+    loadSyndicate(id);
+  });
+}
+
 async function loadAcPanel(silent = false) {
   if (!hasRole('staff')) return;
   try {
-    const [statusRes, playersRes, detectionsRes, bansRes, denialsRes, hintsRes, altRes, economyRes] = await Promise.all([
+    const [statusRes, playersRes, detectionsRes, bansRes, denialsRes, hintsRes, altRes, economyRes, synRes] = await Promise.all([
       fetch('/api/ac/admin/status'),
       fetch('/api/ac/admin/players'),
       fetch('/api/ac/admin/detections?limit=20'),
@@ -3282,6 +3392,7 @@ async function loadAcPanel(silent = false) {
       fetch('/api/ac/admin/rate-hints'),
       fetch('/api/ac/admin/alt-clusters?limit=10'),
       fetch('/api/ac/admin/economy-alerts?limit=15'),
+      fetch('/api/ac/admin/syndicates?limit=8'),
     ]);
 
     if (!playersRes.ok) {
@@ -3299,6 +3410,7 @@ async function loadAcPanel(silent = false) {
     const hintsData = hintsRes.ok ? await hintsRes.json() : { events: [] };
     const altData = altRes.ok ? await altRes.json() : { clusters: [] };
     const economyData = economyRes.ok ? await economyRes.json() : { alerts: [] };
+    const synData = synRes && synRes.ok ? await synRes.json() : { syndicates: [] };
 
     acSetServerStatus(statusData);
     const stats = playersData.stats || statusData.stats || {};
@@ -3370,6 +3482,9 @@ async function loadAcPanel(silent = false) {
         }
       });
     });
+
+    renderSyndicateList(synData.syndicates || []);
+    bindSyndicateLookup();
 
     const clusters = altData.clusters || [];
     el('ac-alt-wrap').innerHTML = clusters.length

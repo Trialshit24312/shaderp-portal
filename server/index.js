@@ -21,7 +21,7 @@ import { getPortalEnv, isAuthConfigured, isOAuthReady, portalBaseUrl } from './e
 import { loadDashboardData, normalizeUpdatePasses, extractPassHighlights } from './dashboard.js';
 import { createQueueManager, queueApiKeyValid } from './queue.js';
 import { createLogManager, logsApiKeyValid } from './logs.js';
-import { createAcManager, registerAcRoutes } from './ac.js';
+import { createAcManager, registerAcRoutes, acApiKeyValid } from './ac.js';
 import { initDb, loadAcState, saveAcState, getDbMode } from './db.js';
 import { initRedis, getRedisMode } from './redis.js';
 import { bootstrapTrustCache } from './trust-cache.js';
@@ -498,7 +498,7 @@ app.get('/api/logs/:id', requireRole('staff'), (req, res) => {
 registerAcRoutes(app, { acManager, portalEnv, requireRole });
 registerThreatMlRoutes(app, { requireRole, acManager, portalEnv });
 registerEconomyForensicsRoutes(app, { requireRole, portalEnv });
-registerWebrtcRoutes(app, { requireRole });
+registerWebrtcRoutes(app, { requireRole, portalEnv, acApiKeyValid });
 registerIceConfigRoute(app, { requireRole, portalEnv });
 setInterval(() => cleanupWebrtcSessions(), 120000);
 const syncTicketToDiscordBridge = (ticket) => syncTicketToDiscord(ticket, { ticketManager, portalEnv, roleMap });
@@ -526,7 +526,7 @@ app.get('/api/portal/version', (_req, res) => {
   });
 });
 
-if (portalEnv.AC_ENABLED && process.env.AC_ML_AUTO_BAN !== '0') {
+if (portalEnv.AC_ENABLED && process.env.AC_ML_AUTO_BAN === '1') {
   const mlInterval = Number(process.env.AC_ML_AUTO_BAN_MS) || 300000;
   setInterval(async () => {
     try {

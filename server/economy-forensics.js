@@ -1,6 +1,8 @@
 /**
  * ShadeRP Portal — economy transaction graph forensics
  */
+import { acApiKeyValid } from './ac-auth.js';
+
 const transactions = [];
 const MAX_TX = 5000;
 
@@ -31,8 +33,7 @@ export function getEconomyGraph(playerId, windowMs = 7200000) {
 
 export function registerEconomyForensicsRoutes(app, { requireRole, portalEnv }) {
   app.post('/api/ac/server/economy-tx', (req, res) => {
-    const key = req.headers['x-ac-key'];
-    if (!key || key !== (portalEnv.AC_API_KEY || portalEnv.QUEUE_API_KEY)) {
+    if (!acApiKeyValid(req, portalEnv)) {
       return res.status(401).json({ error: 'Invalid AC key' });
     }
     logEconomyTx(req.body || {});

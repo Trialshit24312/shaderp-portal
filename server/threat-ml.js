@@ -141,10 +141,11 @@ export function ingestPlayerSync(players) {
   }
 }
 
+import { acApiKeyValid } from './ac-auth.js';
+
 export function registerThreatMlRoutes(app, { requireRole, acManager, portalEnv }) {
   app.post('/api/ac/server/telemetry', (req, res) => {
-    const key = req.headers['x-ac-key'];
-    if (!key || key !== (portalEnv.AC_API_KEY || portalEnv.QUEUE_API_KEY)) {
+    if (!acApiKeyValid(req, portalEnv)) {
       return res.status(401).json({ error: 'Invalid AC key' });
     }
     const { playerId, vector } = req.body || {};

@@ -8,7 +8,20 @@ function getSession(sessionId) {
   return sessions.get(sessionId) || null;
 }
 
-export function registerWebrtcRoutes(app, { requireRole }) {
+function requireAcKey(req, res, portalEnv, acApiKeyValid) {
+  if (typeof acApiKeyValid === 'function') {
+    if (!acApiKeyValid(req, portalEnv)) {
+      res.status(401).json({ error: 'Invalid AC key' });
+      return false;
+    }
+    return true;
+  }
+  // Fail closed if caller forgot to pass validator
+  res.status(500).json({ error: 'AC key validator not configured' });
+  return false;
+}
+
+export function registerWebrtcRoutes(app, { requireRole, portalEnv, acApiKeyValid }) {
   app.post('/api/ac/admin/webrtc/offer', requireRole('staff'), (req, res) => {
     const { sessionId, playerId, sdp } = req.body || {};
     if (!sessionId || !sdp) return res.status(400).json({ error: 'sessionId and sdp required' });
@@ -50,8 +63,7 @@ export function registerWebrtcRoutes(app, { requireRole }) {
   });
 
   app.get('/api/ac/server/webrtc/pending', (req, res) => {
-    const key = req.headers['x-ac-key'];
-    if (!key) return res.status(401).json({ error: 'Invalid AC key' });
+    if (!requireAcKey(req, res, portalEnv, acApiKeyValid)) return;
     const pending = [];
     const now = Date.now();
     for (const [, s] of sessions) {
@@ -66,8 +78,7 @@ export function registerWebrtcRoutes(app, { requireRole }) {
   });
 
   app.post('/api/ac/server/webrtc/claim', (req, res) => {
-    const key = req.headers['x-ac-key'];
-    if (!key) return res.status(401).json({ error: 'Invalid AC key' });
+    if (!requireAcKey(req, res, portalEnv, acApiKeyValid)) return;
     const { sessionId } = req.body || {};
     const s = getSession(sessionId);
     if (!s) return res.status(404).json({ error: 'session not found' });
@@ -78,8 +89,7 @@ export function registerWebrtcRoutes(app, { requireRole }) {
   });
 
   app.post('/api/ac/server/webrtc/answer', (req, res) => {
-    const key = req.headers['x-ac-key'];
-    if (!key) return res.status(401).json({ error: 'Invalid AC key' });
+    if (!requireAcKey(req, res, portalEnv, acApiKeyValid)) return;
     const { sessionId, sdp } = req.body || {};
     const s = getSession(sessionId);
     if (!s) return res.status(404).json({ error: 'session not found' });
@@ -89,8 +99,7 @@ export function registerWebrtcRoutes(app, { requireRole }) {
   });
 
   app.post('/api/ac/server/webrtc/ice', (req, res) => {
-    const key = req.headers['x-ac-key'];
-    if (!key) return res.status(401).json({ error: 'Invalid AC key' });
+    if (!requireAcKey(req, res, portalEnv, acApiKeyValid)) return;
     const { sessionId, candidate } = req.body || {};
     const s = getSession(sessionId);
     if (!s || !candidate) return res.status(400).json({ error: 'sessionId and candidate required' });
@@ -100,8 +109,7 @@ export function registerWebrtcRoutes(app, { requireRole }) {
   });
 
   app.get('/api/ac/server/webrtc/staff-ice/:sessionId', (req, res) => {
-    const key = req.headers['x-ac-key'];
-    if (!key) return res.status(401).json({ error: 'Invalid AC key' });
+    if (!requireAcKey(req, res, portalEnv, acApiKeyValid)) return;
     const s = getSession(req.params.sessionId);
     if (!s) return res.status(404).json({ error: 'session not found' });
     const since = Number(req.query.since) || 0;
@@ -110,8 +118,7 @@ export function registerWebrtcRoutes(app, { requireRole }) {
   });
 
   app.post('/api/ac/server/webrtc/close', (req, res) => {
-    const key = req.headers['x-ac-key'];
-    if (!key) return res.status(401).json({ error: 'Invalid AC key' });
+    if (!requireAcKey(req, res, portalEnv, acApiKeyValid)) return;
     const { sessionId } = req.body || {};
     if (sessionId) sessions.delete(sessionId);
     res.json({ ok: true });
@@ -128,14 +135,12 @@ export function cleanupWebrtcSessions(maxAgeMs = 300000) {
 export function buildIceServers(portalEnv = {}) {
   const servers = [{ urls: 'stun:stun.l.google.com:19302' }];
   const turnUrl = portalEnv.TURN_URL || process.env.TURN_URL || '';
+  const turnUser = portalEnv.TURN_USERNAME || process.env.TURN_USERNAME || '';
+  const turnCred = portalEnv.TURN_CREDENTIAL || process.env.TURN_CREDENTIAL || '';
   if (turnUrl) {
     const entry = { urls: turnUrl };
-    const user = portalEnv.TURN_USERNAME || process.env.TURN_USERNAME || '';
-    const cred = portalEnv.TURN_CREDENTIAL || process.env.TURN_CREDENTIAL || '';
-    if (user) {
-      entry.username = user;
-      entry.credential = cred;
-    }
+    if (turnUser) entry.username = turnUser;
+    if (turnCred) entry.credential = turnCred;
     servers.push(entry);
   }
   return servers;

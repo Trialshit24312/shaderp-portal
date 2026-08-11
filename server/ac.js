@@ -14,6 +14,9 @@ import {
 import { hasMinRole } from './roles.js';
 import { updateTrustFromSync, updateTrustOnDetection } from './trust-cache.js';
 import { ingestPlayerSync } from './threat-ml.js';
+import { acApiKeyValid, resolveAcApiKey } from './ac-auth.js';
+
+export { acApiKeyValid, resolveAcApiKey } from './ac-auth.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const DATA_DIR = path.join(__dirname, '..', 'data');
@@ -445,15 +448,6 @@ export const PROTECTION_CATALOG = [
   { group: 'Advanced', items: ['Anti Freecam', 'Anti Spectate', 'Anti AFK Injection', 'Anti State Bag Overflow', 'Anti Extended NUI Devtools', 'Anti Resource Stop', 'Anti Resource Starter', 'Anti Particles', 'Anti Super Punch', 'Anti Invalid Ped'] },
   { group: 'Extended', items: ['Anti Lua Injection', 'Anti Plate Changer', 'Anti Tiny Ped', 'Anti Handling Modifier', 'Anti Vehicle Weapons', 'Anti Network Events', 'Anti Chat Spam', 'Anti Explosive Damage', 'Anti Clear Tasks', 'Anti Event Blacklist', 'Anti Money Monitor', 'Anti Weapon Range', 'Anti Infinite Ammo', 'Anti Vehicle Boost'] },
 ];
-
-function acApiKeyValid(req, portalEnv) {
-  const key = req.headers['x-ac-key'] || req.headers['x-admin-key'] || req.headers['x-queue-key'];
-  const expected =
-    portalEnv.AC_API_KEY ||
-    portalEnv.QUEUE_API_KEY ||
-    '';
-  return !!expected && key === expected;
-}
 
 function acLogIngest(logManager, type, entry) {
   if (!logManager?.ingest) return;
@@ -2046,7 +2040,7 @@ export function registerAcRoutes(app, { acManager, portalEnv, requireRole }) {
     res.json({ ok: true });
   });
 
-  app.post('/api/ac/admin/console', requireRole('admin'), (req, res) => {
+  app.post('/api/ac/admin/console', requireRole('owner'), (req, res) => {
     const { command } = req.body || {};
     if (!command || typeof command !== 'string') {
       return res.status(400).json({ error: 'command string required' });

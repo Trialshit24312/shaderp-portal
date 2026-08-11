@@ -54,4 +54,6 @@ services:
         sync: false
       - key: CV_WORKER_URL
         sync: false
+      - key: CV_FLAG_THRESHOLD
+        value: "0.82"
 

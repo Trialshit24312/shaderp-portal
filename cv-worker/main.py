@@ -96,7 +96,7 @@ def _yolo_labels(img: np.ndarray) -> tuple[list[str], float]:
         from ultralytics import YOLO  # type: ignore
 
         model = YOLO(weights)
-        results = model.predict(img, verbose=False, conf=0.35)
+        results = model.predict(img, verbose=False, conf=0.82)
         labels: list[str] = []
         best = 0.0
         for r in results:

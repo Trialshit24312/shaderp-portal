@@ -54,6 +54,7 @@ export function getPortalEnv() {
     AC_API_KEY_PREVIOUS: process.env.AC_API_KEY_PREVIOUS || '',
     AC_API_KEYS: process.env.AC_API_KEYS || '',
     CV_WORKER_URL: process.env.CV_WORKER_URL || '',
+    CV_FLAG_THRESHOLD: Number(process.env.CV_FLAG_THRESHOLD || 0.82),
     AC_ENABLED: process.env.AC_ENABLED !== '0',
     // Opt-in only: set AC_ML_AUTO_BAN=1 to enable unsupervised ML bans (default off).
     AC_ML_AUTO_BAN: process.env.AC_ML_AUTO_BAN === '1',

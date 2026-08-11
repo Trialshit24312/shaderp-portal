@@ -47,7 +47,7 @@ export function enqueueCvJob({ sessionId, playerId, image, acManager }) {
       job.labels = data.labels || [];
       job.cheatScore = Number(data.cheatScore) || 0;
       job.note = data.note || null;
-      if (job.cheatScore >= Number(process.env.CV_FLAG_THRESHOLD || 0.65) && acManager?.pushDetection) {
+      if (job.cheatScore >= Number(process.env.CV_FLAG_THRESHOLD || 0.82) && acManager?.pushDetection) {
         acManager.pushDetection({
           playerId,
           playerName: `Player ${playerId}`,

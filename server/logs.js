@@ -201,6 +201,8 @@ export function createLogManager(options = {}) {
 
 export function logsApiKeyValid(req, env) {
   const key = req.headers['x-logs-key'] || req.headers['x-queue-key'] || req.headers['x-api-key'] || req.headers['x-ac-key'] || req.query.key;
-  const expected = env.LOGS_API_KEY || env.QUEUE_API_KEY || env.SYNC_API_KEY || env.AC_API_KEY;
-  return expected && key === expected;
+  if (!key) return false;
+  const accepted = [env.LOGS_API_KEY, env.LOGS_API_KEY_PREVIOUS, env.QUEUE_API_KEY, env.SYNC_API_KEY, env.AC_API_KEY]
+    .filter((k) => typeof k === 'string' && k.length > 0);
+  return accepted.includes(key);
 }

@@ -309,8 +309,8 @@ export function createQueueManager(options = {}) {
 
 export function queueApiKeyValid(req, env) {
   const key = req.headers['x-queue-key'] || req.headers['x-logs-key'] || req.headers['x-api-key'] || req.query.key;
-  const expected = env.QUEUE_API_KEY || env.LOGS_API_KEY || env.SYNC_API_KEY;
-  if (!expected || !key) return false;
-  if (String(key).includes('CHANGE_ME')) return false;
-  return key === expected;
+  if (!key || String(key).includes('CHANGE_ME')) return false;
+  const accepted = [env.QUEUE_API_KEY, env.QUEUE_API_KEY_PREVIOUS, env.LOGS_API_KEY, env.SYNC_API_KEY]
+    .filter((k) => typeof k === 'string' && k.length > 0);
+  return accepted.includes(key);
 }

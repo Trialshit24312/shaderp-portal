@@ -2805,6 +2805,12 @@ function acBindDetectionActions() {
   el('ac-detections-wrap')?.querySelectorAll('.ac-det-evidence').forEach((btn) => {
     btn.addEventListener('click', () => acViewEvidence(btn.dataset.evid));
   });
+  el('ac-detections-wrap')?.querySelectorAll('.ac-det-chain').forEach((btn) => {
+    btn.addEventListener('click', () => {
+      document.querySelector('.ac-tab[data-ac-tab="records"]')?.click();
+      acOpenInvestigation(btn.dataset.chain);
+    });
+  });
 }
 
 function acBindUnbanActions() {
@@ -2890,14 +2896,17 @@ function acRenderPlayers(players) {
       : '—';
     const initial = (p.name || '?').charAt(0).toUpperCase();
     const danger = trust < 40 || (combat.risk ?? 0) >= 70;
-    return `<div class="ac-player-card${danger ? ' danger' : ''}">
+    const silentBadge = p.silent ? '<span class="ac-badge silent">Silent</span>' : '';
+    const shadowBadge = p.shadow ? '<span class="ac-badge shadow">Shadow</span>' : '';
+    return `<div class="ac-player-card${danger ? ' danger' : ''}${p.silent ? ' silent' : ''}">
       <div class="ac-player-avatar">${esc(initial)}</div>
       <div class="ac-player-info">
-        <h4>${esc(p.name)} <span class="ac-trust ${acTrustClass(trust)}">${trust}</span></h4>
+        <h4>${esc(p.name)} <span class="ac-trust ${acTrustClass(trust)}">${trust}</span> ${silentBadge}${shadowBadge}</h4>
         <div class="ac-player-meta">
           <span>#${p.id}</span>
           <span>${p.ping ?? 0}ms</span>
           <span>${p.strikes ?? 0} strikes</span>
+          <span>${esc(p.trustBand || 'normal')}</span>
           <span>${esc(combatLabel)}</span>
           <span class="ac-fp">${esc((p.fingerprint || '—').slice(0, 12))}</span>
         </div>
@@ -2947,6 +2956,7 @@ function acRenderDetections(dets) {
         <div class="ac-det-detail-text">${esc(String(detail || '—'))}</div>
         ${screenshot ? `<a href="${esc(screenshot)}" class="ac-screenshot-link" target="_blank" rel="noopener">📷 Screenshot</a>` : ''}
         ${evidenceId ? `<button type="button" class="btn ghost btn-sm ac-det-evidence" data-evid="${esc(evidenceId)}">Evidence replay</button>` : ''}
+        ${(d.chainId || evidenceId || d.at) ? `<button type="button" class="btn ghost btn-sm ac-det-chain" data-chain="${esc(d.chainId || evidenceId || d.at)}">Chain</button>` : ''}
       </div>
       <div class="ac-det-actions">${canAct ? `
         <button type="button" class="btn primary btn-sm ac-det-watch" data-pid="${pid}" data-pname="${esc(pname)}">Watch</button>
@@ -2957,6 +2967,68 @@ function acRenderDetections(dets) {
 
   el('ac-detections-wrap').innerHTML = cards;
   acBindDetectionActions();
+}
+
+async function acOpenInvestigation(id) {
+  const wrap = el('ac-xdr-wrap');
+  if (!wrap || !id) return;
+  wrap.innerHTML = '<p class="hint">Loading investigation…</p>';
+  try {
+    const res = await fetch(`/api/ac/admin/investigation/${encodeURIComponent(id)}`);
+    if (!res.ok) {
+      wrap.innerHTML = `<p class="hint">No chain for ${esc(String(id))}.</p>`;
+      return;
+    }
+    const data = await res.json();
+    const nodes = data.nodes || [];
+    const w = Math.max(640, nodes.length * 120);
+    const h = 180;
+    const step = nodes.length > 1 ? (w - 80) / (nodes.length - 1) : 0;
+    const circles = nodes.map((n, i) => {
+      const x = 40 + i * step;
+      const y = 90;
+      return `<g class="ac-xdr-node" data-name="${esc(n.label)}">
+        <circle cx="${x}" cy="${y}" r="18"></circle>
+        <text x="${x}" y="${y + 4}" text-anchor="middle">${esc((n.kind || '').slice(0, 4))}</text>
+        <title>${esc(n.label)} — ${esc(n.detail || '')}</title>
+      </g>`;
+    }).join('');
+    const lines = (data.edges || []).map((e) => {
+      const fi = nodes.findIndex((n) => n.id === e.from);
+      const ti = nodes.findIndex((n) => n.id === e.to);
+      if (fi < 0 || ti < 0) return '';
+      const x1 = 40 + fi * step;
+      const x2 = 40 + ti * step;
+      return `<line x1="${x1}" y1="90" x2="${x2}" y2="90"></line>`;
+    }).join('');
+    const list = nodes.map((n, i) => {
+      const evName = n.label || '';
+      return `<li>
+        <strong>${i + 1}. ${esc(n.kind)}</strong> — ${esc(evName)}
+        <small>${esc(n.detail || '')}</small>
+        ${/^[A-Za-z0-9_.:-]+$/.test(evName) ? `<button type="button" class="btn ghost btn-sm ac-xdr-wl" data-event="${esc(evName)}">Whitelist event</button>` : ''}
+      </li>`;
+    }).join('');
+    wrap.innerHTML = `
+      <div class="ac-xdr-svg-wrap">
+        <svg viewBox="0 0 ${w} ${h}" width="100%" height="${h}">${lines}${circles}</svg>
+      </div>
+      <ol class="ac-xdr-list">${list || '<li class="hint">Empty chain</li>'}</ol>`;
+    wrap.querySelectorAll('.ac-xdr-wl').forEach((btn) => {
+      btn.addEventListener('click', async () => {
+        const eventName = btn.getAttribute('data-event');
+        const r = await fetch('/api/ac/admin/whitelist-event', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ eventName }),
+        });
+        if (r.ok) toast(`Whitelisted ${eventName}`);
+        else toast('Whitelist failed');
+      });
+    });
+  } catch (e) {
+    wrap.innerHTML = `<p class="hint">Investigation failed: ${esc(e.message || 'error')}</p>`;
+  }
 }
 
 function acNotifyNewDetections(dets) {

@@ -1,4 +1,4 @@
-# Render Blueprint — https://render.com/docs/blueprint-spec
+﻿# Render Blueprint â€” https://render.com/docs/blueprint-spec
 services:
   - type: web
     name: shaderp-website
@@ -42,3 +42,16 @@ services:
         generateValue: true
       - key: PORTAL_ROLE_MAP
         sync: false
+      - key: DATABASE_URL
+        sync: false
+      - key: AC_API_KEY
+        sync: false
+      - key: AC_API_KEY_PREVIOUS
+        sync: false
+      - key: QUEUE_API_KEY
+        sync: false
+      - key: LOGS_API_KEY
+        sync: false
+      - key: CV_WORKER_URL
+        sync: false
+

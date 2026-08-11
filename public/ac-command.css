@@ -1212,3 +1212,38 @@
     justify-content: flex-end;
   }
 }
+
+#panel-anticheat .ac-badge {
+  display: inline-block;
+  font-size: 0.65rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  padding: 0.1rem 0.35rem;
+  border-radius: 3px;
+  margin-left: 0.25rem;
+  vertical-align: middle;
+}
+#panel-anticheat .ac-badge.silent {
+  background: color-mix(in srgb, var(--accent, #3d8bfd) 25%, transparent);
+  color: var(--accent, #3d8bfd);
+  border: 1px solid color-mix(in srgb, var(--accent, #3d8bfd) 50%, transparent);
+}
+#panel-anticheat .ac-badge.shadow {
+  background: color-mix(in srgb, #9b59b6 25%, transparent);
+  color: #c39bd3;
+  border: 1px solid color-mix(in srgb, #9b59b6 50%, transparent);
+}
+#panel-anticheat .ac-player-card.silent {
+  outline: 1px solid color-mix(in srgb, var(--accent, #3d8bfd) 40%, transparent);
+}
+#panel-anticheat .ac-xdr-svg-wrap { overflow-x: auto; margin-bottom: 0.75rem; }
+#panel-anticheat .ac-xdr svg line { stroke: currentColor; stroke-opacity: 0.35; stroke-width: 2; }
+#panel-anticheat .ac-xdr svg circle {
+  fill: color-mix(in srgb, var(--accent, #3d8bfd) 35%, transparent);
+  stroke: var(--accent, #3d8bfd);
+  stroke-width: 2;
+}
+#panel-anticheat .ac-xdr svg text { fill: currentColor; font-size: 9px; font-family: ui-monospace, monospace; }
+#panel-anticheat .ac-xdr-list { margin: 0; padding-left: 1.25rem; display: grid; gap: 0.35rem; font-size: 0.85rem; }
+#panel-anticheat .ac-xdr-list small { display: block; opacity: 0.7; }

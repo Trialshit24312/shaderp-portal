@@ -1,4 +1,4 @@
-/** ShadeRP portal env — Render often ships without Discord vars; apply safe public defaults. */
+﻿/** ShadeRP portal env â€” Render often ships without Discord vars; apply safe public defaults. */
 const SHADERP = {
   DISCORD_CLIENT_ID: '1520316047146746006',
   DISCORD_GUILD_ID: '1357838976299565087',
@@ -12,7 +12,7 @@ const SHADERP = {
   PORTAL_NAME: 'ShadeRP',
   PORTAL_TAGLINE: 'ESX Legacy Roleplay',
   PORTAL_OWNER_IDS: '1170463252698902561,940681605670916148',
-  /** Discord user IDs allowed to unban — unset = all PORTAL_OWNER_IDS */
+  /** Discord user IDs allowed to unban â€” unset = all PORTAL_OWNER_IDS */
   AC_UNBAN_DISCORD_IDS: '',
   PORTAL_ROLE_MAP:
     '{"1358187333848924260":"owner","1478053644673749076":"owner","1403881048416321698":"admin","1482853698462941195":"admin","1474033054279405829":"admin","1474032455567675525":"admin","1474148037541761160":"developer","1474135398312706089":"developer","1479921052413853970":"developer","1474030129884823715":"staff","1474592310317547733":"staff","1474031386703953920":"moderator","1403880641074036736":"moderator","1438657854432350350":"moderator","1474031854905725050":"moderator","1358199486941364224":"member","1479976364336480460":"member"}',
@@ -49,6 +49,9 @@ export function getPortalEnv() {
     LOGS_RETENTION_DAYS: Math.min(90, parseInt(process.env.LOGS_RETENTION_DAYS, 10) || 30),
     // Prefer a dedicated AC_API_KEY. QUEUE fallback is transitional (see ac-auth.js warn).
     AC_API_KEY: process.env.AC_API_KEY || process.env.QUEUE_API_KEY,
+    AC_API_KEY_PREVIOUS: process.env.AC_API_KEY_PREVIOUS || '',
+    AC_API_KEYS: process.env.AC_API_KEYS || '',
+    CV_WORKER_URL: process.env.CV_WORKER_URL || '',
     AC_ENABLED: process.env.AC_ENABLED !== '0',
     // Opt-in only: set AC_ML_AUTO_BAN=1 to enable unsupervised ML bans (default off).
     AC_ML_AUTO_BAN: process.env.AC_ML_AUTO_BAN === '1',
@@ -86,3 +89,4 @@ export function isAuthConfigured(env) {
 export function isOAuthReady(env) {
   return isAuthConfigured(env) && !!env.DISCORD_CLIENT_SECRET;
 }
+

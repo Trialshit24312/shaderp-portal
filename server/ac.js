@@ -105,10 +105,14 @@ function normalizeLicense(license) {
 
 function fpRecord(playerId, entry) {
   const fp = entry.fingerprint || entry;
+  const webgl = fp.webglTiming || entry.webglTiming || null;
+  const webglHash = webgl?.hash || null;
   return {
     playerId: String(playerId),
     playerName: entry.playerName || fp.playerName || `Player ${playerId}`,
     hash: fp.hash || entry.hash || null,
+    webglHash,
+    webglTiming: webgl,
     license: fp.license || entry.license || null,
     discord: fp.discord || entry.discord || null,
     steam: fp.steam || entry.steam || null,
@@ -145,6 +149,7 @@ function buildAltClusters(state) {
   }
 
   const byHash = new Map();
+  const byWebgl = new Map();
   const byLicense = new Map();
   const byDiscord = new Map();
 
@@ -152,6 +157,10 @@ function buildAltClusters(state) {
     if (e.hash) {
       if (!byHash.has(e.hash)) byHash.set(e.hash, []);
       byHash.get(e.hash).push(e);
+    }
+    if (e.webglHash) {
+      if (!byWebgl.has(e.webglHash)) byWebgl.set(e.webglHash, []);
+      byWebgl.get(e.webglHash).push(e);
     }
     const lic = normalizeLicense(e.license);
     if (lic) {
@@ -200,6 +209,7 @@ function buildAltClusters(state) {
   };
 
   for (const [hash, members] of byHash) pushCluster('fingerprint', hash, members);
+  for (const [hash, members] of byWebgl) pushCluster('webgl', hash, members);
   for (const [lic, members] of byLicense) if (members.length > 1) pushCluster('license', lic, members);
   for (const [disc, members] of byDiscord) if (members.length > 1) pushCluster('discord', disc, members);
 
@@ -574,6 +584,14 @@ export function createAcManager({ enabled = true, auditManager, logManager, init
     if (entry.evidenceId || entry.details?.evidenceId) {
       row.evidenceId = entry.evidenceId || entry.details.evidenceId;
     }
+    if (entry.chainId || entry.details?.chainId) {
+      row.chainId = entry.chainId || entry.details.chainId;
+    }
+    if (entry.chain || entry.details?.chain) {
+      row.chain = entry.chain || entry.details.chain;
+    }
+    row.silent = !!(entry.silent || entry.details?.silent);
+    row.shadow = !!(entry.shadow || entry.details?.shadow);
       state.detections.unshift(row);
       if (state.detections.length > MAX_DETECTIONS) {
         state.detections.length = MAX_DETECTIONS;
@@ -1182,6 +1200,48 @@ export function createAcManager({ enabled = true, auditManager, logManager, init
       return state.detections.slice(0, limit);
     },
 
+    getInvestigation(detectionKey) {
+      const key = String(detectionKey || '');
+      const det = (state.detections || []).find(
+        (d) =>
+          String(d.chainId || '') === key ||
+          String(d.evidenceId || '') === key ||
+          String(d.at || '') === key,
+      );
+      if (!det) return null;
+      const chain = det.chain || det.details?.chain || [];
+      const nodes = chain.map((n, i) => ({
+        id: `n${i}`,
+        label: n.name || n.kind || `step${i}`,
+        kind: n.kind || 'event',
+        detail: n.detail || '',
+        t: n.t,
+      }));
+      const edges = [];
+      for (let i = 0; i < nodes.length - 1; i++) {
+        edges.push({ from: nodes[i].id, to: nodes[i + 1].id });
+      }
+      return {
+        detection: det,
+        chainId: det.chainId,
+        nodes,
+        edges,
+      };
+    },
+
+    queueSilentClear(playerId, requestedBy) {
+      state.commands.push({
+        id: `cmd_${now()}`,
+        type: 'player_action',
+        action: 'clear_silent',
+        playerId: Number(playerId),
+        requestedBy: requestedBy || 'staff',
+        createdAt: now(),
+      });
+      persist();
+      return true;
+    },
+
     getBans(limit = 100) {
       return state.bans.slice(0, limit);
     },
@@ -1606,22 +1666,10 @@ export function registerAcRoutes(app, { acManager, portalEnv, requireRole }) {
     const { sessionId, playerId, image, capturedAt } = req.body || {};
     if (!sessionId || !image) return res.status(400).json({ error: 'sessionId and image required' });
     acManager.pushFrame(sessionId, playerId, image, capturedAt);
+    if (process.env.CV_WORKER_URL && globalThis.__kovertEnqueueCv) {
+      try { globalThis.__kovertEnqueueCv({ sessionId, playerId, image, acManager }); } catch { /* ignore */ }
+    }
     res.json({ ok: true });
-  });
-
-  // Optional off-server CV hook (wire YOLO/OpenCV worker here)
-  app.post('/api/ac/server/cv-analyze', (req, res) => {
-    if (!acApiKeyValid(req, portalEnv)) return res.status(401).json({ error: 'Invalid AC key' });
-    const { sessionId, playerId, image } = req.body || {};
-    if (!image) return res.status(400).json({ error: 'image required' });
-    res.json({
-      ok: true,
-      sessionId: sessionId || null,
-      playerId: playerId || null,
-      labels: [],
-      cheatScore: 0,
-      note: 'CV worker not configured — frames stored via /api/ac/server/frame',
-    });
   });
 
   app.post('/api/ac/server/detection', (req, res) => {
@@ -1799,6 +1847,20 @@ export function registerAcRoutes(app, { acManager, portalEnv, requireRole }) {
 
   app.get('/api/ac/admin/detections', requireRole('staff'), (req, res) => {
     res.json({ detections: acManager.getDetections(parseInt(req.query.limit, 10) || 100) });
+  });
+
+  app.get('/api/ac/admin/investigation/:id', requireRole('staff'), (req, res) => {
+    const inv = acManager.getInvestigation(req.params.id);
+    if (!inv) return res.status(404).json({ error: 'Investigation not found' });
+    res.json(inv);
+  });
+
+  app.post('/api/ac/admin/clear-silent', requireRole('staff'), (req, res) => {
+    const { playerId } = req.body || {};
+    if (!playerId) return res.status(400).json({ error: 'playerId required' });
+    const user = req.session?.user;
+    acManager.queueSilentClear(playerId, user?.username || user?.id || 'staff');
+    res.json({ ok: true, playerId: Number(playerId) });
   });
 
   app.get('/api/ac/admin/bans', requireRole('staff'), (req, res) => {

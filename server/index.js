@@ -29,6 +29,7 @@ import { registerThreatMlRoutes } from './threat-ml.js';
 import { registerEconomyForensicsRoutes } from './economy-forensics.js';
 import { registerWebrtcRoutes, cleanupWebrtcSessions, registerIceConfigRoute } from './webrtc-signaling.js';
 import { registerCvRoutes, enqueueCvJob } from './cv-queue.js';
+import { registerEcdhRoutes } from './ecdh.js';
 import { createTicketManager, registerTicketRoutes } from './tickets.js';
 import { setTicketDiscordClient, syncTicketToDiscord, startTicketDiscordSyncLoop, mirrorTicketMessageToDiscord } from './ticket-discord-sync.js';
 import { createAuditManager, registerAuditRoutes } from './audit.js';
@@ -501,6 +502,7 @@ registerThreatMlRoutes(app, { requireRole, acManager, portalEnv });
 registerEconomyForensicsRoutes(app, { requireRole, portalEnv });
 registerWebrtcRoutes(app, { requireRole, portalEnv, acApiKeyValid });
 registerCvRoutes(app, { requireRole, portalEnv, acApiKeyValid, acManager });
+registerEcdhRoutes(app, { portalEnv });
 globalThis.__kovertEnqueueCv = enqueueCvJob;
 registerIceConfigRoute(app, { requireRole, portalEnv });
 setInterval(() => cleanupWebrtcSessions(), 120000);
@@ -525,7 +527,7 @@ app.get('/api/portal/version', (_req, res) => {
     acEnabled: acManager.isEnabled(),
     dbMode: getDbMode(),
     redisMode: getRedisMode(),
-    features: ['anticheat', 'multi-watch', 'webrtc-live', 'trust-redis', 'threat-ml', 'economy-forensics', 'evidence-replay', 'tickets-web', 'discord-hub', 'multi-guild-setup', 'guild-monitors', 'v4-theme', 'persistent-auth', 'command-center', 'webrtc-signaling', 'postgres-optional', 'turn-ice', 'ollama-optional', 'pvs-culling', 'ghost-honeypot', 'movement-sim', 'physics-validator', 'event-tarpit', 'fragment-bridge', 'unified-ac-logs', 'dom-poison', 'kovert-livery-owner', 'wasm-core', 'syndicate-graph', 'audio-esp', 'poly-tarpit'],
+    features: ['anticheat', 'multi-watch', 'webrtc-live', 'trust-redis', 'threat-ml', 'economy-forensics', 'evidence-replay', 'tickets-web', 'discord-hub', 'multi-guild-setup', 'guild-monitors', 'v4-theme', 'persistent-auth', 'command-center', 'webrtc-signaling', 'postgres-optional', 'turn-ice', 'ollama-optional', 'pvs-culling', 'ghost-honeypot', 'movement-sim', 'physics-validator', 'event-tarpit', 'fragment-bridge', 'unified-ac-logs', 'dom-poison', 'kovert-livery-owner', 'wasm-core', 'syndicate-graph', 'audio-esp', 'poly-tarpit', 'intent-machine', 'nui-biometrics', 'phantom-scramble', 'ecdh-handshake'],
   });
 });
 

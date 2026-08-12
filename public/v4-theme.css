@@ -3,20 +3,20 @@
  * Replaces conflicting teal/violet overlays with one coherent theme.
  */
 :root {
-  --bg: #060608;
-  --bg-elevated: #0c0c10;
-  --bg-card: #111118;
-  --surface: #14141c;
-  --border: rgba(225, 29, 72, 0.14);
-  --text: #f4f4f5;
-  --text-muted: #9ca3af;
-  --muted: #9ca3af;
-  --accent: #e11d48;
-  --accent-2: #fb7185;
-  --accent-dim: rgba(225, 29, 72, 0.12);
-  --accent-glow: rgba(225, 29, 72, 0.35);
-  --glass-bg: rgba(12, 12, 16, 0.88);
-  --glass-border: rgba(255, 255, 255, 0.06);
+  --bg: #02040a;
+  --bg-elevated: #050b16;
+  --bg-card: #070d1a;
+  --surface: #0a1222;
+  --border: rgba(56, 189, 248, 0.16);
+  --text: #f8fafc;
+  --text-muted: #64748b;
+  --muted: #64748b;
+  --accent: #0070ff;
+  --accent-2: #38bdf8;
+  --accent-dim: rgba(0, 112, 255, 0.14);
+  --accent-glow: rgba(0, 112, 255, 0.4);
+  --glass-bg: rgba(7, 13, 26, 0.78);
+  --glass-border: rgba(56, 189, 248, 0.2);
   --warn: #fbbf24;
   --danger: #f87171;
   --ok: #34d399;
@@ -29,7 +29,7 @@
   --role-admin: #f87171;
   --role-manager: #c084fc;
   --role-developer: #60a5fa;
-  --role-staff: #e11d48;
+  --role-staff: #38bdf8;
   --role-moderator: #34d399;
   --role-member: #94a3b8;
 }
@@ -41,8 +41,8 @@ html, body {
 
 .bg-glow {
   background:
-    radial-gradient(ellipse 50% 40% at 0% 0%, rgba(225, 29, 72, 0.1), transparent 55%),
-    radial-gradient(ellipse 40% 35% at 100% 100%, rgba(180, 20, 60, 0.06), transparent 50%);
+    radial-gradient(ellipse 50% 40% at 50% 0%, rgba(0, 112, 255, 0.14), transparent 55%),
+    radial-gradient(ellipse 40% 35% at 100% 100%, rgba(56, 189, 248, 0.06), transparent 50%);
 }
 
 .bg-grid {
@@ -149,15 +149,15 @@ html, body {
 }
 
 .card:hover {
-  border-color: rgba(225, 29, 72, 0.22);
+  border-color: rgba(56, 189, 248, 0.35);
 }
 
 .btn.primary {
-  background: linear-gradient(135deg, #e11d48, #be123c);
+  background: linear-gradient(135deg, #0051ff, #0070ff);
   border: none;
   color: #fff;
   font-weight: 600;
-  box-shadow: 0 6px 20px rgba(225, 29, 72, 0.3);
+  box-shadow: 0 6px 20px rgba(0, 112, 255, 0.35);
 }
 
 .btn.primary:hover {
@@ -171,17 +171,17 @@ html, body {
 
 .btn.ghost:hover {
   background: var(--accent-dim);
-  border-color: rgba(225, 29, 72, 0.25);
+  border-color: rgba(56, 189, 248, 0.35);
 }
 
 .pill {
   background: var(--accent-dim);
   color: var(--accent-2);
-  border: 1px solid rgba(225, 29, 72, 0.2);
+  border: 1px solid rgba(56, 189, 248, 0.25);
 }
 
 .pill.accent {
-  background: rgba(225, 29, 72, 0.18);
+  background: rgba(0, 112, 255, 0.18);
 }
 
 .hero {

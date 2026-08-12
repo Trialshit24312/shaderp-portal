@@ -4,18 +4,19 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <meta name="description" content="ShadeRP — QBCore serious roleplay portal, queue, staff tools, and live anti-cheat dashboard." />
-  <meta name="theme-color" content="#040406" />
+  <meta name="theme-color" content="#02040a" />
   <title>ShadeRP Portal</title>
   <link rel="icon" href="/assets/shaderp-logo.png" type="image/png" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&family=Plus+Jakarta+Sans:wght@500;600;700;800&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="/styles.css?v=7.1.1" />
-  <link rel="stylesheet" href="/v4-theme.css?v=7.1.1" />
-  <link rel="stylesheet" href="/portal-v6.css?v=7.1.1" />
-  <link rel="stylesheet" href="/ac-command.css?v=7.1.1" />
-  <link rel="stylesheet" href="/team-theme.css?v=7.1.1" />
-  <link rel="stylesheet" href="/shade-unified.css?v=7.1.1" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Outfit:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&family=Plus+Jakarta+Sans:wght@500;600;700;800&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="/styles.css?v=8.0.0" />
+  <link rel="stylesheet" href="/v4-theme.css?v=8.0.0" />
+  <link rel="stylesheet" href="/portal-v6.css?v=8.0.0" />
+  <link rel="stylesheet" href="/ac-command.css?v=8.0.0" />
+  <link rel="stylesheet" href="/team-theme.css?v=8.0.0" />
+  <link rel="stylesheet" href="/shade-unified.css?v=8.0.0" />
+  <link rel="stylesheet" href="/cosmic-theme.css?v=8.0.0" />
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js" defer></script>
 </head>
 <body>
@@ -26,14 +27,24 @@
       <p>Loading ShadeRP Portal…</p>
     </div>
   </div>
-  <div class="bg-grid"></div>
-  <div class="bg-glow"></div>
+  <div class="cosmic-stage" aria-hidden="true">
+    <div class="bg-grid"></div>
+    <div class="bg-glow"></div>
+    <div class="cosmic-flare"></div>
+    <div class="cosmic-rays"></div>
+    <div class="cosmic-beams"></div>
+    <canvas id="cosmic-stars" class="cosmic-stars"></canvas>
+    <div class="cosmic-scanlines"></div>
+    <div class="cosmic-grain"></div>
+    <div class="cosmic-vignette"></div>
+    <div class="cosmic-spotlight" id="cosmic-spotlight"></div>
+  </div>
 
   <aside class="sidebar" id="sidebar">
     <div class="brand">
       <img src="/assets/shaderp-logo.png" alt="ShadeRP" class="brand-logo" />
       <div>
-        <h1 id="portal-name">ShadeRP</h1>
+        <h1 id="portal-name" class="glitch-text" data-text="ShadeRP">ShadeRP</h1>
         <p class="tagline" id="portal-tagline">Community Portal</p>
       </div>
     </div>
@@ -859,6 +870,6 @@
   </div>
 
   <div id="toast" class="toast" hidden>Copied</div>
-  <script src="/app.js?v=7.2.1" type="module"></script>
+  <script src="/app.js?v=8.0.0" type="module"></script>
 </body>
 </html>

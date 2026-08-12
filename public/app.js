@@ -13,6 +13,7 @@ import {
   setLastPanel,
 } from './ui.js';
 import { startLiveWatch } from './ac-webrtc.js';
+import { initCosmic, burstGlitch } from './cosmic.js';
 
 let ME = null;
 let DATA = null;
@@ -340,6 +341,7 @@ function showPanel(id) {
   document.querySelectorAll('.panel').forEach((p) => p.classList.toggle('active', p.id === `panel-${id}`));
   const panelEl = el(`panel-${id}`);
   animatePanelSwitch(panelEl);
+  burstGlitch(280);
   setLastPanel(id);
   track('panel_view', { panel: id });
   const navItem = NAV.find((n) => n.id === id);
@@ -4059,6 +4061,7 @@ async function init() {
   setInterval(queueHeartbeat, 45000);
   updateStatusBar();
   initLoadingScreen();
+  initCosmic();
   initAcTabs();
 
   document.body.addEventListener('click', (e) => {

@@ -75,8 +75,8 @@
   position: absolute;
   inset: 0;
   background:
-    radial-gradient(ellipse 50% 80% at 100% 0%, rgba(225, 29, 72, 0.1), transparent 55%),
-    radial-gradient(ellipse 40% 60% at 0% 100%, rgba(167, 139, 250, 0.06), transparent 50%);
+    radial-gradient(ellipse 50% 80% at 100% 0%, rgba(0, 112, 255, 0.14), transparent 55%),
+    radial-gradient(ellipse 40% 60% at 0% 100%, rgba(56, 189, 248, 0.08), transparent 50%);
   pointer-events: none;
 }
 

@@ -4,15 +4,15 @@
  */
 
 #panel-anticheat {
-  --ac-bg: #040406;
-  --ac-surface: #0a0a0f;
-  --ac-card: #0f0f16;
-  --ac-card-hover: #14141e;
-  --ac-border: rgba(255, 255, 255, 0.06);
-  --ac-border-accent: rgba(225, 29, 72, 0.35);
-  --ac-glow: rgba(225, 29, 72, 0.15);
-  --ac-live: #22d3ee;
-  --ac-live-dim: rgba(34, 211, 238, 0.12);
+  --ac-bg: #02040a;
+  --ac-surface: #070d1a;
+  --ac-card: #0a1222;
+  --ac-card-hover: #0e1a30;
+  --ac-border: rgba(56, 189, 248, 0.14);
+  --ac-border-accent: rgba(0, 112, 255, 0.45);
+  --ac-glow: rgba(0, 112, 255, 0.18);
+  --ac-live: #38bdf8;
+  --ac-live-dim: rgba(56, 189, 248, 0.12);
   --ac-mono: 'JetBrains Mono', ui-monospace, monospace;
   position: relative;
 }
@@ -23,8 +23,8 @@
   inset: -1rem -1rem 0 0;
   pointer-events: none;
   background:
-    radial-gradient(ellipse 60% 40% at 100% 0%, rgba(225, 29, 72, 0.08), transparent 55%),
-    radial-gradient(ellipse 40% 30% at 0% 100%, rgba(34, 211, 238, 0.04), transparent 50%);
+    radial-gradient(ellipse 60% 40% at 100% 0%, rgba(0, 112, 255, 0.12), transparent 55%),
+    radial-gradient(ellipse 40% 30% at 0% 100%, rgba(56, 189, 248, 0.08), transparent 50%);
   z-index: 0;
 }
 
@@ -192,7 +192,7 @@
 }
 
 #panel-anticheat .ac-tab.active {
-  background: linear-gradient(180deg, rgba(225, 29, 72, 0.15), rgba(225, 29, 72, 0.05));
+  background: linear-gradient(180deg, rgba(0, 112, 255, 0.2), rgba(0, 112, 255, 0.05));
   border-color: var(--ac-border-accent);
   color: var(--accent-2);
   box-shadow: 0 4px 20px var(--ac-glow);
